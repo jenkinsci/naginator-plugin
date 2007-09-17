@@ -15,8 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.kohsuke.stapler.StaplerRequest;
 
 /**
- * Sample {@link Builder}.
- *
  * <p>
  * When the user configures the project and enables this builder,
  * {@link DescriptorImpl#newInstance(StaplerRequest)} is invoked
@@ -29,7 +27,7 @@ import org.kohsuke.stapler.StaplerRequest;
  * When a build is performed, the {@link #perform(Build, Launcher, BuildListener)} method
  * will be invoked. 
  *
- * @author Nayan Hajratwala
+ * @author Nayan Hajratwala <nayan@chikli.com>
  */
 public class NaginatorPublisher extends Publisher {
 
