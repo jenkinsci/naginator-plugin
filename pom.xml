@@ -16,9 +16,5 @@
     <groupId>com.chikli.hudson.plugin.naginator</groupId>
     <artifactId>naginator</artifactId>
     <packaging>hpi</packaging>
-    <version>1.0</version>
-
-  <scm>
-    <tag>naginator-1_0</tag>
-  </scm>
+    <version>1.1-SNAPSHOT</version>
 </project>
