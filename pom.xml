@@ -13,7 +13,6 @@
      Naginator is a plugin for Hudson that schedules a new build immediately following a build failure, 
      thereby nagging the project members that the build is failing.
     </description>
-    <groupId>com.chikli.hudson.plugin.naginator</groupId>
     <artifactId>naginator</artifactId>
     <packaging>hpi</packaging>
     <version>1.2-SNAPSHOT</version>
