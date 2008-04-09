@@ -1,6 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -14,12 +12,18 @@
 	<description>
 		Naginator is a plugin for Hudson that schedules a new build
 		immediately following a build failure, thereby nagging the
-		project members that the build is failing.
+		project members that the build is failing. 
 	</description>
 	<artifactId>naginator</artifactId>
 	<packaging>hpi</packaging>
-	<version>1.3-SNAPSHOT</version>
+	<version>1.3</version>
 	<url>
 		http://hudson.gotdns.com/wiki/display/HUDSON/Naginator+Plugin
 	</url>
+
+  <scm>
+    <connection>scm:svn:https://guest@svn.dev.java.net/svn/hudson/tags/naginator-1.3</connection>
+    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/naginator-1.3</developerConnection>
+    <url>https://hudson.dev.java.net/source/browse/hudson/hudson/plugins/naginator/tags/naginator-1.3</url>
+  </scm>
 </project>
