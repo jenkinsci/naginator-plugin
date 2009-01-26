@@ -1,31 +1,18 @@
 package com.chikli.hudson.plugin.naginator;
 
 import hudson.Launcher;
-import hudson.model.AbstractProject;
-import hudson.model.Build;
+import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
-import hudson.model.Hudson;
 import hudson.model.Result;
-import hudson.tasks.Builder;
 import hudson.tasks.Publisher;
-
-import javax.servlet.http.HttpServletRequest;
-
+import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
 
+import java.io.IOException;
+
 /**
- * <p>
- * When the user configures the project and enables this builder,
- * {@link DescriptorImpl#newInstance(StaplerRequest)} is invoked
- * and a new {@link NaginatorPublisher} is created. The created
- * instance is persisted to the project configuration XML by using
- * XStream, so this allows you to use instance fields (like {@link #name})
- * to remember the configuration.
- *
- * <p>
- * When a build is performed, the {@link #perform(Build, Launcher, BuildListener)} method
- * will be invoked. 
+ * Reschedules a build if the current one fails.
  *
  * @author Nayan Hajratwala <nayan@chikli.com>
  */
@@ -34,15 +21,27 @@ public class NaginatorPublisher extends Publisher {
     NaginatorPublisher() {
     }
 
-    public boolean perform(Build build, Launcher launcher, BuildListener listener) {
-        
+    @Override
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         // If the build was successful, we don't need to Nag, so just return true
         if (build.getResult() == Result.SUCCESS) {
             return true;
         }
 
-        // Schedule a new build.
-        return build.getProject().scheduleBuild();
+        // if a build fails for a reason that cannot be immediately fixed,
+        // immediate rescheduling may cause a very tight loop.
+        // combined with publishers like e-mail, IM, this could flood the users.
+        //
+        // so to avoid this problem, progressively introduce delay until the next build
+
+        // delay = the number of consective build problems * 5 mins
+        // back off at most 3 hours
+        int n=0;
+        for(AbstractBuild<?,?> b=build; b!=null && b.getResult()!=Result.SUCCESS && n<60; b=b.getPreviousBuild())
+            n+=5;
+
+        // Schedule a new build with the back off
+        return build.getProject().scheduleBuild(n*60);
     }
 
     public Descriptor<Publisher> getDescriptor() {
@@ -76,17 +75,11 @@ public class NaginatorPublisher extends Publisher {
             return "Retry build after failure (Naginator)";
         }
 
-        public boolean configure(HttpServletRequest req) throws FormException {
-            save();
-            return super.configure(req);
-        }
-
-
         /**
          * Creates a new instance of {@link NaginatorPublisher} from a submitted form.
          */
-        public NaginatorPublisher newInstance(StaplerRequest req) throws FormException {
-            // see config.jelly and you'll find "hello_world.name" form entry.
+        @Override
+        public Publisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             return new NaginatorPublisher();
         }
     }
