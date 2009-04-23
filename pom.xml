@@ -18,6 +18,6 @@
 	<packaging>hpi</packaging>
 	<version>1.5-SNAPSHOT</version>
 	<url>
-		http://hudson.gotdns.com/wiki/display/HUDSON/Naginator+Plugin
+		http://wiki.hudson-ci.org/display/HUDSON/Naginator+Plugin
 	</url>
 </project>
