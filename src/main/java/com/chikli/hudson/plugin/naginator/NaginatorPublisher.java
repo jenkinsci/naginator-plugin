@@ -1,10 +1,14 @@
 package com.chikli.hudson.plugin.naginator;
 
+import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.model.Descriptor;
 import hudson.model.Result;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.BuildStepMonitor;
+import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest;
@@ -16,7 +20,7 @@ import java.io.IOException;
  *
  * @author Nayan Hajratwala <nayan@chikli.com>
  */
-public class NaginatorPublisher extends Publisher {
+public class NaginatorPublisher extends Notifier {
 
     NaginatorPublisher() {
     }
@@ -41,10 +45,15 @@ public class NaginatorPublisher extends Publisher {
             n+=5;
 
         // Schedule a new build with the back off
-        return build.getProject().scheduleBuild(n*60);
+        return build.getProject().scheduleBuild(n*60, new NaginatorCause());
     }
 
-    public Descriptor<Publisher> getDescriptor() {
+    public BuildStepMonitor getRequiredMonitorService() {
+        return BuildStepMonitor.BUILD;
+    }
+
+    @Override
+    public BuildStepDescriptor<Publisher> getDescriptor() {
         // see Descriptor javadoc for more about what a descriptor is.
         return DESCRIPTOR;
     }
@@ -52,6 +61,7 @@ public class NaginatorPublisher extends Publisher {
     /**
      * Descriptor should be singleton.
      */
+    @Extension
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
     /**
@@ -62,7 +72,7 @@ public class NaginatorPublisher extends Publisher {
      * See <tt>views/hudson/plugins/naginator/NaginatorBuilder/*.jelly</tt>
      * for the actual HTML fragment for the configuration screen.
      */
-    public static final class DescriptorImpl extends Descriptor<Publisher> {
+    public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
         DescriptorImpl() {
             super(NaginatorPublisher.class);
@@ -73,6 +83,11 @@ public class NaginatorPublisher extends Publisher {
          */
         public String getDisplayName() {
             return "Retry build after failure (Naginator)";
+        }
+
+        @Override
+        public boolean isApplicable(Class<? extends AbstractProject> jobType) {
+            return true;
         }
 
         /**
