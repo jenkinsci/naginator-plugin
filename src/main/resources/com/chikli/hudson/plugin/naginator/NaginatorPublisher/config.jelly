@@ -1,3 +1,27 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  
+<!--
+  <f:entry title="Rerun build for unstable builds as well as failures">
+    <f:checkbox name="naginator.rerunIfUnstable" checked="${h.defaultToTrue(instance.rerunIfUnstable)}"/>
+  </f:entry>
+  <f:optionalBlock name="naginator.checkRegexp"
+                   title="Only rerun build if regular expression is found in output"
+                   checked="${instance.isCheckRegexp()}" >
+    <f:entry title="Regular expression to search for">
+      <f:textbox name="naginator.regexpForRerun" value="${instance.regexpForRerun}" />
+    </f:entry>
+  </f:optionalBlock>
+-->
+
+  <f:entry title="Rerun build for unstable builds as well as failures" field="rerunIfUnstable">
+    <f:checkbox />
+  </f:entry>
+  <f:advanced>
+    <f:entry field="checkRegexp"
+             title="Only rerun build if regular expression is found in output">
+      <f:checkbox />
+    </f:entry>    
+    <f:entry title="Regular expression to search for" field="regexpForRerun">
+      <f:textbox />
+    </f:entry>
+  </f:advanced>
 </j:jelly>
