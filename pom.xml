@@ -16,7 +16,7 @@
   </description>
   <artifactId>naginator</artifactId>
   <packaging>hpi</packaging>
-  <version>1.5-SNAPSHOT</version>
+  <version>1.5</version>
   <url>
     http://wiki.hudson-ci.org/display/HUDSON/Naginator+Plugin
   </url>
@@ -37,4 +37,10 @@
     </developer>
   </developers>
 
+
+  <scm>
+    <connection>scm:svn:https://guest@svn.dev.java.net/svn/hudson/tags/naginator-1.5</connection>
+    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/naginator-1.5</developerConnection>
+    <url>https://hudson.dev.java.net/source/browse/hudson/tags/naginator-1.5</url>
+  </scm>
 </project>
