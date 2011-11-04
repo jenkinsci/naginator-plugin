@@ -37,8 +37,6 @@ public class NaginatorPublisher extends Notifier {
     private final boolean rerunIfUnstable;
     private final boolean checkRegexp;
 
-    private boolean debug = false;
-    
     @DataBoundConstructor
     public NaginatorPublisher(String regexpForRerun,
                               boolean rerunIfUnstable,
@@ -60,109 +58,26 @@ public class NaginatorPublisher extends Notifier {
         return regexpForRerun;
     }
 
-    public void setDebug(boolean debug) {
-        this.debug = debug;
-    }
-    
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-        // If the build was successful, we don't need to Nag, so just return true
-        if (build.getResult() == Result.SUCCESS) {
-            return true;
-        }
-
-        // If we're not set to rerun if unstable, and the build's unstable, return true.
-        if ((!rerunIfUnstable) && (build.getResult() == Result.UNSTABLE)) {
-            return true;
-        }
-
-        // If we're supposed to check for a regular expression in the build output before
-        // scheduling a new build, do so.
-        if (checkRegexp) {
-            if (debug) LOGGER.log(Level.WARNING, "Got checkRegexp == true");
-            
-            if ((regexpForRerun!=null) && (!regexpForRerun.equals(""))) {
-                if (debug) LOGGER.log(Level.WARNING, "regexpForRerun - " + regexpForRerun);
-                
-                try {
-                    // If parseLog returns false, we didn't find the regular expression,
-                    // so return true.
-                    if (!parseLog(build.getLogFile(),
-                                  regexpForRerun)) {
-                        if (debug) LOGGER.log(Level.WARNING, "regexp not in logfile");
-                        return true;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace(listener
-                                      .error("error while parsing logs for naginator - forcing rebuild."));
-                }
-            } 
-        }
-        
-        // if a build fails for a reason that cannot be immediately fixed,
-        // immediate rescheduling may cause a very tight loop.
-        // combined with publishers like e-mail, IM, this could flood the users.
-        //
-        // so to avoid this problem, progressively introduce delay until the next build
-
-        // delay = the number of consective build problems * 5 mins
-        // back off at most 3 hours
-        int n=0;
-        for(AbstractBuild<?,?> b=build; b!=null && b.getResult()!=Result.SUCCESS && n<60; b=b.getPreviousBuild())
-            n+=5;
-
-        if (debug) LOGGER.log(Level.WARNING, "about to try to schedule a build");
-        return scheduleBuild(build, n);
+        // Nothing to do during the build, see NaginatorListener
+        return true;
     }
 
-
-    /**
-     * Wrapper method for mocking purposes.
-     */
-    public boolean scheduleBuild(AbstractBuild<?, ?> build, int n) throws InterruptedException, IOException {
-        // Schedule a new build with the back off
-        if (debug) { 
-            try {
-                build.setDescription("rebuild");
-            } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "couldn't set description: " + e.getStackTrace());
-            } 
-            return true;
-        }
-        else {
-            return build.getProject().scheduleBuild(n*60, new NaginatorCause());
-        }
-    }
-    
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.BUILD;
     }
 
-    private boolean parseLog(File logFile, String regexp) throws IOException,
-        InterruptedException {
-        
-        if (regexp == null) {
-            return false;
-        }
-        
-        // Assume default encoding and text files
-        String line;
-        Pattern pattern = Pattern.compile(regexp);
-        BufferedReader reader = new BufferedReader(new FileReader(logFile));
-        while ((line = reader.readLine()) != null) {
-            Matcher matcher = pattern.matcher(line);
-            if (matcher.find()) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     @Override
     public DescriptorImpl getDescriptor() {
         // see Descriptor javadoc for more about what a descriptor is.
         return (DescriptorImpl) super.getDescriptor();
     }
+
+    @Extension
+    public final static NaginatorListener LISTENER = new NaginatorListener();
+
 
     /**
      * Descriptor for {@link NaginatorPublisher}. Used as a singleton.
