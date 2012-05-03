@@ -1,13 +1,8 @@
 package com.chikli.hudson.plugin.naginator;
 
+import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
-import hudson.model.Hudson;
-import hudson.model.Queue;
-import hudson.model.Result;
+import hudson.model.*;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapper.Environment;
 import hudson.tasks.Builder;
@@ -15,7 +10,9 @@ import hudson.tasks.Builder;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
+import net.sf.json.JSONObject;
 import org.jvnet.hudson.test.HudsonTestCase;
+import org.kohsuke.stapler.StaplerRequest;
 
 public class NaginatorListenerTest extends HudsonTestCase {
     
@@ -46,6 +43,16 @@ public class NaginatorListenerTest extends HudsonTestCase {
             listener.getLogger().println(text);
             build.setResult(result);
             return true;
+        }
+
+        @Extension
+        public static final class DescriptorImpl extends Descriptor<Builder> {
+            public String getDisplayName() {
+                return "MyBuilder";
+            }
+            public MyBuilder newInstance(StaplerRequest req, JSONObject data) {
+                return new MyBuilder("foo", Result.SUCCESS);
+            }
         }
     }
 
