@@ -21,6 +21,12 @@
     http://wiki.hudson-ci.org/display/HUDSON/Naginator+Plugin
   </url>
 
+  <scm>
+    <connection>scm:git:git://github.com/jenkinsci/naginator-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/naginator-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/naginator-plugin</url>
+  </scm>
+
   <licenses>
     <license>
       <name>MIT license</name>
