@@ -2,9 +2,9 @@
   <modelVersion>4.0.0</modelVersion>
   
   <parent>
-    <groupId>org.jvnet.hudson.plugins</groupId>
+    <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.392</version>
+    <version>1.424</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   
@@ -40,6 +40,12 @@
       <name>Andrew Bayer</name>
       <email>andrew.bayer@gmail.com</email>
       <timezone>-8</timezone>
+    </developer>
+    <developer>
+      <id>ndeloof</id>
+      <name>Nicolas De Loof</name>
+      <email>nicolas.deloof@gmail.com</email>
+      <timezone>+1</timezone>
     </developer>
   </developers>
 
