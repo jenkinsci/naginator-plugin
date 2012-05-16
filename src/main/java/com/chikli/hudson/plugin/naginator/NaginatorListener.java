@@ -28,6 +28,11 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
 
         NaginatorPublisher naginator = build.getProject().getPublishersList().get(NaginatorPublisher.class);
 
+        // JENKINS-13791
+        if (naginator == null) {
+            return;
+        }
+
         // If we're not set to rerun if unstable, and the build's unstable, return true.
         if ((!naginator.isRerunIfUnstable()) && (build.getResult() == Result.UNSTABLE)) {
             return;
