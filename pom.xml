@@ -16,7 +16,7 @@
   </description>
   <artifactId>naginator</artifactId>
   <packaging>hpi</packaging>
-  <version>1.7-SNAPSHOT</version>
+  <version>1.7</version>
   <url>
     http://wiki.hudson-ci.org/display/HUDSON/Naginator+Plugin
   </url>
