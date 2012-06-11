@@ -1,6 +1,7 @@
 package com.chikli.hudson.plugin.naginator;
 
 import hudson.model.AbstractBuild;
+import hudson.model.ParametersAction;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
@@ -61,19 +62,9 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
             }
         }
 
-        // if a build fails for a reason that cannot be immediately fixed,
-        // immediate rescheduling may cause a very tight loop.
-        // combined with publishers like e-mail, IM, this could flood the users.
-        //
-        // so to avoid this problem, progressively introduce delay until the next build
+        int n = naginator.getDelay().computeScheduleDelay(build);
 
-        // delay = the number of consective build problems * 5 mins
-        // back off at most 3 hours
-        int n=0;
-        for(AbstractBuild<?,?> b=build; b!=null && b.getResult()!=Result.SUCCESS && n<60; b=b.getPreviousBuild())
-            n+=5;
-
-        LOGGER.log(Level.FINE, "about to try to schedule a build");
+        LOGGER.log(Level.FINE, "about to try to schedule a build in " + n + " seconds");
         scheduleBuild(build, n);
     }
 
@@ -82,7 +73,8 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
      * Wrapper method for mocking purposes.
      */
     public boolean scheduleBuild(AbstractBuild<?, ?> build, int n) {
-        return build.getProject().scheduleBuild(n*60, new NaginatorCause());
+        ParametersAction p = build.getAction(ParametersAction.class);
+        return build.getProject().scheduleBuild(n, new NaginatorCause(), p);
     }
 
     private boolean parseLog(File logFile, String regexp) throws IOException {

@@ -5,7 +5,6 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.model.Result;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
@@ -15,16 +14,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.ObjectStreamException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -37,13 +26,24 @@ public class NaginatorPublisher extends Notifier {
     private final boolean rerunIfUnstable;
     private final boolean checkRegexp;
 
+    private ScheduleDelay delay;
+
     @DataBoundConstructor
     public NaginatorPublisher(String regexpForRerun,
                               boolean rerunIfUnstable,
-                              boolean checkRegexp) {
+                              boolean checkRegexp, ScheduleDelay delay) {
         this.regexpForRerun = regexpForRerun;
         this.checkRegexp = checkRegexp;
         this.rerunIfUnstable = rerunIfUnstable;
+        this.delay = delay;
+    }
+
+    public Object readResolve() {
+        if (this.delay == null) {
+            // Backward compatibility : progressive 5 minutes up to 3 hours
+            delay = new ProgressiveDelay(5*60, 3*60*60);
+        }
+        return this;
     }
 
     public boolean isRerunIfUnstable() {
@@ -56,6 +56,10 @@ public class NaginatorPublisher extends Notifier {
 
     public String getRegexpForRerun() {
         return regexpForRerun;
+    }
+
+    public ScheduleDelay getDelay() {
+        return delay;
     }
 
     @Override
@@ -98,7 +102,7 @@ public class NaginatorPublisher extends Notifier {
          * This human readable name is used in the configuration screen.
          */
         public String getDisplayName() {
-            return "Retry build after failure (Naginator)";
+            return "Retry build after failure";
         }
 
         @Override
