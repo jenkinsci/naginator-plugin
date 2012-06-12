@@ -1,9 +1,6 @@
 package com.chikli.hudson.plugin.naginator;
 
-import hudson.model.AbstractBuild;
-import hudson.model.ParametersAction;
-import hudson.model.Result;
-import hudson.model.TaskListener;
+import hudson.model.*;
 import hudson.model.listeners.RunListener;
 
 import java.io.BufferedReader;
@@ -15,6 +12,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static hudson.model.Result.SUCCESS;
+
 /**
  * @author <a href="mailto:nicolas.deloof@cloudbees.com">Nicolas De loof</a>
  */
@@ -23,7 +22,7 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
 
     @Override
     public void onCompleted(AbstractBuild<?, ?> build, TaskListener listener) {
-        if (build.getResult() == Result.SUCCESS) {
+        if (build.getResult() == SUCCESS) {
             return;
         }
 
@@ -62,12 +61,23 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
             }
         }
 
-        int n = naginator.getDelay().computeScheduleDelay(build);
-
-        LOGGER.log(Level.FINE, "about to try to schedule a build in " + n + " seconds");
-        scheduleBuild(build, n);
+        if (canSchedule(build, naginator)) {
+            int n = naginator.getDelay().computeScheduleDelay(build);
+            LOGGER.log(Level.FINE, "about to try to schedule a build in " + n + " seconds");
+            scheduleBuild(build, n);
+        } else {
+            LOGGER.log(Level.FINE, "max number of schedules for this build");
+        }
     }
 
+    public boolean canSchedule(Run build, NaginatorPublisher naginator) {
+        Run r = build;
+        int max = naginator.getMaxSchedule();
+        if (max <=0) return true;
+        int n = 0;
+        for(; r!=null && r.getResult()!= SUCCESS && n++ <= max; r=r.getPreviousBuild()) {}
+        return n < max;
+    }
 
     /**
      * Wrapper method for mocking purposes.

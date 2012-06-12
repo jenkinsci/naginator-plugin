@@ -95,7 +95,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
 
         FreeStyleProject project = createFreeStyleProject();
         project.getBuildersList().add(new MyBuilder("foo", Result.SUCCESS, 1000));
-        NaginatorPublisher nag = new NaginatorPublisher("foo", false, false, new FixedDelay(0));
+        NaginatorPublisher nag = new NaginatorPublisher("foo", false, false);
         project.getPublishersList().add(nag);
         BuildWrapper failTheBuild = new FailTheBuild();
         project.getBuildWrappersList().add(failTheBuild);
@@ -108,7 +108,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
                                     boolean rerunIfUnstable, boolean checkRegexp) throws Exception {
         FreeStyleProject project = createFreeStyleProject();
         project.getBuildersList().add(new MyBuilder(buildLog, result));
-        NaginatorPublisher nag = new NaginatorPublisher(regexpForRerun, rerunIfUnstable, checkRegexp, new FixedDelay(0));
+        NaginatorPublisher nag = new NaginatorPublisher(regexpForRerun, rerunIfUnstable, checkRegexp);
         project.getPublishersList().add(nag);
 
         return isScheduledForRetry(project);

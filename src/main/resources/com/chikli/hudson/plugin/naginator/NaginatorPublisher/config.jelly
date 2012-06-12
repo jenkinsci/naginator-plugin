@@ -8,6 +8,10 @@
         <f:hetero-radio descriptors="${delays}" field="delay"/>
     </f:entry>
 
+    <f:entry title="Max number of successive failed build" field="maxSchedule">
+        <f:textbox/>
+    </f:entry>
+
     <f:advanced>
         <f:entry field="checkRegexp"
                  title="Only rerun build if regular expression is found in output">

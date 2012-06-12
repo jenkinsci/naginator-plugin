@@ -28,13 +28,25 @@ public class NaginatorPublisher extends Notifier {
 
     private ScheduleDelay delay;
 
+    private int maxSchedule;
+
+    // backward compatible constructor
+    public NaginatorPublisher(String regexpForRerun,
+                              boolean rerunIfUnstable,
+                              boolean checkRegexp) {
+        this(regexpForRerun, rerunIfUnstable, checkRegexp, 0, new ProgressiveDelay(5*60, 3*60*60));
+    }
+
     @DataBoundConstructor
     public NaginatorPublisher(String regexpForRerun,
                               boolean rerunIfUnstable,
-                              boolean checkRegexp, ScheduleDelay delay) {
+                              boolean checkRegexp,
+                              int maxSchedule,
+                              ScheduleDelay delay) {
         this.regexpForRerun = regexpForRerun;
         this.checkRegexp = checkRegexp;
         this.rerunIfUnstable = rerunIfUnstable;
+        this.maxSchedule = maxSchedule;
         this.delay = delay;
     }
 
@@ -60,6 +72,10 @@ public class NaginatorPublisher extends Notifier {
 
     public ScheduleDelay getDelay() {
         return delay;
+    }
+
+    public int getMaxSchedule() {
+        return maxSchedule;
     }
 
     @Override
