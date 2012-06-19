@@ -43,9 +43,11 @@ public class ProgressiveDelay extends ScheduleDelay {
         // back off at most 3 hours
 
         int n=0;
-        Run b = failedBuild;
-        for(; b!=null && b.getResult()!= Result.SUCCESS && n<max; b=b.getPreviousBuild()) {
-            n += increment;
+        Run r = failedBuild;
+        while (r != null && r.getAction(NaginatorAction.class) != null) {
+            if (n >= max) break;
+            r = r.getPreviousBuild();
+            n++;
         }
         return n;
     }

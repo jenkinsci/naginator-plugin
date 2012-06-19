@@ -75,7 +75,13 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
         int max = naginator.getMaxSchedule();
         if (max <=0) return true;
         int n = 0;
-        for(; r!=null && r.getResult()!= SUCCESS && n++ <= max; r=r.getPreviousBuild()) {}
+
+        while (r != null && r.getAction(NaginatorAction.class) != null) {
+            if (n >= max) break;
+            r = r.getPreviousBuild();
+            n++;
+        }
+
         return n < max;
     }
 
@@ -84,7 +90,7 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
      */
     public boolean scheduleBuild(AbstractBuild<?, ?> build, int n) {
         ParametersAction p = build.getAction(ParametersAction.class);
-        return build.getProject().scheduleBuild(n, new NaginatorCause(), p);
+        return build.getProject().scheduleBuild(n, new NaginatorCause(), p, new NaginatorAction());
     }
 
     private boolean parseLog(File logFile, String regexp) throws IOException {
