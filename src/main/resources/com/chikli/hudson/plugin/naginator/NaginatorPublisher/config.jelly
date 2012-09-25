@@ -3,12 +3,12 @@
         <f:checkbox />
     </f:entry>
 
-    <f:entry title="${%Delay before schedule}">
+    <f:entry title="${%Delay before retrying build}">
         <j:invokeStatic var="delays" className="com.chikli.hudson.plugin.naginator.ScheduleDelay" method="all"/>
         <f:hetero-radio descriptors="${delays}" field="delay"/>
     </f:entry>
 
-    <f:entry title="${%Max number of successive failed build}" field="maxSchedule">
+    <f:entry title="${%Maximum number of successive failed builds}" field="maxSchedule">
         <f:textbox/>
     </f:entry>
 

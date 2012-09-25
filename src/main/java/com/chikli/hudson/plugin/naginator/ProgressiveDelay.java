@@ -56,7 +56,7 @@ public class ProgressiveDelay extends ScheduleDelay {
     public static class DescriptorImpl extends ScheduleDelayDescriptor {
         @Override
         public String getDisplayName() {
-            return "Progressively introduce delay until the next build";
+            return "Progressive";
         }
     }
 }

@@ -4,5 +4,5 @@
   Since we don't really have anything dynamic here, let's just use static HTML. 
 -->
 <div>
-  This plugin allows you to reschedule job upon failure.
+  This plugin reschedules failed jobs.
 </div>

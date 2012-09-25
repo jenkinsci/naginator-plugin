@@ -31,7 +31,7 @@ public class FixedDelay extends ScheduleDelay {
     public static class DescriptorImpl extends ScheduleDelayDescriptor {
         @Override
         public String getDisplayName() {
-            return "Fixed delay";
+            return "Fixed";
         }
     }
 }
