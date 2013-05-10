@@ -18,7 +18,7 @@
   <packaging>hpi</packaging>
   <version>1.9-SNAPSHOT</version>
   <url>
-    http://wiki.hudson-ci.org/display/HUDSON/Naginator+Plugin
+    http://wiki.jenkins-ci.org/display/JENKINS/Naginator+Plugin
   </url>
 
   <scm>
