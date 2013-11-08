@@ -1,11 +1,6 @@
 <div xmlns="http://www.w3.org/1999/html">
-    If a build fails for a reason that cannot be immediately fixed,
-    immediate rescheduling may cause a very tight loop.
-    combined with publishers like e-mail, IM, this could flood the users.
-    <p>
-    So to avoid this problem, progressively introduce delay (in sec) until the next build.
-    The delay starts with the <em>increment</em> value,then it is grows by the
-    <tt>increment * number of consecutive failures</tt>
-    (e.g. starting with 5, it takes 10, 20, 35, 55 ...etc... up to the max value)
-    then the delay value remains the <em>max</em>.
+    Progressively delay before retrying build. The delay starts at
+    <em>increment</em> seconds and grows by <tt>increment * number of
+    consecutive failures</tt> up to the maximum value, then remains at
+    <em>maximum</em>. e.g. (5, 10, 20, 35, 55, ..., maximum) seconds.
 </div>
