@@ -116,12 +116,9 @@ public class NaginatorListenerTest extends HudsonTestCase {
 
     private boolean isScheduledForRetry(FreeStyleProject project) throws InterruptedException, ExecutionException {
         FreeStyleBuild build = project.scheduleBuild2(0).get();
+        Thread.sleep(1000); // wait for job to run and possibly re-run
 
-        Queue queue = Hudson.getInstance().getQueue();
-        Queue.Item[] tasks = queue.getItems();
-        boolean scheduled = tasks.length > 0;
-        queue.clear();
-        return scheduled;
+        return project.getLastBuild().getNumber() > 1;
     }
 
     private static final class FailTheBuild extends BuildWrapper {
