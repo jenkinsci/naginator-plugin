@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.tasks.BuildWrapper;
+import hudson.tasks.BuildWrapperDescriptor;
 import hudson.tasks.Builder;
 
 import java.io.IOException;
@@ -131,6 +132,18 @@ public class NaginatorListenerTest extends HudsonTestCase {
                     return true;
                 }
             };
+        }
+
+        @Extension
+        public static class DescriptorImpl extends BuildWrapperDescriptor {
+
+            public boolean isApplicable(AbstractProject<?, ?> item) {
+                return true;
+            }
+
+            public String getDisplayName() {
+                return null;
+            }
         }
     }
 }
