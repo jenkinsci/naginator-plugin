@@ -2,7 +2,9 @@ package com.chikli.hudson.plugin.naginator;
 
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.*;
+import hudson.tasks.BuildTrigger;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.tasks.Builder;
@@ -10,6 +12,7 @@ import hudson.tasks.Builder;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
+import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.kohsuke.stapler.StaplerRequest;
@@ -102,6 +105,40 @@ public class NaginatorListenerTest extends HudsonTestCase {
         project.getBuildWrappersList().add(failTheBuild);
 
         assertEquals(true, isScheduledForRetry(project));
+    }
+
+    /**
+     * A -> B
+     *
+     * A triggers B if successful.
+     * B will be rebuild 2 times if it fails and it will.
+     *
+     * Test will check that B:s rebuild attempts will also contain the UpstreamCause from the original B:s build
+     *
+     * @throws Exception
+     */
+    public void testRetainCauses() throws Exception {
+        FreeStyleProject a = createFreeStyleProject("a");
+        FreeStyleProject b = createFreeStyleProject("b");
+        a.getPublishersList().add(new BuildTrigger("b", Result.SUCCESS));
+        NaginatorPublisher nag = new NaginatorPublisher("", false, false, 2, new FixedDelay(1));
+
+        b.getPublishersList().add(nag);
+
+        BuildWrapper failTheBuild = new FailTheBuild();
+        b.getBuildWrappersList().add(failTheBuild);
+        jenkins.rebuildDependencyGraph();
+
+        buildAndAssertSuccess(a);
+        waitUntilNoActivity();
+        assertNotNull(a.getLastBuild());
+        assertNotNull(b.getLastBuild());
+        assertEquals(1, a.getLastBuild().getNumber());
+        assertEquals(3, b.getLastBuild().getNumber());
+        assertEquals(Result.FAILURE, b.getLastBuild().getResult());
+        assertEquals(2, b.getBuildByNumber(2).getActions(CauseAction.class).size());
+        assertEquals(2, b.getBuildByNumber(3).getActions(CauseAction.class).size());
+
     }
 
 
