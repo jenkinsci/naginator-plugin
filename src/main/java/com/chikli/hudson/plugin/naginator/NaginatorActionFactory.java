@@ -15,11 +15,13 @@ import java.util.Collections;
 @Extension
 public class NaginatorActionFactory extends TransientBuildActionFactory {
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Collection<? extends Action> createFor(Run target) {
-        if (target.getResult().isWorseThan(Result.SUCCESS)) {
+        Result result = target.getResult();
+        if (result != null && result.isWorseThan(Result.SUCCESS)) {
             return Collections.singleton(new NaginatorRetryAction());
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 }
