@@ -13,6 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static hudson.model.Result.SUCCESS;
+import static hudson.model.Result.ABORTED;
 
 /**
  * @author <a href="mailto:nicolas.deloof@cloudbees.com">Nicolas De loof</a>
@@ -22,7 +23,7 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
 
     @Override
     public void onCompleted(AbstractBuild<?, ?> build, TaskListener listener) {
-        if (build.getResult() == SUCCESS) {
+        if ((build.getResult() == SUCCESS) || (build.getResult() == ABORTED)) {
             return;
         }
 
