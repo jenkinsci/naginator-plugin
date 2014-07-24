@@ -121,7 +121,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
         FreeStyleProject a = createFreeStyleProject("a");
         FreeStyleProject b = createFreeStyleProject("b");
         a.getPublishersList().add(new BuildTrigger("b", Result.SUCCESS));
-        NaginatorPublisher nag = new NaginatorPublisher("", false, false, 2, new FixedDelay(1));
+        NaginatorPublisher nag = new NaginatorPublisher("", false, false, false, 2, new FixedDelay(1));
 
         b.getPublishersList().add(nag);
 

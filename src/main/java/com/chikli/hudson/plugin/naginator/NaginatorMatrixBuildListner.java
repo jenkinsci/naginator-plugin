@@ -1,0 +1,30 @@
+package com.chikli.hudson.plugin.naginator;
+
+import hudson.Extension;
+import hudson.matrix.MatrixBuild;
+import hudson.matrix.MatrixConfiguration;
+import hudson.matrix.listeners.MatrixBuildListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+
+/**
+ *
+ * @author galunto
+ */
+@Extension
+public class NaginatorMatrixBuildListner extends MatrixBuildListener {
+    
+    /*
+     * Used to filter the matrix parts which finished with success.
+    */
+    public boolean doBuildConfiguration(MatrixBuild mb, MatrixConfiguration mc) {
+        NaginatorMatrixAction nma = mb.getAction(NaginatorMatrixAction.class);
+        
+        if (nma != null) {
+            return nma.isCombinationNeedsRerun(mc.getCombination());
+        }
+        
+        return true;
+    }
+}

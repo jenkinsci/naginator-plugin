@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 public class NaginatorPublisher extends Notifier {
     private final String regexpForRerun;
     private final boolean rerunIfUnstable;
+    private final boolean rerunMatrixPart;
     private final boolean checkRegexp;
 
     private ScheduleDelay delay;
@@ -34,18 +35,20 @@ public class NaginatorPublisher extends Notifier {
     public NaginatorPublisher(String regexpForRerun,
                               boolean rerunIfUnstable,
                               boolean checkRegexp) {
-        this(regexpForRerun, rerunIfUnstable, checkRegexp, 0, new ProgressiveDelay(5*60, 3*60*60));
+        this(regexpForRerun, rerunIfUnstable, false, checkRegexp, 0, new ProgressiveDelay(5*60, 3*60*60));
     }
 
     @DataBoundConstructor
     public NaginatorPublisher(String regexpForRerun,
                               boolean rerunIfUnstable,
+                              boolean rerunMatrixPart,
                               boolean checkRegexp,
                               int maxSchedule,
                               ScheduleDelay delay) {
         this.regexpForRerun = regexpForRerun;
-        this.checkRegexp = checkRegexp;
         this.rerunIfUnstable = rerunIfUnstable;
+        this.rerunMatrixPart = rerunMatrixPart;
+        this.checkRegexp = checkRegexp;
         this.maxSchedule = maxSchedule;
         this.delay = delay;
     }
@@ -62,6 +65,10 @@ public class NaginatorPublisher extends Notifier {
         return rerunIfUnstable;
     }
 
+    public boolean isRerunMatrixPart() {
+        return rerunMatrixPart;
+    }
+    
     public boolean isCheckRegexp() {
         return checkRegexp;
     }
