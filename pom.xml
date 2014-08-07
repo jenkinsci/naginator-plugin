@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.532</version>
+    <version>1.565</version>
   </parent>
   
   <name>Naginator</name>
@@ -15,7 +15,7 @@
   </description>
   <artifactId>naginator</artifactId>
   <packaging>hpi</packaging>
-  <version>1.12-SNAPSHOT</version>
+  <version>1.2-SNAPSHOT</version>
   <url>
     http://wiki.jenkins-ci.org/display/JENKINS/Naginator+Plugin
   </url>
@@ -46,6 +46,12 @@
       <email>nicolas.deloof@gmail.com</email>
       <timezone>+1</timezone>
     </developer>
+    <developer>
+      <id>galunto</id>
+      <name>Tomer Galun</name>
+      <email>tomer4@gmail.com</email>
+      <timezone>+2</timezone>
+    </developer>
   </developers>
 
     <repositories>
@@ -61,6 +67,15 @@
             <url>http://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>matrix-project</artifactId>
+            <version>1.2</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
 </project>  
   
 

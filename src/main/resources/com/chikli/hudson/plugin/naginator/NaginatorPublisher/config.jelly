@@ -3,6 +3,10 @@
         <f:checkbox />
     </f:entry>
 
+    <f:entry title="Rerun build only for failed parts on the matrix" field="rerunMatrixPart">
+        <f:checkbox />
+    </f:entry>
+
     <f:entry title="${%Delay before retrying build}">
         <j:invokeStatic var="delays" className="com.chikli.hudson.plugin.naginator.ScheduleDelay" method="all"/>
         <f:hetero-radio descriptors="${delays}" field="delay"/>
