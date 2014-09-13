@@ -31,7 +31,7 @@ public class NaginatorRetryAction implements Action {
     public void doIndex(StaplerResponse res, @AncestorInPath AbstractBuild build) throws IOException {
         Jenkins.getInstance().checkPermission(Item.BUILD);
         ParametersAction p = build.getAction(ParametersAction.class);
-        build.getProject().scheduleBuild(0, new NaginatorCause((Run) build), p, new NaginatorAction());
+        build.getProject().scheduleBuild(0, new NaginatorUpstreamCause((Run) build), p, new NaginatorAction());
         res.sendRedirect2(build.getUpUrl());
     }
 }
