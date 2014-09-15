@@ -1,11 +1,12 @@
 package com.chikli.hudson.plugin.naginator;
 
-import com.chikli.hudson.plugin.naginator.ScheduleDelay;
+import static java.lang.Math.min;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+
 import hudson.Extension;
 import hudson.model.AbstractBuild;
-import hudson.model.Result;
 import hudson.model.Run;
-import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * @author: <a hef="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
@@ -39,17 +40,16 @@ public class ProgressiveDelay extends ScheduleDelay {
         //
         // so to avoid this problem, progressively introduce delay until the next build
 
-        // delay = the number of consective build problems * 5 mins
-        // back off at most 3 hours
-
-        int n=0;
+        int n = 1;
+        int delay = increment;
         Run r = failedBuild;
         while (r != null && r.getAction(NaginatorAction.class) != null) {
-            if (n >= max) break;
             r = r.getPreviousBuild();
             n++;
+            delay += n * increment;
         }
-        return n;
+        // delay = increment * n * (n + 1) / 2
+        return max <= 0 ? delay : min(delay, max);
     }
 
     @Extension
