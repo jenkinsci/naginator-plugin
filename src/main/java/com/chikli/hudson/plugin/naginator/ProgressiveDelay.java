@@ -47,7 +47,7 @@ public class ProgressiveDelay extends ScheduleDelay {
         while (r != null && r.getAction(NaginatorAction.class) != null) {
             if (n >= max) break;
             r = r.getPreviousBuild();
-            n++;
+            n += increment;
         }
         return n;
     }
