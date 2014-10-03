@@ -1,21 +1,27 @@
 package com.chikli.hudson.plugin.naginator;
 
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+
+import org.jvnet.hudson.test.HudsonTestCase;
+import org.kohsuke.stapler.StaplerRequest;
+
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.Util;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.CauseAction;
+import hudson.model.Descriptor;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
+import hudson.model.Result;
 import hudson.tasks.BuildTrigger;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.tasks.Builder;
-
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-
-import jenkins.model.Jenkins;
+import hudson.tasks.Publisher;
 import net.sf.json.JSONObject;
-import org.jvnet.hudson.test.HudsonTestCase;
-import org.kohsuke.stapler.StaplerRequest;
 
 public class NaginatorListenerTest extends HudsonTestCase {
     
@@ -99,7 +105,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
 
         FreeStyleProject project = createFreeStyleProject();
         project.getBuildersList().add(new MyBuilder("foo", Result.SUCCESS, 1000));
-        NaginatorPublisher nag = new NaginatorPublisher("foo", false, false);
+        NaginatorPublisher nag = new NaginatorPublisher("foo", false, false, false, 10, new FixedDelay(0));
         project.getPublishersList().add(nag);
         BuildWrapper failTheBuild = new FailTheBuild();
         project.getBuildWrappersList().add(failTheBuild);
@@ -146,7 +152,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
                                     boolean rerunIfUnstable, boolean checkRegexp) throws Exception {
         FreeStyleProject project = createFreeStyleProject();
         project.getBuildersList().add(new MyBuilder(buildLog, result));
-        NaginatorPublisher nag = new NaginatorPublisher(regexpForRerun, rerunIfUnstable, checkRegexp);
+        Publisher nag = new NaginatorPublisher(regexpForRerun, rerunIfUnstable, false, checkRegexp, 10, new FixedDelay(0));
         project.getPublishersList().add(nag);
 
         return isScheduledForRetry(project);
