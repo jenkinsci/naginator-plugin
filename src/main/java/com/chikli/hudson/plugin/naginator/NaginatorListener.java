@@ -133,7 +133,7 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
         for (Combination c : combinations) {
             nma.addCombinationToRerun(c);
         }
-        return build.getProject().scheduleBuild(n, new NaginatorCause(), p, nma, causeAction);
+        return build.getProject().scheduleBuild(n, new NaginatorUpstreamCause((Run) build), p, nma, causeAction);
     }
     
     /**
@@ -142,7 +142,7 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
     public boolean scheduleBuild(AbstractBuild<?, ?> build, int n) {
         ParametersAction p = build.getAction(ParametersAction.class);
         CauseAction causeAction = new CauseAction(build.getAction(CauseAction.class));
-        return build.getProject().scheduleBuild(n, new NaginatorCause(), p, new NaginatorAction(), causeAction);
+        return build.getProject().scheduleBuild(n, new NaginatorUpstreamCause((Run) build), p, new NaginatorAction(), causeAction);
     }
 
     private boolean parseLog(File logFile, String regexp) throws IOException {
