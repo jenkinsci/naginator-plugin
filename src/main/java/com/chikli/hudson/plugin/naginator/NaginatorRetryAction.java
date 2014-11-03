@@ -17,15 +17,18 @@ import org.kohsuke.stapler.StaplerResponse;
 public class NaginatorRetryAction implements Action {
 
     public String getIconFileName() {
-        return "refresh.png";
+        return Jenkins.getInstance().hasPermission(Item.BUILD) ?
+            "refresh.png" : null;
     }
 
     public String getDisplayName() {
-        return "Retry";
+        return Jenkins.getInstance().hasPermission(Item.BUILD) ?
+            "Retry" : null;
     }
 
     public String getUrlName() {
-        return "retry";
+        return Jenkins.getInstance().hasPermission(Item.BUILD) ?
+            "retry" : null;
     }
 
     public void doIndex(StaplerResponse res, @AncestorInPath AbstractBuild build) throws IOException {
