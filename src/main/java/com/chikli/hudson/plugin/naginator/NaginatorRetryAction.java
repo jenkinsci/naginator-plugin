@@ -6,6 +6,8 @@ import hudson.model.Item;
 import hudson.model.ParametersAction;
 import hudson.model.Run;
 import java.io.IOException;
+
+import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.StaplerRequest;
@@ -34,7 +36,7 @@ public class NaginatorRetryAction implements Action {
     public void doIndex(StaplerResponse res, @AncestorInPath AbstractBuild build) throws IOException {
         Jenkins.getInstance().checkPermission(Item.BUILD);
         ParametersAction p = build.getAction(ParametersAction.class);
-        build.getProject().scheduleBuild(0, new NaginatorCause(), p, new NaginatorAction());
+        build.getProject().scheduleBuild(0, new NaginatorCause(build), p, new NaginatorAction());
         res.sendRedirect2(build.getUpUrl());
     }
 }
