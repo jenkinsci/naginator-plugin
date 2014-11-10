@@ -88,7 +88,7 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
                             if ((r.getResult() == SUCCESS) || (r.getResult() == ABORTED)) {
                                 continue;
                             }
-                            if ((!naginator.isRerunIfUnstable()) && (build.getResult() == Result.UNSTABLE)) {
+                            if ((!naginator.isRerunIfUnstable()) && (r.getResult() == Result.UNSTABLE)) {
                                 continue;
                             }
                             
