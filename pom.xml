@@ -15,7 +15,7 @@
   </description>
   <artifactId>naginator</artifactId>
   <packaging>hpi</packaging>
-  <version>1.13-SNAPSHOT</version>
+  <version>1.13</version>
   <url>
     http://wiki.jenkins-ci.org/display/JENKINS/Naginator+Plugin
   </url>
