@@ -1,0 +1,6 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:entry field="optOut">
+        <f:checkbox title="Don't let user manually re-trigger this job"/>
+    </f:entry>
+
+</j:jelly>
