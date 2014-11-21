@@ -127,22 +127,18 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
     }
 
     public boolean scheduleMatrixBuild(AbstractBuild<?, ?> build, List<Combination> combinations, int n) {
-        ParametersAction p = build.getAction(ParametersAction.class);
-        CauseAction causeAction = new CauseAction(build.getAction(CauseAction.class));
         NaginatorMatrixAction nma = new NaginatorMatrixAction();
         for (Combination c : combinations) {
             nma.addCombinationToRerun(c);
         }
-        return build.getProject().scheduleBuild(n, new NaginatorCause(build), p, nma, causeAction);
+        return NaginatorRetryAction.scheduleBuild(build, n, nma);
     }
-    
+
     /**
      * Wrapper method for mocking purposes.
      */
     public boolean scheduleBuild(AbstractBuild<?, ?> build, int n) {
-        ParametersAction p = build.getAction(ParametersAction.class);
-        CauseAction causeAction = new CauseAction(build.getAction(CauseAction.class));
-        return build.getProject().scheduleBuild(n, new NaginatorCause(build), p, new NaginatorAction(), causeAction);
+        return NaginatorRetryAction.scheduleBuild(build, n);
     }
 
     private boolean parseLog(File logFile, String regexp) throws IOException {

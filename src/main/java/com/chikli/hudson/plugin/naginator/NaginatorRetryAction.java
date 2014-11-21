@@ -1,17 +1,19 @@
 package com.chikli.hudson.plugin.naginator;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.StaplerResponse;
+
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
+import hudson.model.CauseAction;
 import hudson.model.Item;
 import hudson.model.ParametersAction;
-import hudson.model.Run;
-import java.io.IOException;
 
-import hudson.security.ACL;
 import jenkins.model.Jenkins;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.StaplerResponse;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
@@ -35,8 +37,21 @@ public class NaginatorRetryAction implements Action {
 
     public void doIndex(StaplerResponse res, @AncestorInPath AbstractBuild build) throws IOException {
         Jenkins.getInstance().checkPermission(Item.BUILD);
-        ParametersAction p = build.getAction(ParametersAction.class);
-        build.getProject().scheduleBuild(0, new NaginatorCause(build), p, new NaginatorAction());
+        NaginatorRetryAction.scheduleBuild(build, 0);
         res.sendRedirect2(build.getUpUrl());
     }
+
+    static boolean scheduleBuild(final AbstractBuild<?, ?> build, final int delay) {
+        return scheduleBuild(build, delay, new NaginatorAction());
+    }
+
+    static boolean scheduleBuild(final AbstractBuild<?, ?> build, final int delay, final NaginatorAction action) {
+        final List<Action> actions = new ArrayList<Action>();
+        actions.add(action);
+        actions.add(build.getAction(ParametersAction.class));
+        actions.add(build.getAction(CauseAction.class));
+
+        return build.getProject().scheduleBuild(delay, new NaginatorCause(build), actions.toArray(new Action[actions.size()]));
+    }
+
 }
