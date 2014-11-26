@@ -43,10 +43,10 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
         if ((!naginator.isRerunIfUnstable()) && (build.getResult() == Result.UNSTABLE)) {
             return;
         }
-        
+
         // Do nothing for a single Matrix run. (Run only when all Matrix finishes)
         if (build instanceof MatrixRun) {
-            return; 
+            return;
         }
 
         // If we're supposed to check for a regular expression in the build output before
@@ -78,12 +78,12 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
                     new Object[]{build.getNumber(), n, build.getProject().getName()} );
             
             List<Combination> combsToRerun = new ArrayList<Combination>();
-            
+
             if (naginator.isRerunMatrixPart()) {
                 if (build instanceof MatrixBuild) {
                     MatrixBuild mb = (MatrixBuild) build;
                     List<MatrixRun> matrixRuns = mb.getRuns();
-                    
+
                     for(MatrixRun r : matrixRuns) {
                         if (r.getNumber() == build.getNumber()) {
                             if ((r.getResult() == SUCCESS) || (r.getResult() == ABORTED)) {
@@ -97,10 +97,10 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
                             combsToRerun.add(r.getParent().getCombination());    
                         }
                     }
-                    
+
                 }
             }
-            
+
             if (!combsToRerun.isEmpty()) {
                 LOGGER.log(Level.FINE, "schedule matrix rebuild");
                 scheduleMatrixBuild(build, combsToRerun, n);
@@ -152,14 +152,21 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
         // Assume default encoding and text files
         String line;
         Pattern pattern = Pattern.compile(regexp);
-        BufferedReader reader = new BufferedReader(new FileReader(logFile));
-        while ((line = reader.readLine()) != null) {
-            Matcher matcher = pattern.matcher(line);
-            if (matcher.find()) {
-                return true;
-            }
+        BufferedReader reader = null;
+        try {
+          reader = new BufferedReader(new FileReader(logFile));
+          while ((line = reader.readLine()) != null) {
+              Matcher matcher = pattern.matcher(line);
+              if (matcher.find()) {
+                  return true;
+              }
+          }
+          return false;
         }
-        return false;
+        finally {
+          if(reader != null)
+            reader.close();
+        }
     }
 
     private static final Logger LOGGER = Logger.getLogger(NaginatorListener.class.getName());
