@@ -56,7 +56,7 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
 
             String regexpForRerun = naginator.getRegexpForRerun();
             if ((regexpForRerun !=null) && (!regexpForRerun.equals(""))) {
-                LOGGER.log(Level.FINEST, "regexpForRerun - " + regexpForRerun);
+                LOGGER.log(Level.FINEST, "regexpForRerun - {0}", regexpForRerun);
 
                 try {
                     // If parseLog returns false, we didn't find the regular expression,
@@ -74,7 +74,8 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
 
         if (canSchedule(build, naginator)) {
             int n = naginator.getDelay().computeScheduleDelay(build);
-            LOGGER.log(Level.FINE, "about to try to schedule a build in " + n + " seconds");
+            LOGGER.log(Level.FINE, "about to try to schedule a build #{0} in {1} seconds for {2}",
+                    new Object[]{build.getNumber(), n, build.getProject().getName()} );
             
             List<Combination> combsToRerun = new ArrayList<Combination>();
             
@@ -92,7 +93,7 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
                                 continue;
                             }
                             
-                            LOGGER.log(Level.FINE, "add combination to matrix rerun (" + r.getParent().getCombination().toString() + ")");
+                            LOGGER.log(Level.FINE, "add combination to matrix rerun ({0})", r.getParent().getCombination().toString());
                             combsToRerun.add(r.getParent().getCombination());    
                         }
                     }
@@ -107,7 +108,8 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
                 scheduleBuild(build, n);
             }
         } else {
-            LOGGER.log(Level.FINE, "max number of schedules for this build (#" + build.getNumber() + ")");
+            LOGGER.log(Level.FINE, "max number of schedules for #{0} build, project {1}",
+                    new Object[]{build.getNumber(), build.getProject().getName()} );
         }
     }
 
