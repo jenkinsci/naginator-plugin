@@ -19,12 +19,17 @@ public class NaginatorOptOutProperty extends JobProperty<AbstractProject<?, ?>> 
         return optOut;
     }
 
+    @Override
+    public DescriptorImpl getDescriptor() {
+        return (DescriptorImpl) super.getDescriptor();
+    }
+
     @Extension
     public static class DescriptorImpl extends JobPropertyDescriptor {
 
         @Override
         public String getDisplayName() {
-            return "";
+            return "Naginator Property";
         }
     }
 }
