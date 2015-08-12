@@ -58,16 +58,45 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
             if ((regexpForRerun !=null) && (!regexpForRerun.equals(""))) {
                 LOGGER.log(Level.FINEST, "regexpForRerun - {0}", regexpForRerun);
 
-                try {
-                    // If parseLog returns false, we didn't find the regular expression,
-                    // so return true.
-                    if (!parseLog(build.getLogFile(), regexpForRerun)) {
-                        LOGGER.log(Level.FINEST, "regexp not in logfile");
-                        return;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace(listener
+                if (build instanceof MatrixBuild) {
+                    MatrixBuild mb = (MatrixBuild)build;
+                    List<MatrixRun> matrixRuns = mb.getRuns();
+
+					// for matrix builds, check the logs of all matrix runs
+                    for (MatrixRun r : matrixRuns) {
+                        if (r.getNumber() == build.getNumber()) {
+                            if ((r.getResult() == SUCCESS) || (r.getResult() == ABORTED)) {
+                                continue;
+                            }
+                            if ((!naginator.isRerunIfUnstable()) && (r.getResult() == Result.UNSTABLE)) {
+                                continue;
+                            }
+
+                            try {
+                                if (parseLog(r.getLogFile(), regexpForRerun)) {
+                                    // found a match in one of the matrix runs
+                                    // this is reason enough to restart the (parent) matrix job
+                                    LOGGER.log(Level.FINEST, "regexp found in logfile");
+                                    break;
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace(listener
                                       .error("error while parsing logs for naginator - forcing rebuild."));
+                            }                            
+                        }
+                    }
+                } else {
+                    try {
+                        // If parseLog returns false, we didn't find the regular expression,
+                        // so return true.
+                        if (!parseLog(build.getLogFile(), regexpForRerun)) {
+                            LOGGER.log(Level.FINEST, "regexp not in logfile");
+                            return;
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace(listener
+                                          .error("error while parsing logs for naginator - forcing rebuild."));
+                    }
                 }
             }
         }
