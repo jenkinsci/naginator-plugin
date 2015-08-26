@@ -24,6 +24,10 @@
         <f:entry title="${%Regular expression to search for}" field="regexpForRerun">
             <f:textbox />
         </f:entry>
+        <f:entry field="parseMatrixRuns"
+                 title="${%Search regex in matrix run logs instead of parent log}">
+            <f:checkbox />
+        </f:entry>
     </f:advanced>
 
 </j:jelly>

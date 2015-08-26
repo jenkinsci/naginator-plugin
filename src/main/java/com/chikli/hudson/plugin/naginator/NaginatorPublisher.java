@@ -26,7 +26,7 @@ public class NaginatorPublisher extends Notifier {
     private final boolean rerunIfUnstable;
     private final boolean rerunMatrixPart;
     private final boolean checkRegexp;
-
+    private final boolean parseMatrixRuns;
     private ScheduleDelay delay;
 
     private int maxSchedule;
@@ -38,17 +38,29 @@ public class NaginatorPublisher extends Notifier {
         this(regexpForRerun, rerunIfUnstable, false, checkRegexp, 0, new ProgressiveDelay(5*60, 3*60*60));
     }
 
-    @DataBoundConstructor
+    // backward compatible constructor
     public NaginatorPublisher(String regexpForRerun,
                               boolean rerunIfUnstable,
                               boolean rerunMatrixPart,
                               boolean checkRegexp,
                               int maxSchedule,
                               ScheduleDelay delay) {
+        this(regexpForRerun, rerunIfUnstable, rerunMatrixPart, checkRegexp, false, maxSchedule, delay);
+    }
+
+    @DataBoundConstructor
+    public NaginatorPublisher(String regexpForRerun,
+                              boolean rerunIfUnstable,
+                              boolean rerunMatrixPart,
+                              boolean checkRegexp,
+                              boolean parseMatrixRuns,
+                              int maxSchedule,
+                              ScheduleDelay delay) {
         this.regexpForRerun = regexpForRerun;
         this.rerunIfUnstable = rerunIfUnstable;
         this.rerunMatrixPart = rerunMatrixPart;
         this.checkRegexp = checkRegexp;
+        this.parseMatrixRuns = parseMatrixRuns;
         this.maxSchedule = maxSchedule;
         this.delay = delay;
     }
@@ -71,6 +83,10 @@ public class NaginatorPublisher extends Notifier {
     
     public boolean isCheckRegexp() {
         return checkRegexp;
+    }
+    
+    public boolean isParseMatrixRuns() {
+        return parseMatrixRuns;
     }
 
     public String getRegexpForRerun() {
