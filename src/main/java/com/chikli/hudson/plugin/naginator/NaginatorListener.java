@@ -58,51 +58,12 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
             if ((regexpForRerun !=null) && (!regexpForRerun.equals(""))) {
                 LOGGER.log(Level.FINEST, "regexpForRerun - {0}", regexpForRerun);
 
-                if (build instanceof MatrixBuild) {
-                    MatrixBuild mb = (MatrixBuild)build;
-                    List<MatrixRun> matrixRuns = mb.getRuns();
-                    boolean regexFound = false;
-
-                    // for matrix builds, check the logs of all matrix runs
-                    for (MatrixRun r : matrixRuns) {
-                        if (r.getNumber() == build.getNumber()) {
-                            if ((r.getResult() == SUCCESS) || (r.getResult() == ABORTED)) {
-                                continue;
-                            }
-                            if ((!naginator.isRerunIfUnstable()) && (r.getResult() == Result.UNSTABLE)) {
-                                continue;
-                            }
-
-                            try {
-                                if (parseLog(r.getLogFile(), regexpForRerun)) {
-                                    // found a match in one of the matrix runs
-                                    // this is reason enough to restart the (parent) matrix job
-                                    LOGGER.log(Level.FINEST, "regexp found in logfile");
-                                    regexFound = true;
-                                    break;
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace(listener
-                                      .error("error while parsing logs for naginator - forcing rebuild."));
-                            }
-                        }
-                    }
-                    // return if no regex was found in the matrix run logs. reschedule otherwise
-                    if (!regexFound) {
-                        return;
-                    }
-                } else {
-                    try {
-                        // If parseLog returns false, we didn't find the regular expression,
-                        // so return true.
-                        if (!parseLog(build.getLogFile(), regexpForRerun)) {
-                            LOGGER.log(Level.FINEST, "regexp not in logfile");
-                            return;
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace(listener
-                                          .error("error while parsing logs for naginator - forcing rebuild."));
-                    }
+                // reschedule the build:
+                // - if regex is found
+                // - if IOException is caught while parsing the log(s)
+                if (!testRegexp(build, listener, naginator, regexpForRerun)) {
+                    LOGGER.log(Level.FINEST, "regexp not in logfile");
+                    return;
                 }
             }
         }
@@ -145,6 +106,53 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
         } else {
             LOGGER.log(Level.FINE, "max number of schedules for #{0} build, project {1}",
                     new Object[]{build.getNumber(), build.getProject().getName()} );
+        }
+    }
+
+    /**
+     * Parse the log file for a regex match (special handling for matrix jobs).
+     * Returns true if regex was found or IOException was caught, else otherwise.
+     *
+     * @param build The recently completed build
+     * @param listener The task listener
+     * @param naginator The naginator publisher
+     * @param regexpForRerun The regex to match
+     * @return True if regex was found or IOException was caught, else otherwise.
+     */
+    private boolean testRegexp(AbstractBuild<?, ?> build, TaskListener listener, NaginatorPublisher naginator,
+        String regexpForRerun) {
+        try {
+            if (naginator.isParseMatrixRuns() && (build instanceof MatrixBuild)) {
+                MatrixBuild mb = (MatrixBuild)build;
+                List<MatrixRun> matrixRuns = mb.getRuns();
+
+                // for matrix builds, check the logs of all matrix runs
+                for (MatrixRun r : matrixRuns) {
+                    if (r.getNumber() == build.getNumber()) {
+                        if ((r.getResult() == SUCCESS) || (r.getResult() == ABORTED)) {
+                            continue;
+                        }
+                        if ((!naginator.isRerunIfUnstable()) && (r.getResult() == Result.UNSTABLE)) {
+                            continue;
+                        }
+                        if (parseLog(r.getLogFile(), regexpForRerun)) {
+                            // found a match in one of the matrix runs
+                            // this is reason enough to restart the (parent) matrix job
+                            LOGGER.log(Level.FINEST, "regexp found in logfile");
+                            return true;
+                        }
+                    }
+                }
+                // regex was not found
+                return false;
+            } else {
+                // If parseLog returns true, we found the regular expression
+                return parseLog(build.getLogFile(), regexpForRerun);
+            }
+        } catch (IOException e) {
+            e.printStackTrace(listener.error("error while parsing logs for naginator - forcing rebuild."));
+            // reschedule if IOException was caught
+            return true;
         }
     }
 
