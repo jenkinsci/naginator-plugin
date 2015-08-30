@@ -24,6 +24,14 @@ import hudson.tasks.Publisher;
 import net.sf.json.JSONObject;
 
 public class NaginatorListenerTest extends HudsonTestCase {
+    @Override
+    protected void tearDown() throws Exception {
+        try {
+            super.tearDown();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     
     private final static class MyBuilder extends Builder {
         private final String text;

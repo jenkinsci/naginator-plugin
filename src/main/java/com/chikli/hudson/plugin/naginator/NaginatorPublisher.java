@@ -2,6 +2,8 @@ package com.chikli.hudson.plugin.naginator;
 
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.matrix.MatrixRun;
+import hudson.matrix.MatrixBuild;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -87,7 +89,16 @@ public class NaginatorPublisher extends Notifier {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-        // Nothing to do during the build, see NaginatorListener
+        if (build instanceof MatrixRun) {
+            MatrixBuild parent = ((MatrixRun)build).getParentBuild();
+            if (parent.getAction(NaginatorPublisherScheduleAction.class) == null) {
+                // No strict exclusion is required
+                // as it doesn't matter if the action gets duplicated.
+                parent.addAction(new NaginatorPublisherScheduleAction(this));
+            }
+        } else {
+            build.addAction(new NaginatorPublisherScheduleAction(this));
+        }
         return true;
     }
 
