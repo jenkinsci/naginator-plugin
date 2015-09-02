@@ -3,19 +3,31 @@ package com.chikli.hudson.plugin.naginator;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
+import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.FailureBuilder;
+import org.jvnet.hudson.test.SleepBuilder;
 import org.kohsuke.stapler.StaplerRequest;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.Descriptor;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import hudson.model.ParametersAction;
+import hudson.model.ParametersDefinitionProperty;
+import hudson.model.StringParameterDefinition;
+import hudson.model.StringParameterValue;
 import hudson.model.Result;
+import hudson.model.TaskListener;
 import hudson.tasks.BuildTrigger;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
@@ -196,5 +208,74 @@ public class NaginatorListenerTest extends HudsonTestCase {
                 return null;
             }
         }
+    }
+    
+    @Bug(17626)
+    public void testCountScheduleIndependently() throws Exception {
+        // Running a two sequence of builds
+        // with parameter PARAM=A and PARAM=B.
+        // Each of them should be rescheduled
+        // 2 times.
+        
+        FreeStyleProject p = createFreeStyleProject();
+        p.addProperty(new ParametersDefinitionProperty(
+                new StringParameterDefinition("PARAM", "")
+        ));
+        p.getBuildersList().add(new SleepBuilder(100));
+        p.getBuildersList().add(new FailureBuilder());
+        p.getPublishersList().add(new NaginatorPublisher(
+                "",                     // regexpForRerun
+                false,                  // rerunIfUnstable
+                false,                  // rerunMatrixPart
+                false,                  // checkRegexp
+                2,                      // maxSchedule
+                new FixedDelay(0)       // delay
+        ));
+        
+        p.scheduleBuild2(
+                0,
+                new Cause.UserIdCause(),
+                new ParametersAction(
+                    new StringParameterValue("PARAM", "A")
+                )
+        );
+        p.scheduleBuild2(
+                0,
+                new Cause.UserIdCause(),
+                new ParametersAction(
+                    new StringParameterValue("PARAM", "B")
+                )
+        );
+        
+        waitUntilNoActivity();
+        
+        assertEquals(3, Collections2.filter(
+                p.getBuilds(),
+                new Predicate<FreeStyleBuild>() {
+                    public boolean apply(FreeStyleBuild b) {
+                        try {
+                            return "A".equals(b.getEnvironment(TaskListener.NULL).get("PARAM"));
+                        } catch (IOException e) {
+                            return false;
+                        } catch (InterruptedException e) {
+                            return false;
+                        }
+                    }
+                }
+        ).size());
+        assertEquals(3, Collections2.filter(
+                p.getBuilds(),
+                new Predicate<FreeStyleBuild>() {
+                    public boolean apply(FreeStyleBuild b) {
+                        try {
+                            return "B".equals(b.getEnvironment(TaskListener.NULL).get("PARAM"));
+                        } catch (IOException e) {
+                            return false;
+                        } catch (InterruptedException e) {
+                            return false;
+                        }
+                    }
+                }
+        ).size());
     }
 }
