@@ -59,9 +59,9 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
 
                 if (!combsToRerun.isEmpty()) {
                     LOGGER.log(Level.FINE, "schedule matrix rebuild");
-                    scheduleMatrixBuild(build, combsToRerun, n);
+                    scheduleMatrixBuild(build, combsToRerun, n, retryCount + 1);
                 } else {
-                    scheduleBuild(build, n);
+                    scheduleBuild(build, n, retryCount + 1);
                 }
             }
         }
@@ -87,7 +87,16 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
         return n < max;
     }
 
-    private int calculateRetryCount(@Nonnull Run<?, ?> r) {
+    public static int calculateRetryCount(@Nonnull Run<?, ?> r) {
+        NaginatorAction naginatorAction = r.getAction(NaginatorAction.class);
+        if (naginatorAction == null) {
+            return 0;
+        }
+        if (naginatorAction.getRetryCount() > 0) {
+            return naginatorAction.getRetryCount();
+        }
+        
+        // fallback for build made by older versions.
         int n = 0;
         
         while (r != null && r.getAction(NaginatorAction.class) != null) {
@@ -97,8 +106,16 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
         return n;
     }
     
+    /**
+     * @deprecated use {@link NaginatorScheduleAction} to make a build rescheduled.
+     */
+    @Deprecated
     public boolean scheduleMatrixBuild(AbstractBuild<?, ?> build, List<Combination> combinations, int n) {
-        NaginatorMatrixAction nma = new NaginatorMatrixAction();
+        return scheduleMatrixBuild(build, combinations, n, NaginatorListener.calculateRetryCount(build));
+    }
+    
+    private boolean scheduleMatrixBuild(AbstractBuild<?, ?> build, List<Combination> combinations, int n, int retryCount) {
+        NaginatorMatrixAction nma = new NaginatorMatrixAction(retryCount);
         for (Combination c : combinations) {
             nma.addCombinationToRerun(c);
         }
@@ -107,9 +124,16 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
 
     /**
      * Wrapper method for mocking purposes.
+     * 
+     * @deprecated use {@link NaginatorScheduleAction} to make a build rescheduled.
      */
+    @Deprecated
     public boolean scheduleBuild(AbstractBuild<?, ?> build, int n) {
-        return NaginatorRetryAction.scheduleBuild(build, n);
+        return scheduleBuild(build, n, NaginatorListener.calculateRetryCount(build));
+    }
+
+    private boolean scheduleBuild(AbstractBuild<?, ?> build, int n, int retryCount) {
+        return NaginatorRetryAction.scheduleBuild(build, n, retryCount);
     }
 
     private static final Logger LOGGER = Logger.getLogger(NaginatorListener.class.getName());

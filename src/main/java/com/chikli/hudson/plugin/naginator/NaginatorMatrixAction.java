@@ -12,7 +12,20 @@ import java.util.List;
 public class NaginatorMatrixAction extends NaginatorAction {
     private List<Combination> combsToRerun;
 
+    /**
+     * @deprecated use {@link NaginatorMatrixAction#NaginatorMatrixAction(int)}.
+     */
+    @Deprecated
     public NaginatorMatrixAction() {
+        this(0);
+    }
+
+    /**
+     * @param retryCount the number of retry this build is rescheduled for.
+     * @since 1.16
+     */
+    public NaginatorMatrixAction(int retryCount) {
+        super(retryCount);
         this.combsToRerun = new ArrayList<Combination>();
     }
     
