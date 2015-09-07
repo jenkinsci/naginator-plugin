@@ -55,7 +55,7 @@ public class ProgressiveDelayTest {
     private static AbstractBuild createBuild(final boolean hasNaginatorAction, final AbstractBuild previousBuild) {
         final AbstractBuild build = mock(AbstractBuild.class);
         when(build.getPreviousBuild()).thenReturn(previousBuild);
-        when(build.getAction(NaginatorAction.class)).thenReturn(hasNaginatorAction ? new NaginatorAction() : null);
+        when(build.getAction(NaginatorAction.class)).thenReturn(hasNaginatorAction ? new NaginatorAction(0) : null);
         return build;
     }
 }
