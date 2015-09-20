@@ -7,8 +7,8 @@ import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.SleepBuilder;
-import org.kohsuke.stapler.StaplerRequest;
 
+import com.chikli.hudson.plugin.naginator.testutils.MyBuilder;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 
@@ -19,7 +19,6 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Cause;
 import hudson.model.CauseAction;
-import hudson.model.Descriptor;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.ParametersAction;
@@ -31,9 +30,7 @@ import hudson.model.TaskListener;
 import hudson.tasks.BuildTrigger;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
-import hudson.tasks.Builder;
 import hudson.tasks.Publisher;
-import net.sf.json.JSONObject;
 
 public class NaginatorListenerTest extends HudsonTestCase {
     @Override
@@ -45,46 +42,6 @@ public class NaginatorListenerTest extends HudsonTestCase {
         }
     }
     
-    private final static class MyBuilder extends Builder {
-        private final String text;
-        private final Result result;
-        private final int duration;
-
-        public MyBuilder(String text, Result result) {
-            super();
-            this.text = text;
-            this.result = result;
-            this.duration = 0;
-        }
-
-        private MyBuilder(String text, Result result, int duration) {
-            this.text = text;
-            this.result = result;
-            this.duration = duration;
-        }
-
-        @Override
-        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
-                               BuildListener listener) throws InterruptedException,
-                                                              IOException {
-            if (duration > 0) Thread.sleep(duration);
-
-            listener.getLogger().println(text);
-            build.setResult(result);
-            return true;
-        }
-
-        @Extension
-        public static final class DescriptorImpl extends Descriptor<Builder> {
-            public String getDisplayName() {
-                return "MyBuilder";
-            }
-            public MyBuilder newInstance(StaplerRequest req, JSONObject data) {
-                return new MyBuilder("foo", Result.SUCCESS);
-            }
-        }
-    }
-
     public void testSuccessNoRebuild() throws Exception {
         assertEquals(false, isScheduledForRetry("build log", Result.SUCCESS, "foo", false, false));
     }

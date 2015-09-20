@@ -1,6 +1,7 @@
 package com.chikli.hudson.plugin.naginator;
 
 import hudson.matrix.MatrixRun;
+import hudson.matrix.MatrixBuild;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -19,6 +20,8 @@ import javax.annotation.Nonnull;
 
 /**
  * Used from {@link NaginatorPublisher} to mark a build to be reshceduled.
+ * 
+ * @since 1.16
  */
 public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
     private static final Logger LOGGER = Logger.getLogger(NaginatorPublisherScheduleAction.class.getName());
@@ -26,11 +29,13 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
     private final String regexpForRerun;
     private final boolean rerunIfUnstable;
     private final boolean checkRegexp;
+    private final boolean regexpForMatrixParent;
     
     public NaginatorPublisherScheduleAction(NaginatorPublisher publisher) {
         super(publisher.getMaxSchedule(), publisher.getDelay(), publisher.isRerunMatrixPart());
         this.regexpForRerun = publisher.getRegexpForRerun();
         this.rerunIfUnstable = publisher.isRerunIfUnstable();
+        this.regexpForMatrixParent = publisher.isRegexpForMatrixParent();
         this.checkRegexp = publisher.isCheckRegexp();
     }
     
@@ -47,6 +52,10 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return checkRegexp;
     }
     
+    public boolean isRegexpForMatrixParent() {
+        return regexpForMatrixParent;
+    }
+    
     @Override
     public boolean shouldSchedule(@Nonnull Run<?, ?> run, @Nonnull TaskListener listener, int retryCount) {
         if ((run.getResult() == Result.SUCCESS) || (run.getResult() == Result.ABORTED)) {
@@ -60,24 +69,11 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         
         // If we're supposed to check for a regular expression in the build output before
         // scheduling a new build, do so.
-        if (isCheckRegexp()) {
+        if (isCheckRegexp() && (!(run instanceof MatrixBuild) || isRegexpForMatrixParent())) {
             LOGGER.log(Level.FINEST, "Got checkRegexp == true");
             
-            String regexpForRerun = getRegexpForRerun();
-            if ((regexpForRerun != null) && (!regexpForRerun.equals(""))) {
-                LOGGER.log(Level.FINEST, "regexpForRerun - {0}", regexpForRerun);
-                
-                try {
-                    // If parseLog returns false, we didn't find the regular expression,
-                    // so return true.
-                    if (!parseLog(run.getLogFile(), regexpForRerun)) {
-                        LOGGER.log(Level.FINEST, "regexp not in logfile");
-                        return false;
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace(listener
-                                      .error("error while parsing logs for naginator - forcing rebuild."));
-                }
+            if (!testRegexp(run, listener)) {
+                return false;
             }
         }
         
@@ -91,6 +87,33 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         }
         if ((!isRerunIfUnstable()) && (run.getResult() == Result.UNSTABLE)) {
             return false;
+        }
+        if (isCheckRegexp() && !isRegexpForMatrixParent()) {
+            LOGGER.log(Level.FINEST, "Got isRerunMatrixPart == true");
+            
+            if (!testRegexp(run, listener)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    private boolean testRegexp(@Nonnull Run<?, ?> run, TaskListener listener) {
+        String regexpForRerun = getRegexpForRerun();
+        if ((regexpForRerun != null) && (!regexpForRerun.equals(""))) {
+            LOGGER.log(Level.FINEST, "regexpForRerun - {0}", regexpForRerun);
+            
+            try {
+                // If parseLog returns false, we didn't find the regular expression,
+                // so return true.
+                if (!parseLog(run.getLogFile(), regexpForRerun)) {
+                    LOGGER.log(Level.FINEST, "regexp not in logfile");
+                    return false;
+                }
+            } catch (IOException e) {
+                e.printStackTrace(listener
+                                  .error("error while parsing logs for naginator - forcing rebuild."));
+            }
         }
         return true;
     }
