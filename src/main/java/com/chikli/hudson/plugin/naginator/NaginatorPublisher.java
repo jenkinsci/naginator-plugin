@@ -4,14 +4,18 @@ import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.MatrixRun;
 import hudson.matrix.MatrixBuild;
+import hudson.matrix.MatrixProject;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Job;
 import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import net.sf.json.JSONObject;
+
+import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -28,6 +32,7 @@ public class NaginatorPublisher extends Notifier {
     private final boolean rerunIfUnstable;
     private final boolean rerunMatrixPart;
     private final boolean checkRegexp;
+    private final Boolean regexpForMatrixParent;
 
     private ScheduleDelay delay;
 
@@ -40,11 +45,30 @@ public class NaginatorPublisher extends Notifier {
         this(regexpForRerun, rerunIfUnstable, false, checkRegexp, 0, new ProgressiveDelay(5*60, 3*60*60));
     }
 
+    /**
+     * backward compatible constructor.
+     * 
+     * Watch that <code>regexpForMatrixParent</code> gets <code>true</code>
+     * for the backward compatibility.
+     */
+    public NaginatorPublisher(String regexpForRerun,
+                              boolean rerunIfUnstable,
+                              boolean rerunMatrixPart,
+                              boolean checkRegexp,
+                              int maxSchedule,
+                              ScheduleDelay delay) {
+        this(regexpForRerun, rerunIfUnstable, rerunMatrixPart, checkRegexp, true, maxSchedule, delay);
+    }
+    
+    /**
+     * @since 1.16
+     */
     @DataBoundConstructor
     public NaginatorPublisher(String regexpForRerun,
                               boolean rerunIfUnstable,
                               boolean rerunMatrixPart,
                               boolean checkRegexp,
+                              boolean regexpForMatrixParent,
                               int maxSchedule,
                               ScheduleDelay delay) {
         this.regexpForRerun = regexpForRerun;
@@ -52,6 +76,7 @@ public class NaginatorPublisher extends Notifier {
         this.rerunMatrixPart = rerunMatrixPart;
         this.checkRegexp = checkRegexp;
         this.maxSchedule = maxSchedule;
+        this.regexpForMatrixParent = regexpForMatrixParent;
         this.delay = delay;
     }
 
@@ -59,6 +84,17 @@ public class NaginatorPublisher extends Notifier {
         if (this.delay == null) {
             // Backward compatibility : progressive 5 minutes up to 3 hours
             delay = new ProgressiveDelay(5*60, 3*60*60);
+        }
+        if (regexpForMatrixParent == null) {
+            return new NaginatorPublisher(
+                    regexpForRerun,
+                    rerunIfUnstable,
+                    rerunMatrixPart,
+                    checkRegexp,
+                    true,               // true for backward compatibility.
+                    maxSchedule,
+                    delay
+            );
         }
         return this;
     }
@@ -73,6 +109,19 @@ public class NaginatorPublisher extends Notifier {
     
     public boolean isCheckRegexp() {
         return checkRegexp;
+    }
+
+    /**
+     * Returns whether apply the regexp to the matrix parent instead of matrix children.
+     * 
+     * The default is <code>false</code> for naginator-plugin >= 1.16
+     * though <code>true</code> for configurations upgraded from naginator-plugin < 1.16.
+     * 
+     * @return Returns whether apply the regexp to the matrix parent instead of matrix children
+     * @since 1.16
+     */
+    public boolean isRegexpForMatrixParent() {
+        return regexpForMatrixParent;
     }
 
     public String getRegexpForRerun() {
@@ -150,6 +199,19 @@ public class NaginatorPublisher extends Notifier {
         @Override
         public Notifier newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             return req.bindJSON(NaginatorPublisher.class, formData);
+        }
+        
+        /**
+         * @return true if the current request is for a matrix project.
+         * @since 1.16
+         */
+        public boolean isMatrixProject() {
+            StaplerRequest req = Stapler.getCurrentRequest();
+            if (req == null) {
+                return false;
+            }
+            Job<?, ?> job = req.findAncestorObject(Job.class);
+            return (job instanceof MatrixProject);
         }
     }
 
