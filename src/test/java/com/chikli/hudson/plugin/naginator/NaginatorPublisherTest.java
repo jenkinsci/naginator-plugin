@@ -328,4 +328,19 @@ public class NaginatorPublisherTest {
         assertFalse(p.getPublishersList().get(NaginatorPublisher.class).isRegexpForMatrixParent());
         j.assertEqualDataBoundBeans(expected, p.getPublishersList().get(NaginatorPublisher.class));
     }
+    
+    @Test
+    public void testRegexpTimeoutMsInSystemConfiguration() throws Exception {
+        NaginatorPublisher.DescriptorImpl d = (NaginatorPublisher.DescriptorImpl)j.jenkins.getDescriptor(NaginatorPublisher.class);
+        d.setRegexpTimeoutMs(NaginatorPublisher.DEFAULT_REGEXP_TIMEOUT_MS);
+        d.save();       // ensure the default value is saved to the file.
+        
+        // set to the memory, but not saved to the file.
+        d.setRegexpTimeoutMs(1000);
+        
+        j.configRoundtrip();
+        
+        d.load();
+        assertEquals(1000, d.getRegexpTimeoutMs());
+    }
 }

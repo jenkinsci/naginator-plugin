@@ -10,6 +10,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -17,6 +22,8 @@ import java.util.regex.Pattern;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
+
+import jenkins.model.Jenkins;
 
 /**
  * Used from {@link NaginatorPublisher} to mark a build to be reshceduled.
@@ -118,7 +125,89 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return true;
     }
     
-    private boolean parseLog(File logFile, @Nonnull String regexp) throws IOException {
+    private long getRegexpTimeoutMs() {
+        Jenkins j = Jenkins.getInstance();
+        if (j == null) {
+            return NaginatorPublisher.DEFAULT_REGEXP_TIMEOUT_MS;
+        }
+        NaginatorPublisher.DescriptorImpl d = (NaginatorPublisher.DescriptorImpl)j.getDescriptor(NaginatorPublisher.class);
+        if (d == null) {
+            return NaginatorPublisher.DEFAULT_REGEXP_TIMEOUT_MS;
+        }
+        return d.getRegexpTimeoutMs();
+    }
+    
+    private boolean parseLog(final File logFile, @Nonnull final String regexp) throws IOException {
+        // TODO annotate `logFile` with `@Nonnull`
+        // after upgrading the target Jenkins to 1.568 or later.
+        
+        long timeout = getRegexpTimeoutMs();
+        
+        FutureTask<Boolean> task = new FutureTask<Boolean>(new Callable<Boolean>() {
+            public Boolean call() throws Exception {
+                return parseLogImpl(logFile, regexp);
+            }
+        });
+        
+        Thread t = new Thread(task);
+        t.start();
+        
+        try {
+            // never null
+            return task.get(timeout, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            LOGGER.log(
+                    Level.WARNING,
+                    String.format("Aborted regexp '%s' for too long execution time ( > %d ms).", regexp, timeout)
+            );
+        } catch (InterruptedException e) {
+            LOGGER.log(
+                    Level.SEVERE,
+                    String.format("Aborted regexp '%s'", regexp),
+                    e
+            );
+        } catch (ExecutionException e) {
+            LOGGER.log(
+                    Level.SEVERE,
+                    String.format("Aborted regexp '%s'", regexp),
+                    e
+            );
+        }
+        if (t.isAlive()) {
+            t.interrupt();
+        }
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            // ok
+        }
+        return false;
+    }
+    
+    private class InterruptibleCharSequence implements CharSequence {
+        private final CharSequence wrapped;
+        
+        public InterruptibleCharSequence(CharSequence wrapped) {
+            this.wrapped = wrapped;
+        }
+        
+        public int length() {
+            return wrapped.length();
+        }
+        
+        public char charAt(int index) {
+            if (Thread.currentThread().isInterrupted()) {
+                throw new RuntimeException(new InterruptedException());
+            }
+            return wrapped.charAt(index);
+        }
+        
+        public CharSequence subSequence(int start, int end) {
+            return wrapped.subSequence(start, end);
+        }
+    }
+    
+    private boolean parseLogImpl(final File logFile, @Nonnull final String regexp) throws IOException {
         // TODO annotate `logFile` with `@Nonnull`
         // after upgrading the target Jenkins to 1.568 or later.
 
@@ -129,7 +218,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         try {
             reader = new BufferedReader(new FileReader(logFile));
             while ((line = reader.readLine()) != null) {
-                Matcher matcher = pattern.matcher(line);
+                Matcher matcher = pattern.matcher(new InterruptibleCharSequence(line));
                 if (matcher.find()) {
                     return true;
                 }

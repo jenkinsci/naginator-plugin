@@ -249,6 +249,9 @@ public class NaginatorListenerTest extends HudsonTestCase {
                 new FixedDelay(0)       // delay
         ));
         
+        ((NaginatorPublisher.DescriptorImpl)jenkins.getDescriptor(NaginatorPublisher.class))
+            .setRegexpTimeoutMs(1000);
+        
         p.scheduleBuild2(0);
         waitUntilNoActivityUpTo(10 * 1000);
     }
