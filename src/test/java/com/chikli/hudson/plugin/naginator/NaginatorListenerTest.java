@@ -235,4 +235,21 @@ public class NaginatorListenerTest extends HudsonTestCase {
                 }
         ).size());
     }
+    
+    @Bug(24903)
+    public void testCatastorophicRegularExpression() throws Exception {
+        FreeStyleProject p = createFreeStyleProject();
+        p.getBuildersList().add(new MyBuilder("0000000000000000000000000000000000000000000000000000", Result.FAILURE));
+        p.getPublishersList().add(new NaginatorPublisher(
+                "(0*)*NOSUCHSTRING",               // regexpForRerun
+                false,                  // rerunIfUnstable
+                false,                  // rerunMatrixPart
+                true,                   // checkRegexp
+                1,                      // maxSchedule
+                new FixedDelay(0)       // delay
+        ));
+        
+        p.scheduleBuild2(0);
+        waitUntilNoActivityUpTo(10 * 1000);
+    }
 }
