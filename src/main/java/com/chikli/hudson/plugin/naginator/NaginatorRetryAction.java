@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerResponse;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Item;
+import hudson.model.Job;
 import hudson.model.ParametersAction;
 
 import jenkins.model.Jenkins;
@@ -20,23 +22,33 @@ import jenkins.model.Jenkins;
  */
 public class NaginatorRetryAction implements Action {
 
+    private boolean hasPermission() {
+        Job<?, ?> job = Stapler.getCurrentRequest().findAncestorObject(Job.class);
+        if (job != null) {
+            return job.getACL().hasPermission(Item.BUILD);
+        }
+        
+        Jenkins j = Jenkins.getInstance();
+        return (j != null)?j.hasPermission(Item.BUILD):false;
+    }
+
     public String getIconFileName() {
-        return Jenkins.getInstance().hasPermission(Item.BUILD) ?
+        return hasPermission() ?
             "refresh.png" : null;
     }
 
     public String getDisplayName() {
-        return Jenkins.getInstance().hasPermission(Item.BUILD) ?
+        return hasPermission() ?
             "Retry" : null;
     }
 
     public String getUrlName() {
-        return Jenkins.getInstance().hasPermission(Item.BUILD) ?
+        return hasPermission() ?
             "retry" : null;
     }
 
     public void doIndex(StaplerResponse res, @AncestorInPath AbstractBuild build) throws IOException {
-        Jenkins.getInstance().checkPermission(Item.BUILD);
+        build.getACL().checkPermission(Item.BUILD);
         NaginatorRetryAction.scheduleBuild(build, 0, NaginatorListener.calculateRetryCount(build));
         res.sendRedirect2(build.getUpUrl());
     }
