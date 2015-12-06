@@ -1,7 +1,6 @@
 package com.chikli.hudson.plugin.naginator;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.HudsonTestCase;
@@ -135,9 +134,9 @@ public class NaginatorListenerTest extends HudsonTestCase {
         return isScheduledForRetry(project);
     }
 
-    private boolean isScheduledForRetry(FreeStyleProject project) throws InterruptedException, ExecutionException {
+    private boolean isScheduledForRetry(FreeStyleProject project) throws Exception {
         FreeStyleBuild build = project.scheduleBuild2(0).get();
-        Thread.sleep(1000); // wait for job to run and possibly re-run
+        waitUntilNoActivity();
 
         return project.getLastBuild().getNumber() > 1;
     }
