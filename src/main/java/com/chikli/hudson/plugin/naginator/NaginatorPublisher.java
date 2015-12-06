@@ -28,6 +28,8 @@ import java.util.logging.Logger;
  * @author Nayan Hajratwala <nayan@chikli.com>
  */
 public class NaginatorPublisher extends Notifier {
+    public final static long DEFAULT_REGEXP_TIMEOUT_MS = 30000;
+    
     private final String regexpForRerun;
     private final boolean rerunIfUnstable;
     private final boolean rerunMatrixPart;
@@ -176,9 +178,39 @@ public class NaginatorPublisher extends Notifier {
      */
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+        private long regexpTimeoutMs;
 
         public DescriptorImpl() {
-            super(NaginatorPublisher.class);
+            // default value
+            regexpTimeoutMs = DEFAULT_REGEXP_TIMEOUT_MS;
+            load();
+        }
+
+        /**
+         * @return timeout for regular expressions.
+         * @since 1.16.1
+         */
+        public long getRegexpTimeoutMs() {
+            return regexpTimeoutMs;
+        }
+
+        /**
+         * @param regexpTimeoutMs timeout for regular expressions.
+         * @since 1.16.1
+         */
+        public void setRegexpTimeoutMs(long regexpTimeoutMs) {
+            this.regexpTimeoutMs = regexpTimeoutMs;
+        }
+
+        /**
+         * @see hudson.model.Descriptor#configure(org.kohsuke.stapler.StaplerRequest, net.sf.json.JSONObject)
+         */
+        @Override
+        public boolean configure(StaplerRequest req, JSONObject json) throws hudson.model.Descriptor.FormException {
+            setRegexpTimeoutMs(json.getLong("regexpTimeoutMs"));
+            boolean result = super.configure(req, json);
+            save();
+            return result;
         }
 
         /**
