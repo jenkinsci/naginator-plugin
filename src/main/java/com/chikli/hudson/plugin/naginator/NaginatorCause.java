@@ -13,7 +13,7 @@ public class NaginatorCause extends Cause {
     private final String summary;
 
     public NaginatorCause(AbstractBuild<?, ?> build) {
-        this.summary = build.getDisplayName();
+        this.summary = String.format("<a href=\"/%s\">%s</a>", build.getUrl(), build.getDisplayName());
     }
 
     @Override
