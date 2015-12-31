@@ -9,15 +9,29 @@ import hudson.model.Cause;
  */
 public class NaginatorCause extends Cause {
 
-
     private final String summary;
+    private final String projectName;
+    private final String sourceBuildUrl;
+    private final int sourceBuildNumber;
 
     public NaginatorCause(AbstractBuild<?, ?> build) {
-        this.summary = String.format("<a href=\"/%s\">%s</a>", build.getUrl(), build.getDisplayName());
+        this.summary = build.getDisplayName();
+        this.projectName = build.getParent().getFullName();
+        this.sourceBuildUrl = build.getUrl();
+        this.sourceBuildNumber = build.getNumber();
     }
 
     @Override
     public String getShortDescription() {
         return Messages.NaginatorCause_Description(summary);
     }
+
+    public String getSummary() { return this.summary; }
+
+    public String getProjectName() { return this.projectName; }
+
+    public String getSourceBuildUrl() { return this.sourceBuildUrl; }
+
+    public int getSourceBuildNumber() { return this.sourceBuildNumber; }
+
 }

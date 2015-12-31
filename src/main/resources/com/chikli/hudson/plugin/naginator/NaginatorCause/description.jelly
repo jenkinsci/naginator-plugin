@@ -1,0 +1,19 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <span>
+        <j:choose>
+            <j:when test="${app.getItemByFullName(it.projectName)!=null}">
+                <j:choose>
+                    <j:when test="${app.getItemByFullName(it.projectName).getBuildByNumber(it.sourceBuildNumber)!=null}">
+                        <j:out value="${%DescriptionWithLinkToSource(it.summary,it.sourceBuildUrl,rootURL)}"/>
+                    </j:when>
+                    <j:otherwise>
+                        <j:out value="${%DescriptionWithDeletedSource(it.summary)}"/>
+                    </j:otherwise>
+                </j:choose>
+            </j:when>
+            <j:otherwise>
+                <j:out value="${it.shortDescription}"/>
+            </j:otherwise>
+        </j:choose>
+    </span>
+</j:jelly>
