@@ -4,7 +4,7 @@
             <j:when test="${app.getItemByFullName(it.projectName)!=null}">
                 <j:choose>
                     <j:when test="${app.getItemByFullName(it.projectName).getBuildByNumber(it.sourceBuildNumber)!=null}">
-                        <j:out value="${%DescriptionWithLinkToSource(it.summary,it.sourceBuildUrl,rootURL)}"/>
+                        <j:out value="${%DescriptionWithLinkToSource(it.summary,rootURL,it.jobUrl,it.sourceBuildNumber)}"/>
                     </j:when>
                     <j:otherwise>
                         <j:out value="${%DescriptionWithDeletedSource(it.summary)}"/>
