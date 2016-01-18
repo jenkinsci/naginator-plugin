@@ -38,9 +38,7 @@ public class NaginatorCause extends Cause {
 
     public String getSummary() { return this.summary; }
 
-    public String getProjectName() {
-       return this.project.getFullName();
-    }
+    public Job getProject() { return this.project; }
 
     public String getJobUrl() {
         return this.project.getUrl();

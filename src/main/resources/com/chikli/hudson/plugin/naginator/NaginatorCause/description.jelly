@@ -1,9 +1,9 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <span>
         <j:choose>
-            <j:when test="${app.getItemByFullName(it.projectName)!=null}">
+            <j:when test="${it.project!=null}">
                 <j:choose>
-                    <j:when test="${app.getItemByFullName(it.projectName).getBuildByNumber(it.sourceBuildNumber)!=null}">
+                    <j:when test="${it.project.getBuildByNumber(it.sourceBuildNumber)!=null}">
                         <j:out value="${%DescriptionWithLinkToSource(it.summary,rootURL,it.jobUrl,it.sourceBuildNumber)}"/>
                     </j:when>
                     <j:otherwise>
