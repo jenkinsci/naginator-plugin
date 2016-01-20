@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
 public class NaginatorCause extends Cause {
 
     private final String summary;
-    private final int sourceBuildNumber;
+    private final Integer sourceBuildNumber;
     private transient Job project;
 
     public NaginatorCause(AbstractBuild<?, ?> build) {
