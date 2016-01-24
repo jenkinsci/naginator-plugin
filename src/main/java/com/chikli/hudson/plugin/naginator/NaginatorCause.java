@@ -44,6 +44,6 @@ public class NaginatorCause extends Cause {
         return this.project.getUrl();
     }
 
-    public int getSourceBuildNumber() { return this.sourceBuildNumber; }
+    public Integer getSourceBuildNumber() { return this.sourceBuildNumber; }
 
 }
