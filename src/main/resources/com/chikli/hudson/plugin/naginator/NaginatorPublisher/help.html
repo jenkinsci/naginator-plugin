@@ -3,4 +3,14 @@
     <p>
     Note: immediate rescheduling of failed builds, combined with publishers such as e-mail or IM, will flood the
     recipients. Take care to configure a suitable delay between builds or limit the maximum retries.
+    <p>
+    Following variables are defined for rescheduled builds.
+    <dl>
+      <dt>NAGINATOR_COUNT</dt>
+        <dd>How many times the build was rescheduled.</dd>
+      <dt>NAGINATOR_MAXCOUNT</dt>
+        <dd>How many times the build can be rescheduled. This can be 0 if manually rescheduled.</dd>
+      <dt>NAGINATOR_BUILD_NUMBER</dt>
+        <dd>The build number of the failed build causing the reschedule.</dd>
+    </dl>
 </div>
