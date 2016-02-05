@@ -43,7 +43,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         this.regexpForRerun = publisher.getRegexpForRerun();
         this.rerunIfUnstable = publisher.isRerunIfUnstable();
         this.regexpForMatrixParent = publisher.isRegexpForMatrixParent();
-        this.checkRegexp = publisher.isCheckRegexp();
+        this.checkRegexp = publisher.getCheckRegexp();
     }
     
     @CheckForNull

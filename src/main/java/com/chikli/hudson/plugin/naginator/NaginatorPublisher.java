@@ -108,8 +108,8 @@ public class NaginatorPublisher extends Notifier {
     public boolean isRerunMatrixPart() {
         return rerunMatrixPart;
     }
-    
-    public boolean isCheckRegexp() {
+
+    public boolean getCheckRegexp() {
         return checkRegexp;
     }
 
