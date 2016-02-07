@@ -38,7 +38,7 @@ public class NaginatorAction implements BuildBadgeAction {
      * @since 1.17
      */
     public NaginatorAction(@CheckForNull Run<?, ?> parentBuild, int retryCount, int maxRetryCount) {
-        this.parentBuildNumber = (parentBuild != null)?parentBuild.getNumber():null;
+        this.parentBuildNumber = (parentBuild != null) ? parentBuild.getNumber() : null;
         this.retryCount = retryCount;
         this.maxRetryCount = maxRetryCount;
     }
