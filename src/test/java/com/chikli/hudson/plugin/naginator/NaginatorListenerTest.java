@@ -1,6 +1,11 @@
 package com.chikli.hudson.plugin.naginator;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.HudsonTestCase;
@@ -13,6 +18,10 @@ import com.google.common.collect.Collections2;
 
 import hudson.Extension;
 import hudson.Launcher;
+import hudson.matrix.Axis;
+import hudson.matrix.AxisList;
+import hudson.matrix.Combination;
+import hudson.matrix.MatrixProject;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -22,6 +31,7 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
+import hudson.model.Run;
 import hudson.model.StringParameterDefinition;
 import hudson.model.StringParameterValue;
 import hudson.model.Result;
@@ -29,6 +39,7 @@ import hudson.model.TaskListener;
 import hudson.tasks.BuildTrigger;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
+import hudson.tasks.Builder;
 import hudson.tasks.Publisher;
 
 public class NaginatorListenerTest extends HudsonTestCase {
@@ -253,5 +264,123 @@ public class NaginatorListenerTest extends HudsonTestCase {
         
         p.scheduleBuild2(0);
         waitUntilNoActivityUpTo(10 * 1000);
+    }
+    
+    
+    public static class VariableRecordBuilder extends Builder {
+        private final String name;
+        private final Map<String, String> recorded = new HashMap<String, String>();
+        
+        public VariableRecordBuilder(@Nonnull String name) {
+            this.name = name;
+        }
+        
+        private String getIdForBuild(@Nonnull Run<?, ?> r) {
+            return String.format("%s-%s", r.getParent().getFullName(), r.getId());
+        }
+        
+        @CheckForNull
+        public String getRecordedValue(@Nonnull Run<?, ?> r) {
+            return recorded.get(getIdForBuild(r));
+        }
+        
+        @Override
+        public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
+            recorded.put(getIdForBuild(build), build.getEnvironment(listener).get(name));
+            return true;
+        }
+    }
+    
+    public void testVariable() throws Exception {
+        FreeStyleProject p = createFreeStyleProject();
+        VariableRecordBuilder countRecorder = new VariableRecordBuilder("NAGINATOR_COUNT");
+        VariableRecordBuilder maxCountRecorder = new VariableRecordBuilder("NAGINATOR_MAXCOUNT");
+        VariableRecordBuilder buildNumberRecorder = new VariableRecordBuilder("NAGINATOR_BUILD_NUMBER");
+        p.getBuildersList().add(countRecorder);
+        p.getBuildersList().add(maxCountRecorder);
+        p.getBuildersList().add(buildNumberRecorder);
+        p.getBuildersList().add(new FailureBuilder());
+        p.getPublishersList().add(new NaginatorPublisher(
+                "",     // regexpForRerun
+                false,  // rerunIfUnstable
+                false,  // rerunMatrixPart
+                false,  // checkRegexp
+                false,  // regexpForMatrixParent
+                2,      // maxSchedule
+                new FixedDelay(0) // delay
+        ));
+        
+        p.scheduleBuild2(0);
+        waitUntilNoActivity();
+        
+        // There should be 3 builds
+        assertEquals(3, p.getLastBuild().getNumber());
+        
+        // for the first build (not a retrying build)
+        assertNull(countRecorder.getRecordedValue(p.getBuildByNumber(1)));
+        assertNull(maxCountRecorder.getRecordedValue(p.getBuildByNumber(1)));
+        assertNull(buildNumberRecorder.getRecordedValue(p.getBuildByNumber(1)));
+        
+        // for the first retry
+        assertEquals("1", countRecorder.getRecordedValue(p.getBuildByNumber(2)));
+        assertEquals("2", maxCountRecorder.getRecordedValue(p.getBuildByNumber(2)));
+        assertEquals("1", buildNumberRecorder.getRecordedValue(p.getBuildByNumber(2)));
+        
+        // for the second retry
+        assertEquals("2", countRecorder.getRecordedValue(p.getBuildByNumber(3)));
+        assertEquals("2", maxCountRecorder.getRecordedValue(p.getBuildByNumber(3)));
+        assertEquals("2", buildNumberRecorder.getRecordedValue(p.getBuildByNumber(3)));
+    }
+    
+    public void testVariableForMatrixBuild() throws Exception {
+        MatrixProject p = createMatrixProject();
+        AxisList axisList = new AxisList(new Axis("axis1", "value1", "value2"));
+        p.setAxes(axisList);
+        VariableRecordBuilder countRecorder = new VariableRecordBuilder("NAGINATOR_COUNT");
+        VariableRecordBuilder maxCountRecorder = new VariableRecordBuilder("NAGINATOR_MAXCOUNT");
+        VariableRecordBuilder buildNumberRecorder = new VariableRecordBuilder("NAGINATOR_BUILD_NUMBER");
+        p.getBuildersList().add(countRecorder);
+        p.getBuildersList().add(maxCountRecorder);
+        p.getBuildersList().add(buildNumberRecorder);
+        p.getBuildersList().add(new FailureBuilder());
+        p.getPublishersList().add(new NaginatorPublisher(
+                "",     // regexpForRerun
+                false,  // rerunIfUnstable
+                false,  // rerunMatrixPart
+                false,  // checkRegexp
+                false,  // regexpForMatrixParent
+                2,      // maxSchedule
+                new FixedDelay(0) // delay
+        ));
+        
+        p.scheduleBuild2(0);
+        waitUntilNoActivity();
+        
+        // There should be 3 builds
+        assertEquals(3, p.getLastBuild().getNumber());
+        
+        // for the first build (not a retrying build)
+        assertNull(countRecorder.getRecordedValue(p.getBuildByNumber(1).getExactRun(new Combination(axisList, "value1"))));
+        assertNull(maxCountRecorder.getRecordedValue(p.getBuildByNumber(1).getExactRun(new Combination(axisList, "value1"))));
+        assertNull(buildNumberRecorder.getRecordedValue(p.getBuildByNumber(1).getExactRun(new Combination(axisList, "value1"))));
+        assertNull(countRecorder.getRecordedValue(p.getBuildByNumber(1).getExactRun(new Combination(axisList, "value2"))));
+        assertNull(maxCountRecorder.getRecordedValue(p.getBuildByNumber(1).getExactRun(new Combination(axisList, "value2"))));
+        assertNull(buildNumberRecorder.getRecordedValue(p.getBuildByNumber(1).getExactRun(new Combination(axisList, "value2"))));
+        
+        // for the first retry
+        assertEquals("1", countRecorder.getRecordedValue(p.getBuildByNumber(2).getExactRun(new Combination(axisList, "value1"))));
+        assertEquals("2", maxCountRecorder.getRecordedValue(p.getBuildByNumber(2).getExactRun(new Combination(axisList, "value1"))));
+        assertEquals("1", buildNumberRecorder.getRecordedValue(p.getBuildByNumber(2).getExactRun(new Combination(axisList, "value1"))));
+        assertEquals("1", countRecorder.getRecordedValue(p.getBuildByNumber(2).getExactRun(new Combination(axisList, "value2"))));
+        assertEquals("2", maxCountRecorder.getRecordedValue(p.getBuildByNumber(2).getExactRun(new Combination(axisList, "value2"))));
+        assertEquals("1", buildNumberRecorder.getRecordedValue(p.getBuildByNumber(2).getExactRun(new Combination(axisList, "value2"))));
+        
+        // for the second retry
+        assertEquals("2", countRecorder.getRecordedValue(p.getBuildByNumber(3).getExactRun(new Combination(axisList, "value1"))));
+        assertEquals("2", maxCountRecorder.getRecordedValue(p.getBuildByNumber(3).getExactRun(new Combination(axisList, "value1"))));
+        assertEquals("2", buildNumberRecorder.getRecordedValue(p.getBuildByNumber(3).getExactRun(new Combination(axisList, "value1"))));
+        assertEquals("2", countRecorder.getRecordedValue(p.getBuildByNumber(3).getExactRun(new Combination(axisList, "value2"))));
+        assertEquals("2", maxCountRecorder.getRecordedValue(p.getBuildByNumber(3).getExactRun(new Combination(axisList, "value2"))));
+        assertEquals("2", buildNumberRecorder.getRecordedValue(p.getBuildByNumber(3).getExactRun(new Combination(axisList, "value2"))));
     }
 }

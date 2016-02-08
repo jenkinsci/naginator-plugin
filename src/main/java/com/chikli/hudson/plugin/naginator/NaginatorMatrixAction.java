@@ -1,8 +1,12 @@
 package com.chikli.hudson.plugin.naginator;
 
 import hudson.matrix.Combination;
+import hudson.model.Run;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.CheckForNull;
 
 /**
  * This is an extention for the NaginatorAction class which used to store the
@@ -23,9 +27,21 @@ public class NaginatorMatrixAction extends NaginatorAction {
     /**
      * @param retryCount the number of retry this build is rescheduled for.
      * @since 1.16
+     * @deprecated use {@link #NaginatorMatrixAction(Run, int, int)} instead.
      */
+    @Deprecated
     public NaginatorMatrixAction(int retryCount) {
-        super(retryCount);
+        this(null, retryCount, 0);
+    }
+    
+    /**
+     * @param parentBuild the build to be rescheduled.
+     * @param retryCount the number of retry this build is rescheduled for.
+     * @param maxRetryCount the maximum number to retry. Can be 0 for indeterminable cases.
+     * @since 1.17
+     */
+    public NaginatorMatrixAction(@CheckForNull Run<?, ?> parentBuild, int retryCount, int maxRetryCount) {
+        super(parentBuild, retryCount, maxRetryCount);
         this.combsToRerun = new ArrayList<Combination>();
     }
     

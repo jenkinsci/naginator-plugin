@@ -1,16 +1,20 @@
 package com.chikli.hudson.plugin.naginator;
 
+import hudson.Launcher;
 import hudson.matrix.Combination;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixRun;
 import hudson.model.*;
+import hudson.model.Run.RunnerAbortedException;
 import hudson.model.listeners.RunListener;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
@@ -59,12 +63,36 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
 
                 if (!combsToRerun.isEmpty()) {
                     LOGGER.log(Level.FINE, "schedule matrix rebuild");
-                    scheduleMatrixBuild(build, combsToRerun, n, retryCount + 1);
+                    scheduleMatrixBuild(build, combsToRerun, n, retryCount + 1, action.getMaxSchedule());
                 } else {
-                    scheduleBuild(build, n, retryCount + 1);
+                    scheduleBuild(build, n, retryCount + 1, action.getMaxSchedule());
                 }
             }
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Environment setUpEnvironment(@SuppressWarnings("rawtypes") AbstractBuild build, Launcher launcher, BuildListener listener)
+            throws IOException, InterruptedException, RunnerAbortedException
+    {
+        final NaginatorAction action = build.getRootBuild().getAction(NaginatorAction.class);
+        if (action == null) {
+            return null;
+        }
+        
+        return new Environment() {
+            @Override
+            public void buildEnvVars(Map<String, String> env) {
+                env.put("NAGINATOR_COUNT", Integer.toString(action.getRetryCount()));
+                env.put("NAGINATOR_MAXCOUNT", Integer.toString(action.getMaxRetryCount()));
+                if (action.getParentBuildNumber() != null) {
+                    env.put("NAGINATOR_BUILD_NUMBER", action.getParentBuildNumber().toString());
+                }
+            }
+        };
     }
 
     /**
@@ -111,15 +139,15 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
      */
     @Deprecated
     public boolean scheduleMatrixBuild(AbstractBuild<?, ?> build, List<Combination> combinations, int n) {
-        return scheduleMatrixBuild(build, combinations, n, NaginatorListener.calculateRetryCount(build));
+        return scheduleMatrixBuild(build, combinations, n, NaginatorListener.calculateRetryCount(build), 0);
     }
     
-    private boolean scheduleMatrixBuild(AbstractBuild<?, ?> build, List<Combination> combinations, int n, int retryCount) {
-        NaginatorMatrixAction nma = new NaginatorMatrixAction(retryCount);
+    private boolean scheduleMatrixBuild(AbstractBuild<?, ?> build, List<Combination> combinations, int delay, int retryCount, int maxRetryCount) {
+        NaginatorMatrixAction nma = new NaginatorMatrixAction(build, retryCount, maxRetryCount);
         for (Combination c : combinations) {
             nma.addCombinationToRerun(c);
         }
-        return NaginatorRetryAction.scheduleBuild(build, n, nma);
+        return NaginatorRetryAction.scheduleBuild(build, delay, nma);
     }
 
     /**
@@ -129,11 +157,11 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
      */
     @Deprecated
     public boolean scheduleBuild(AbstractBuild<?, ?> build, int n) {
-        return scheduleBuild(build, n, NaginatorListener.calculateRetryCount(build));
+        return scheduleBuild(build, n, NaginatorListener.calculateRetryCount(build), 0);
     }
 
-    private boolean scheduleBuild(AbstractBuild<?, ?> build, int n, int retryCount) {
-        return NaginatorRetryAction.scheduleBuild(build, n, retryCount);
+    private boolean scheduleBuild(AbstractBuild<?, ?> build, int n, int retryCount, int maxRetryCount) {
+        return NaginatorRetryAction.scheduleBuild(build, n, retryCount, maxRetryCount);
     }
 
     private static final Logger LOGGER = Logger.getLogger(NaginatorListener.class.getName());

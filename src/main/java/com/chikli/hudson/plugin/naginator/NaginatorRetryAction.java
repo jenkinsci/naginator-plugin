@@ -49,12 +49,12 @@ public class NaginatorRetryAction implements Action {
 
     public void doIndex(StaplerResponse res, @AncestorInPath AbstractBuild build) throws IOException {
         build.getACL().checkPermission(Item.BUILD);
-        NaginatorRetryAction.scheduleBuild(build, 0, NaginatorListener.calculateRetryCount(build));
+        NaginatorRetryAction.scheduleBuild(build, 0, NaginatorListener.calculateRetryCount(build), 0);
         res.sendRedirect2(build.getUpUrl());
     }
 
-    static boolean scheduleBuild(final AbstractBuild<?, ?> build, final int delay, int retryCount) {
-        return scheduleBuild(build, delay, new NaginatorAction(retryCount));
+    static boolean scheduleBuild(final AbstractBuild<?, ?> build, final int delay, int retryCount, int maxRetryCount) {
+        return scheduleBuild(build, delay, new NaginatorAction(build, retryCount, maxRetryCount));
     }
 
     static boolean scheduleBuild(final AbstractBuild<?, ?> build, final int delay, final NaginatorAction action) {
