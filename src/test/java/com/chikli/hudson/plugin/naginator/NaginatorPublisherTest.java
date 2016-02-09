@@ -315,7 +315,7 @@ public class NaginatorPublisherTest {
                 naginator.getRegexpForRerun(),
                 naginator.isRerunIfUnstable(),
                 naginator.isRerunMatrixPart(),
-                naginator.isCheckRegexp(),
+                naginator.getCheckRegexp(),
                 false,  // regexpForMatrixParent (not preserved)
                 naginator.getMaxSchedule(),
                 naginator.getDelay()
