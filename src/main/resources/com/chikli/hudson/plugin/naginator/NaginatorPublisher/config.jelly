@@ -22,7 +22,7 @@
             <f:entry title="${%Regular expression to search for}" field="regexpForRerun">
                 <f:textbox />
             </f:entry>
-            <j:if test="${descriptor.matrixProject}">
+            <j:if test="${descriptor.isMatrixProject(it)}">
                 <f:entry title="${%Test regular expression for the matrix parent}" field="regexpForMatrixParent">
                     <f:checkbox />
                 </f:entry>

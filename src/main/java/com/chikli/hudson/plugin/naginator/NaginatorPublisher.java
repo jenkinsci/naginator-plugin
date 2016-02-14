@@ -235,15 +235,9 @@ public class NaginatorPublisher extends Notifier {
         
         /**
          * @return true if the current request is for a matrix project.
-         * @since 1.16
          */
-        public boolean isMatrixProject() {
-            StaplerRequest req = Stapler.getCurrentRequest();
-            if (req == null) {
-                return false;
-            }
-            Job<?, ?> job = req.findAncestorObject(Job.class);
-            return (job instanceof MatrixProject);
+        public boolean isMatrixProject(Object it) {
+            return (it instanceof MatrixProject);
         }
     }
 
