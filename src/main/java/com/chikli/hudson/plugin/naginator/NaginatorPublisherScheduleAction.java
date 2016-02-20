@@ -37,6 +37,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
     private final boolean rerunIfUnstable;
     private final boolean checkRegexp;
     private final boolean regexpForMatrixParent;
+    private final NoChildStrategy noChildStrategy;
     
     public NaginatorPublisherScheduleAction(NaginatorPublisher publisher) {
         super(publisher.getMaxSchedule(), publisher.getDelay(), publisher.isRerunMatrixPart());
@@ -44,6 +45,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         this.rerunIfUnstable = publisher.isRerunIfUnstable();
         this.regexpForMatrixParent = publisher.isRegexpForMatrixParent();
         this.checkRegexp = publisher.isCheckRegexp();
+        this.noChildStrategy = publisher.getNoChildStrategy();
     }
     
     @CheckForNull
@@ -229,5 +231,13 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
                 reader.close();
             }
         }
+    }
+    
+    @Override
+    @Nonnull
+    public NoChildStrategy getNoChildStrategy() {
+        return (noChildStrategy != null)
+                ? noChildStrategy
+                : NoChildStrategy.getDefault();
     }
 }

@@ -284,12 +284,18 @@ public class NaginatorPublisherTest {
                 1,      // maxSchedule
                 new FixedDelay(0)
         );
+        naginator.setNoChildStrategy(NoChildStrategy.RerunEmpty);
         
         p.getPublishersList().add(naginator);
         
         j.configRoundtrip(p);
         
         j.assertEqualDataBoundBeans(naginator, p.getPublishersList().get(NaginatorPublisher.class));
+        // assertEqualDataBoundBeans doesn't work for DataBoundSetter fields.
+        assertEquals(
+                naginator.getNoChildStrategy(),
+                p.getPublishersList().get(NaginatorPublisher.class).getNoChildStrategy()
+        );
     }
     
     
@@ -311,15 +317,17 @@ public class NaginatorPublisherTest {
                 1,      // maxSchedule
                 new FixedDelay(0)
         );
+        naginator.setNoChildStrategy(NoChildStrategy.RerunEmpty);
         NaginatorPublisher expected = new NaginatorPublisher(
                 naginator.getRegexpForRerun(),
                 naginator.isRerunIfUnstable(),
-                naginator.isRerunMatrixPart(),
+                false,  // retunMatrixPart (not preserved)
                 naginator.isCheckRegexp(),
                 false,  // regexpForMatrixParent (not preserved)
                 naginator.getMaxSchedule(),
                 naginator.getDelay()
         );
+        naginator.setNoChildStrategy(NoChildStrategy.getDefault());     // not preserved
         
         p.getPublishersList().add(naginator);
         
@@ -327,6 +335,11 @@ public class NaginatorPublisherTest {
         
         assertFalse(p.getPublishersList().get(NaginatorPublisher.class).isRegexpForMatrixParent());
         j.assertEqualDataBoundBeans(expected, p.getPublishersList().get(NaginatorPublisher.class));
+        // assertEqualDataBoundBeans doesn't work for DataBoundSetter fields.
+        assertEquals(
+                expected.getNoChildStrategy(),
+                p.getPublishersList().get(NaginatorPublisher.class).getNoChildStrategy()
+        );
     }
     
     @Test

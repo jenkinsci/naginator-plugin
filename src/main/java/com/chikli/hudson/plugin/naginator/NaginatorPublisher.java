@@ -15,12 +15,15 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import net.sf.json.JSONObject;
 
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.util.logging.Logger;
+
+import javax.annotation.Nonnull;
 
 /**
  * Reschedules a build if the current one fails.
@@ -35,6 +38,7 @@ public class NaginatorPublisher extends Notifier {
     private final boolean rerunMatrixPart;
     private final boolean checkRegexp;
     private final Boolean regexpForMatrixParent;
+    private NoChildStrategy noChildStrategy;    /* almost final */
 
     private ScheduleDelay delay;
 
@@ -107,6 +111,28 @@ public class NaginatorPublisher extends Notifier {
 
     public boolean isRerunMatrixPart() {
         return rerunMatrixPart;
+    }
+    
+    /**
+     * @param noChildStrategy
+     * 
+     * @since 1.17
+     */
+    @DataBoundSetter
+    public void setNoChildStrategy(@Nonnull NoChildStrategy noChildStrategy) {
+        this.noChildStrategy = noChildStrategy;
+    }
+    
+    /**
+     * @return the strategy for no children to rerun for a matrix project.
+     * 
+     * @since 1.17
+     */
+    @Nonnull
+    public NoChildStrategy getNoChildStrategy() {
+        return (noChildStrategy != null)
+                ? noChildStrategy
+                : NoChildStrategy.getDefault();
     }
     
     public boolean isCheckRegexp() {

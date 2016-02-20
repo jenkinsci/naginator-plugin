@@ -93,10 +93,16 @@ public class NaginatorScheduleActionTest {
     
     private static class MatrixConfigurationScheduleAction extends NaginatorScheduleAction {
         private final String combinationFilter;
+        private final NoChildStrategy noChildStrategy;
         
-        public MatrixConfigurationScheduleAction(String combinationFilter, int maxSchedule, ScheduleDelay delay, boolean rerunMatrixPart) {
+        public MatrixConfigurationScheduleAction(String combinationFilter, int maxSchedule, ScheduleDelay delay, boolean rerunMatrixPart, NoChildStrategy noChildStrategy) {
             super(maxSchedule, delay, rerunMatrixPart);
             this.combinationFilter = combinationFilter;
+            this.noChildStrategy = noChildStrategy;
+        }
+        
+        public MatrixConfigurationScheduleAction(String combinationFilter, int maxSchedule, ScheduleDelay delay, boolean rerunMatrixPart) {
+            this(combinationFilter, maxSchedule, delay, rerunMatrixPart, NoChildStrategy.getDefault());
         }
         
         @Override
@@ -105,6 +111,11 @@ public class NaginatorScheduleActionTest {
                     run.getParent().getParent().getAxes(),
                     combinationFilter
             );
+        }
+        
+        @Override
+        public NoChildStrategy getNoChildStrategy() {
+            return noChildStrategy;
         }
     }
     
@@ -353,9 +364,10 @@ public class NaginatorScheduleActionTest {
         p.getBuildersList().add(new ScheduleActionBuilder(
                 new MatrixConfigurationScheduleAction(
                         "false",
-                        1,
+                        maxSchedule,
                         new FixedDelay(0),
-                        true
+                        true,
+                        NoChildStrategy.RerunWhole
                 )
         ));
         p.scheduleBuild2(0);
@@ -368,6 +380,77 @@ public class NaginatorScheduleActionTest {
         assertNotNull(b.getExactRun(new Combination(axes, "1", "1")));
         assertNotNull(b.getExactRun(new Combination(axes, "1", "2")));
         assertNotNull(b.getExactRun(new Combination(axes, "2", "1")));
+        assertNull(b.getExactRun(new Combination(axes, "2", "2")));
+    }
+    
+    /**
+     * Filtering out all children with DontRerun strategy
+     * cause trigger nothing.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testMatrixWithNoChildrenNoRerun() throws Exception {
+        final int maxSchedule = 1;
+        
+        MatrixProject p = j.createMatrixProject();
+        AxisList axes = new AxisList(
+                new Axis("axis1", "1", "2"),
+                new Axis("axis2", "1", "2")
+        );
+        p.setAxes(axes);
+        p.setCombinationFilter("!(axis1=='2' && axis2=='2')");
+        p.getBuildersList().add(new ScheduleActionBuilder(
+                new MatrixConfigurationScheduleAction(
+                        "false",
+                        maxSchedule,
+                        new FixedDelay(0),
+                        true,
+                        NoChildStrategy.DontRun
+                )
+        ));
+        p.scheduleBuild2(0);
+        j.waitUntilNoActivity();
+        
+        assertEquals(1, p.getLastBuild().number);
+    }
+    
+    /**
+     * Filtering out all children cause trigger the matrix,
+     * but no children.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testMatrixWithNoChildrenEmpty() throws Exception {
+        final int maxSchedule = 1;
+        
+        MatrixProject p = j.createMatrixProject();
+        AxisList axes = new AxisList(
+                new Axis("axis1", "1", "2"),
+                new Axis("axis2", "1", "2")
+        );
+        p.setAxes(axes);
+        p.setCombinationFilter("!(axis1=='2' && axis2=='2')");
+        p.getBuildersList().add(new ScheduleActionBuilder(
+                new MatrixConfigurationScheduleAction(
+                        "false",
+                        maxSchedule,
+                        new FixedDelay(0),
+                        true,
+                        NoChildStrategy.RerunEmpty
+                )
+        ));
+        p.scheduleBuild2(0);
+        j.waitUntilNoActivity();
+        
+        assertEquals(maxSchedule + 1, p.getLastBuild().number);
+        
+        // No children are rescheduled
+        MatrixBuild b = p.getLastBuild();
+        assertNull(b.getExactRun(new Combination(axes, "1", "1")));
+        assertNull(b.getExactRun(new Combination(axes, "1", "2")));
+        assertNull(b.getExactRun(new Combination(axes, "2", "1")));
         assertNull(b.getExactRun(new Combination(axes, "2", "2")));
     }
     

@@ -64,6 +64,19 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
                 if (!combsToRerun.isEmpty()) {
                     LOGGER.log(Level.FINE, "schedule matrix rebuild");
                     scheduleMatrixBuild(build, combsToRerun, n, retryCount + 1, action.getMaxSchedule());
+                } else if (build instanceof MatrixBuild && action.isRerunMatrixPart()) {
+                    // No children to rerun
+                    switch (action.getNoChildStrategy()) {
+                    case RerunWhole:
+                        scheduleBuild(build, n, retryCount + 1, action.getMaxSchedule());
+                        break;
+                    case RerunEmpty:
+                        LOGGER.log(Level.FINE, "schedule matrix rebuild");
+                        scheduleMatrixBuild(build, combsToRerun, n, retryCount + 1, action.getMaxSchedule());
+                        break;
+                    case DontRun:
+                        continue;   // confusing, but back to the look for NaginatorScheduleAction
+                    }
                 } else {
                     scheduleBuild(build, n, retryCount + 1, action.getMaxSchedule());
                 }
