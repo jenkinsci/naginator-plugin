@@ -65,12 +65,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
     
     @Override
     public boolean shouldSchedule(@Nonnull Run<?, ?> run, @Nonnull TaskListener listener, int retryCount) {
-        if ((run.getResult() == Result.SUCCESS) || (run.getResult() == Result.ABORTED)) {
-            return false;
-        }
-        
-        // If we're not set to rerun if unstable, and the build's unstable, return true.
-        if ((!isRerunIfUnstable()) && (run.getResult() == Result.UNSTABLE)) {
+        if (!checkCommonScheduleThreshold(run)) {
             return false;
         }
         
@@ -82,6 +77,23 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
             if (!testRegexp(run, listener)) {
                 return false;
             }
+        } else if (
+                isCheckRegexp()
+                && (run instanceof MatrixBuild)
+                && !isRegexpForMatrixParent()
+                && !isRerunMatrixPart()
+        ) {
+            // check should be performed for child builds here.
+            for (MatrixRun r : ((MatrixBuild)run).getExactRuns()) {
+                if (!checkCommonScheduleThreshold(r)) {
+                    continue;
+                }
+                if (testRegexp(r, listener)) {
+                    return true;
+                }
+            }
+            // no children matched.
+            return false;
         }
         
         return super.shouldSchedule(run, listener, retryCount);
@@ -89,10 +101,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
 
     @Override
     public boolean shouldScheduleForMatrixRun(@Nonnull MatrixRun run, @Nonnull TaskListener listener) {
-        if ((run.getResult() == Result.SUCCESS) || (run.getResult() == Result.ABORTED)) {
-            return false;
-        }
-        if ((!isRerunIfUnstable()) && (run.getResult() == Result.UNSTABLE)) {
+        if (!checkCommonScheduleThreshold(run)) {
             return false;
         }
         if (isCheckRegexp() && !isRegexpForMatrixParent()) {
@@ -101,6 +110,18 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
             if (!testRegexp(run, listener)) {
                 return false;
             }
+        }
+        return true;
+    }
+    
+    private boolean checkCommonScheduleThreshold(@Nonnull Run<?, ?> run) {
+        if ((run.getResult() == Result.SUCCESS) || (run.getResult() == Result.ABORTED)) {
+            return false;
+        }
+        
+        // If we're not set to rerun if unstable, and the build's unstable, return true.
+        if ((!isRerunIfUnstable()) && (run.getResult() == Result.UNSTABLE)) {
+            return false;
         }
         return true;
     }
