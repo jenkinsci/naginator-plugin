@@ -30,6 +30,7 @@ import java.io.IOException;
 
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import com.chikli.hudson.plugin.naginator.testutils.MyBuilder;
@@ -264,6 +265,41 @@ public class NaginatorPublisherTest {
         assertNotNull(b.getExactRun(new Combination(axes, "value1")));
         assertNull(b.getExactRun(new Combination(axes, "value2")));
         assertNotNull(b.getExactRun(new Combination(axes, "value3")));
+    }
+    
+    /**
+     * Tests the behavior when <code>regexpForMatrixParent</code> is <code>false</code>
+     * and <code>retunMatrixPart</code> is <code>false</code>.
+     * 
+     * @throws Exception
+     */
+    @Bug(32821)
+    @Test
+    public void testRegexpForMatrixChildWithoutMatrixPart() throws Exception {
+        MatrixProject p = j.createMatrixProject();
+        AxisList axes = new AxisList(
+                new Axis("axis1", "value1", "value2", "value3")
+        );
+        p.setAxes(axes);
+        
+        // all axis fails, and outputs "I am (axis value)"
+        p.getBuildersList().add(new MyBuilder("I am ${axis1}", Result.FAILURE));
+        p.getPublishersList().add(new NaginatorPublisher(
+                "thatcannotbe",
+                false,  // rerunIfUnstable
+                false,  // retunMatrixPart
+                true,   // checkRegexp
+                false,  // regexpForMatrixParent
+                1,      // maxSchedule
+                new FixedDelay(0)
+        ));
+        
+        p.scheduleBuild2(0);
+        j.waitUntilNoActivity();
+        
+        // build should not be rescheduled
+        // as the regular expression matches for no children.
+        assertEquals(1, p.getLastBuild().number);
     }
     
     /**
