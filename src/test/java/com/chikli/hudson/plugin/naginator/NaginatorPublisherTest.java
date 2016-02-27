@@ -27,6 +27,7 @@ package com.chikli.hudson.plugin.naginator;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -162,7 +163,7 @@ public class NaginatorPublisherTest {
     }
     
     /**
-     * Tests the behavior when <code>regexpForMatrixParent</code> is <code>true</code>
+     * Tests the behavior when <code>regexpForMatrixStrategy</code> is <code>TestParent</code>
      * and the log match the regular expression.
      * 
      * @throws Exception
@@ -177,15 +178,16 @@ public class NaginatorPublisherTest {
         
         // only axis1=value2 fails.
         p.getBuildersList().add(new FailSpecificAxisBuilder("axis1 == 'value2'"));
-        p.getPublishersList().add(new NaginatorPublisher(
+        NaginatorPublisher naginator = new NaginatorPublisher(
                 "value2 completed with result FAILURE",
                 false,  // rerunIfUnstable
                 true,   // retunMatrixPart
                 true,   // checkRegexp
-                true,   // regexpForMatrixParent
                 1,      // maxSchedule
                 new FixedDelay(0)
-        ));
+        );
+        naginator.setRegexpForMatrixStrategy(RegexpForMatrixStrategy.TestParent);
+        p.getPublishersList().add(naginator);
         
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
@@ -195,7 +197,7 @@ public class NaginatorPublisherTest {
     }
     
     /**
-     * Tests the behavior when <code>regexpForMatrixParent</code> is <code>true</code>
+     * Tests the behavior when <code>regexpForMatrixStrategy</code> is <code>TestParent</code>
      * but the log doesn't match the regular expression.
      * 
      * @throws Exception
@@ -210,15 +212,16 @@ public class NaginatorPublisherTest {
         
         // only axis1=value3 fails.
         p.getBuildersList().add(new FailSpecificAxisBuilder("axis1 == 'value3'"));
-        p.getPublishersList().add(new NaginatorPublisher(
+        NaginatorPublisher naginator = new NaginatorPublisher(
                 "value2 completed with result FAILURE",
                 false,  // rerunIfUnstable
                 true,   // retunMatrixPart
                 true,   // checkRegexp
-                true,   // regexpForMatrixParent
                 1,      // maxSchedule
                 new FixedDelay(0)
-        ));
+        );
+        naginator.setRegexpForMatrixStrategy(RegexpForMatrixStrategy.TestParent);
+        p.getPublishersList().add(naginator);
         
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
@@ -229,7 +232,7 @@ public class NaginatorPublisherTest {
     
     
     /**
-     * Tests the behavior when <code>regexpForMatrixParent</code> is <code>false</code>.
+     * Tests the behavior when <code>regexpForMatrixStrategy</code> is <code>TestChildrenRetriggerMatched</code>.
      * 
      * @throws Exception
      */
@@ -243,15 +246,16 @@ public class NaginatorPublisherTest {
         
         // all axis fails, and outputs "I am (axis value)"
         p.getBuildersList().add(new MyBuilder("I am ${axis1}", Result.FAILURE));
-        p.getPublishersList().add(new NaginatorPublisher(
+        NaginatorPublisher naginator = new NaginatorPublisher(
                 "I am value[13]",
                 false,  // rerunIfUnstable
                 true,   // retunMatrixPart
                 true,   // checkRegexp
-                false,  // regexpForMatrixParent
                 1,      // maxSchedule
                 new FixedDelay(0)
-        ));
+        );
+        naginator.setRegexpForMatrixStrategy(RegexpForMatrixStrategy.TestChildrenRetriggerMatched);
+        p.getPublishersList().add(naginator);
         
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
@@ -264,6 +268,155 @@ public class NaginatorPublisherTest {
         assertNotNull(b.getExactRun(new Combination(axes, "value1")));
         assertNull(b.getExactRun(new Combination(axes, "value2")));
         assertNotNull(b.getExactRun(new Combination(axes, "value3")));
+    }
+    
+    /**
+     * Tests the behavior when <code>regexpForMatrixStrategy</code> is <code>TestChildrenRetriggerMatched</code>
+     * and <code>retunMatrixPart</code> is <code>false</code>.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testRegexpForMatrixChildWithoutMatrixPart() throws Exception {
+        MatrixProject p = j.createMatrixProject();
+        AxisList axes = new AxisList(
+                new Axis("axis1", "value1", "value2", "value3")
+        );
+        p.setAxes(axes);
+        
+        // all axis fails, and outputs "I am (axis value)"
+        p.getBuildersList().add(new MyBuilder("I am ${axis1}", Result.FAILURE));
+        NaginatorPublisher naginator = new NaginatorPublisher(
+                "thatcannotbe",
+                false,  // rerunIfUnstable
+                false,  // retunMatrixPart
+                true,   // checkRegexp
+                1,      // maxSchedule
+                new FixedDelay(0)
+        );
+        naginator.setRegexpForMatrixStrategy(RegexpForMatrixStrategy.TestChildrenRetriggerMatched);
+        naginator.setNoChildStrategy(NoChildStrategy.DontRun);
+        p.getPublishersList().add(naginator);
+        
+        p.scheduleBuild2(0);
+        j.waitUntilNoActivity();
+        
+        // build is rescheduled
+        // as regular expression is not applied actually.
+        assertEquals(2, p.getLastBuild().number);
+    }
+    
+    /**
+     * Tests the behavior when <code>regexpForMatrixStrategy</code> is <code>TestChildrenRetriggerAll</code>.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testRegexpForMatrixChildAndRetriggerAll() throws Exception {
+        MatrixProject p = j.createMatrixProject();
+        AxisList axes = new AxisList(
+                new Axis("axis1", "value1", "value2", "value3")
+        );
+        p.setAxes(axes);
+        
+        // axis1=value1 and axis1=value3 fails, and outputs "I am (axis value)"
+        p.getBuildersList().add(new MyBuilder("I am ${axis1}", "axis1 in ['value2']"));
+        NaginatorPublisher naginator = new NaginatorPublisher(
+                "I am value1",
+                false,  // rerunIfUnstable
+                true,   // retunMatrixPart
+                true,   // checkRegexp
+                1,      // maxSchedule
+                new FixedDelay(0)
+        );
+        naginator.setRegexpForMatrixStrategy(RegexpForMatrixStrategy.TestChildrenRetriggerAll);
+        p.getPublishersList().add(naginator);
+        
+        p.scheduleBuild2(0);
+        j.waitUntilNoActivity();
+        
+        // build rescheduled.
+        assertEquals(2, p.getLastBuild().number);
+        
+        // only axis1=value1, axis1=value3 is rescheduled for the failure.
+        MatrixBuild b = p.getLastBuild();
+        assertNotNull(b.getExactRun(new Combination(axes, "value1")));
+        assertNull(b.getExactRun(new Combination(axes, "value2")));
+        assertNotNull(b.getExactRun(new Combination(axes, "value3")));
+    }
+    
+    /**
+     * Tests the behavior when <code>regexpForMatrixStrategy</code> is <code>TestChildrenRetriggerAll</code>
+     * and <code>retunMatrixPart</code> is <code>false</code>.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testRegexpForMatrixChildAndRetriggerAllWithoutMatrixPart() throws Exception {
+        MatrixProject p = j.createMatrixProject();
+        AxisList axes = new AxisList(
+                new Axis("axis1", "value1", "value2", "value3")
+        );
+        p.setAxes(axes);
+        
+        // axis1=value1 and axis1=value3 fails, and outputs "I am (axis value)"
+        p.getBuildersList().add(new MyBuilder("I am ${axis1}", "axis1 in ['value2']"));
+        NaginatorPublisher naginator = new NaginatorPublisher(
+                "I am value1",
+                false,  // rerunIfUnstable
+                false,  // retunMatrixPart
+                true,   // checkRegexp
+                1,      // maxSchedule
+                new FixedDelay(0)
+        );
+        naginator.setRegexpForMatrixStrategy(RegexpForMatrixStrategy.TestChildrenRetriggerAll);
+        p.getPublishersList().add(naginator);
+        
+        p.scheduleBuild2(0);
+        j.waitUntilNoActivity();
+        
+        // build rescheduled.
+        assertEquals(2, p.getLastBuild().number);
+        
+        // all axes are rescheduled
+        MatrixBuild b = p.getLastBuild();
+        assertNotNull(b.getExactRun(new Combination(axes, "value1")));
+        assertNotNull(b.getExactRun(new Combination(axes, "value2")));
+        assertNotNull(b.getExactRun(new Combination(axes, "value3")));
+    }
+    
+    /**
+     * Tests the behavior when <code>regexpForMatrixStrategy</code> is <code>TestChildrenRetriggerAll</code>
+     * and <code>retunMatrixPart</code> is <code>false</code>.
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testRegexpForMatrixChildAndRetriggerDontMatch() throws Exception {
+        MatrixProject p = j.createMatrixProject();
+        AxisList axes = new AxisList(
+                new Axis("axis1", "value1", "value2", "value3")
+        );
+        p.setAxes(axes);
+        
+        // all axis fails, and outputs "I am (axis value)"
+        p.getBuildersList().add(new MyBuilder("I am ${axis1}", Result.FAILURE));
+        NaginatorPublisher naginator = new NaginatorPublisher(
+                "thatcannotbe",
+                false,  // rerunIfUnstable
+                false,  // retunMatrixPart
+                true,   // checkRegexp
+                1,      // maxSchedule
+                new FixedDelay(0)
+        );
+        naginator.setRegexpForMatrixStrategy(RegexpForMatrixStrategy.TestChildrenRetriggerAll);
+        p.getPublishersList().add(naginator);
+        
+        p.scheduleBuild2(0);
+        j.waitUntilNoActivity();
+        
+        // build is not rescheduled as no child matches the regexp.
+        assertEquals(1, p.getLastBuild().number);
     }
     
     /**
@@ -280,10 +433,10 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 true,   // retunMatrixPart
                 true,   // checkRegexp
-                true,   // regexpForMatrixParent
                 1,      // maxSchedule
                 new FixedDelay(0)
         );
+        naginator.setRegexpForMatrixStrategy(RegexpForMatrixStrategy.TestChildrenRetriggerAll);
         naginator.setNoChildStrategy(NoChildStrategy.RerunEmpty);
         
         p.getPublishersList().add(naginator);
@@ -292,6 +445,10 @@ public class NaginatorPublisherTest {
         
         j.assertEqualDataBoundBeans(naginator, p.getPublishersList().get(NaginatorPublisher.class));
         // assertEqualDataBoundBeans doesn't work for DataBoundSetter fields.
+        assertEquals(
+                naginator.getRegexpForMatrixStrategy(),
+                p.getPublishersList().get(NaginatorPublisher.class).getRegexpForMatrixStrategy()
+        );
         assertEquals(
                 naginator.getNoChildStrategy(),
                 p.getPublishersList().get(NaginatorPublisher.class).getNoChildStrategy()
@@ -313,33 +470,24 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 true,   // retunMatrixPart
                 true,   // checkRegexp
-                true,   // regexpForMatrixParent
                 1,      // maxSchedule
                 new FixedDelay(0)
         );
-        naginator.setNoChildStrategy(NoChildStrategy.RerunEmpty);
+        p.getPublishersList().add(naginator);
+        
         NaginatorPublisher expected = new NaginatorPublisher(
                 naginator.getRegexpForRerun(),
                 naginator.isRerunIfUnstable(),
                 false,  // retunMatrixPart (not preserved)
                 naginator.isCheckRegexp(),
-                false,  // regexpForMatrixParent (not preserved)
                 naginator.getMaxSchedule(),
                 naginator.getDelay()
         );
-        naginator.setNoChildStrategy(NoChildStrategy.getDefault());     // not preserved
-        
-        p.getPublishersList().add(naginator);
         
         j.configRoundtrip(p);
         
-        assertFalse(p.getPublishersList().get(NaginatorPublisher.class).isRegexpForMatrixParent());
+        // don't care about regexpForMatrixStrategy and noChildStrategy
         j.assertEqualDataBoundBeans(expected, p.getPublishersList().get(NaginatorPublisher.class));
-        // assertEqualDataBoundBeans doesn't work for DataBoundSetter fields.
-        assertEquals(
-                expected.getNoChildStrategy(),
-                p.getPublishersList().get(NaginatorPublisher.class).getNoChildStrategy()
-        );
     }
     
     @Test
@@ -355,5 +503,95 @@ public class NaginatorPublisherTest {
         
         d.load();
         assertEquals(1000, d.getRegexpTimeoutMs());
+    }
+    
+    @Test
+    public void testReadResolveFor1_15() throws Exception {
+        // for the case regexpForMatrixParent and regexpForMatrixStrategy is not set
+        NaginatorPublisher target = new NaginatorPublisher(
+                "",     // regexpForRerun
+                false,  // rerunIfUnstable
+                true,   // rerunMatrixPart
+                true,   // checkRegexp
+                1,      // maxschedule
+                new FixedDelay(0)
+        );
+        
+        Field regexpForMatrixParent = target.getClass().getDeclaredField("regexpForMatrixParent");
+        Field regexpForMatrixStrategy = target.getClass().getDeclaredField("regexpForMatrixStrategy");
+        try {
+            regexpForMatrixParent.setAccessible(true);
+            regexpForMatrixStrategy.setAccessible(true);
+            regexpForMatrixParent.set(target, null);
+            regexpForMatrixStrategy.set(target, null);
+        } finally {
+            regexpForMatrixParent.setAccessible(false);
+            regexpForMatrixStrategy.setAccessible(false);
+        }
+        
+        assertEquals(
+                RegexpForMatrixStrategy.TestParent,
+                ((NaginatorPublisher)target.readResolve()).getRegexpForMatrixStrategy()
+        );
+    }
+    
+    @Test
+    public void testReadResolveFor1_16WithTestParent() throws Exception {
+        // for the case regexpForMatrixParent and regexpForMatrixStrategy is not set
+        NaginatorPublisher target = new NaginatorPublisher(
+                "",     // regexpForRerun
+                false,  // rerunIfUnstable
+                true,   // rerunMatrixPart
+                true,   // checkRegexp
+                1,      // maxschedule
+                new FixedDelay(0)
+        );
+        
+        Field regexpForMatrixParent = target.getClass().getDeclaredField("regexpForMatrixParent");
+        Field regexpForMatrixStrategy = target.getClass().getDeclaredField("regexpForMatrixStrategy");
+        try {
+            regexpForMatrixParent.setAccessible(true);
+            regexpForMatrixStrategy.setAccessible(true);
+            regexpForMatrixParent.set(target, true);
+            regexpForMatrixStrategy.set(target, null);
+        } finally {
+            regexpForMatrixParent.setAccessible(false);
+            regexpForMatrixStrategy.setAccessible(false);
+        }
+        
+        assertEquals(
+                RegexpForMatrixStrategy.TestParent,
+                ((NaginatorPublisher)target.readResolve()).getRegexpForMatrixStrategy()
+        );
+    }
+    
+    @Test
+    public void testReadResolveFor1_16WithTestChild() throws Exception {
+        // for the case regexpForMatrixParent and regexpForMatrixStrategy is not set
+        NaginatorPublisher target = new NaginatorPublisher(
+                "",     // regexpForRerun
+                false,  // rerunIfUnstable
+                true,   // rerunMatrixPart
+                true,   // checkRegexp
+                1,      // maxschedule
+                new FixedDelay(0)
+        );
+        
+        Field regexpForMatrixParent = target.getClass().getDeclaredField("regexpForMatrixParent");
+        Field regexpForMatrixStrategy = target.getClass().getDeclaredField("regexpForMatrixStrategy");
+        try {
+            regexpForMatrixParent.setAccessible(true);
+            regexpForMatrixStrategy.setAccessible(true);
+            regexpForMatrixParent.set(target, false);
+            regexpForMatrixStrategy.set(target, null);
+        } finally {
+            regexpForMatrixParent.setAccessible(false);
+            regexpForMatrixStrategy.setAccessible(false);
+        }
+        
+        assertEquals(
+                RegexpForMatrixStrategy.TestChildrenRetriggerMatched,
+                ((NaginatorPublisher)target.readResolve()).getRegexpForMatrixStrategy()
+        );
     }
 }

@@ -13,9 +13,12 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -37,7 +40,9 @@ public class NaginatorPublisher extends Notifier {
     private final boolean rerunIfUnstable;
     private final boolean rerunMatrixPart;
     private final boolean checkRegexp;
-    private final Boolean regexpForMatrixParent;
+    @Deprecated
+    private transient Boolean regexpForMatrixParent;
+    private RegexpForMatrixStrategy regexpForMatrixStrategy;    /* almost final */
     private NoChildStrategy noChildStrategy;    /* almost final */
 
     private ScheduleDelay delay;
@@ -52,29 +57,13 @@ public class NaginatorPublisher extends Notifier {
     }
 
     /**
-     * backward compatible constructor.
-     * 
-     * Watch that <code>regexpForMatrixParent</code> gets <code>true</code>
-     * for the backward compatibility.
-     */
-    public NaginatorPublisher(String regexpForRerun,
-                              boolean rerunIfUnstable,
-                              boolean rerunMatrixPart,
-                              boolean checkRegexp,
-                              int maxSchedule,
-                              ScheduleDelay delay) {
-        this(regexpForRerun, rerunIfUnstable, rerunMatrixPart, checkRegexp, true, maxSchedule, delay);
-    }
-    
-    /**
-     * @since 1.16
+     * constructor.
      */
     @DataBoundConstructor
     public NaginatorPublisher(String regexpForRerun,
                               boolean rerunIfUnstable,
                               boolean rerunMatrixPart,
                               boolean checkRegexp,
-                              boolean regexpForMatrixParent,
                               int maxSchedule,
                               ScheduleDelay delay) {
         this.regexpForRerun = regexpForRerun;
@@ -82,8 +71,24 @@ public class NaginatorPublisher extends Notifier {
         this.rerunMatrixPart = rerunMatrixPart;
         this.checkRegexp = checkRegexp;
         this.maxSchedule = maxSchedule;
-        this.regexpForMatrixParent = regexpForMatrixParent;
         this.delay = delay;
+        setRegexpForMatrixStrategy(RegexpForMatrixStrategy.TestParent); // backward compatibility with < 1.16
+    }
+    
+    /**
+     * @since 1.16
+     * @deprecated use {@link #NaginatorPublisher(String, boolean, boolean, boolean, int, ScheduleDelay)} and other setters
+     */
+    @Deprecated
+    public NaginatorPublisher(String regexpForRerun,
+                              boolean rerunIfUnstable,
+                              boolean rerunMatrixPart,
+                              boolean checkRegexp,
+                              boolean regexpForMatrixParent,
+                              int maxSchedule,
+                              ScheduleDelay delay) {
+        this(regexpForRerun, rerunIfUnstable, rerunMatrixPart, checkRegexp, maxSchedule, delay);
+        setRegexpForMatrixParent(regexpForMatrixParent);
     }
 
     public Object readResolve() {
@@ -91,16 +96,15 @@ public class NaginatorPublisher extends Notifier {
             // Backward compatibility : progressive 5 minutes up to 3 hours
             delay = new ProgressiveDelay(5*60, 3*60*60);
         }
-        if (regexpForMatrixParent == null) {
-            return new NaginatorPublisher(
-                    regexpForRerun,
-                    rerunIfUnstable,
-                    rerunMatrixPart,
-                    checkRegexp,
-                    true,               // true for backward compatibility.
-                    maxSchedule,
-                    delay
-            );
+        if (regexpForMatrixStrategy == null) {
+            if (regexpForMatrixParent != null) {
+                // >= 1.16
+                setRegexpForMatrixParent(regexpForMatrixParent.booleanValue());
+                regexpForMatrixParent = null;
+            } else {
+                // < 1.16
+                setRegexpForMatrixStrategy(RegexpForMatrixStrategy.TestParent);
+            }
         }
         return this;
     }
@@ -147,13 +151,41 @@ public class NaginatorPublisher extends Notifier {
      * 
      * @return Returns whether apply the regexp to the matrix parent instead of matrix children
      * @since 1.16
+     * @deprecated use {@link #getRegexpForMatrixStrategy()}
      */
+    @Deprecated
     public boolean isRegexpForMatrixParent() {
-        return regexpForMatrixParent;
+        return (getRegexpForMatrixStrategy() == RegexpForMatrixStrategy.TestParent);
+    }
+
+    private void setRegexpForMatrixParent(boolean regexpForMatrixParent) {
+        setRegexpForMatrixStrategy(
+                regexpForMatrixParent
+                ? RegexpForMatrixStrategy.TestParent
+                : RegexpForMatrixStrategy.TestChildrenRetriggerMatched  // compatible with 1.16.
+        );
     }
 
     public String getRegexpForRerun() {
         return regexpForRerun;
+    }
+
+    /**
+     * @param regexpForMatrixStrategy
+     * @since 1.17
+     */
+    @DataBoundSetter
+    public void setRegexpForMatrixStrategy(@Nonnull RegexpForMatrixStrategy regexpForMatrixStrategy) {
+        this.regexpForMatrixStrategy = regexpForMatrixStrategy;
+    }
+
+    /**
+     * @return how to apply regexp for matrix builds.
+     * @since 1.17
+     */
+    @Nonnull
+    public RegexpForMatrixStrategy getRegexpForMatrixStrategy() {
+        return regexpForMatrixStrategy;
     }
 
     public ScheduleDelay getDelay() {
@@ -167,6 +199,13 @@ public class NaginatorPublisher extends Notifier {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         if (build instanceof MatrixRun) {
+            if (
+                    getRegexpForMatrixStrategy() == RegexpForMatrixStrategy.TestChildrenRetriggerMatched
+                    && !isRerunMatrixPart()
+            ) {
+                listener.getLogger().println("[Naginator] Warning: TestChildrenRetriggerMatched doesn't work without rerunMatrixPart");
+            }
+            
             MatrixBuild parent = ((MatrixRun)build).getParentBuild();
             if (parent.getAction(NaginatorPublisherScheduleAction.class) == null) {
                 // No strict exclusion is required
@@ -264,6 +303,26 @@ public class NaginatorPublisher extends Notifier {
          */
         public boolean isMatrixProject(Object it) {
             return (it instanceof MatrixProject);
+        }
+        
+        public FormValidation doCheckRegexpForMatrixStrategy(
+                @QueryParameter RegexpForMatrixStrategy value,
+                @QueryParameter boolean rerunMatrixPart
+        ) {
+            // called only when regexpForMatrixStrategy is displayed,
+            // and we can assume that this is a matrix project.
+            if (value == RegexpForMatrixStrategy.TestChildrenRetriggerMatched && !rerunMatrixPart) {
+                return FormValidation.warning(Messages.NaginatorPublisher_RegexpForMatrixStrategy_RerunMatrixPartShouldBeEnabled());
+            }
+            return FormValidation.ok();
+        }
+        
+        public ListBoxModel doFillRegexpForMatrixStrategyItems() {
+            ListBoxModel ret = new ListBoxModel();
+            for (RegexpForMatrixStrategy strategy: RegexpForMatrixStrategy.values()) {
+                ret.add(strategy.getDisplayName(), strategy.name());
+            }
+            return ret;
         }
     }
 

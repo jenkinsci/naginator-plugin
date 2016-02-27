@@ -36,16 +36,34 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
     private final String regexpForRerun;
     private final boolean rerunIfUnstable;
     private final boolean checkRegexp;
-    private final boolean regexpForMatrixParent;
+    private transient Boolean regexpForMatrixParent;        // for backward compatibility
+    private /* almost final */ RegexpForMatrixStrategy regexpForMatrixStrategy;
     private final NoChildStrategy noChildStrategy;
     
     public NaginatorPublisherScheduleAction(NaginatorPublisher publisher) {
         super(publisher.getMaxSchedule(), publisher.getDelay(), publisher.isRerunMatrixPart());
         this.regexpForRerun = publisher.getRegexpForRerun();
         this.rerunIfUnstable = publisher.isRerunIfUnstable();
-        this.regexpForMatrixParent = publisher.isRegexpForMatrixParent();
         this.checkRegexp = publisher.isCheckRegexp();
+        this.regexpForMatrixStrategy = publisher.getRegexpForMatrixStrategy();
         this.noChildStrategy = publisher.getNoChildStrategy();
+    }
+    
+    public Object readResolve() {
+        if (regexpForMatrixStrategy == null) {
+            // < 1.17
+            if (regexpForMatrixParent != null) {
+                regexpForMatrixStrategy = 
+                        regexpForMatrixParent.booleanValue()
+                        ? RegexpForMatrixStrategy.TestParent
+                        : RegexpForMatrixStrategy.TestChildrenRetriggerMatched;
+                regexpForMatrixParent = null;
+            } else {
+                // something strange.
+                regexpForMatrixStrategy = RegexpForMatrixStrategy.getDefault();
+            }
+        }
+        return this;
     }
     
     @CheckForNull
@@ -61,27 +79,43 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return checkRegexp;
     }
     
+    /**
+     * @deprecated use {@link #getRegexpForMatrixStrategy()}
+     */
+    @Deprecated
     public boolean isRegexpForMatrixParent() {
-        return regexpForMatrixParent;
+        return getRegexpForMatrixStrategy() == RegexpForMatrixStrategy.TestParent;
+    }
+    
+    /**
+     * @since 1.17
+     */
+    @Nonnull
+    public RegexpForMatrixStrategy getRegexpForMatrixStrategy() {
+        return regexpForMatrixStrategy;
     }
     
     @Override
     public boolean shouldSchedule(@Nonnull Run<?, ?> run, @Nonnull TaskListener listener, int retryCount) {
-        if ((run.getResult() == Result.SUCCESS) || (run.getResult() == Result.ABORTED)) {
-            return false;
-        }
-        
-        // If we're not set to rerun if unstable, and the build's unstable, return true.
-        if ((!isRerunIfUnstable()) && (run.getResult() == Result.UNSTABLE)) {
+        if (!checkCommonScheduleThreshold(run)) {
             return false;
         }
         
         // If we're supposed to check for a regular expression in the build output before
         // scheduling a new build, do so.
-        if (isCheckRegexp() && (!(run instanceof MatrixBuild) || isRegexpForMatrixParent())) {
+        if (isCheckRegexp() && (!(run instanceof MatrixBuild) || getRegexpForMatrixStrategy() == RegexpForMatrixStrategy.TestParent)) {
             LOGGER.log(Level.FINEST, "Got checkRegexp == true");
             
             if (!testRegexp(run, listener)) {
+                return false;
+            }
+        } else if (
+                isCheckRegexp()
+                && (run instanceof MatrixBuild)
+                && getRegexpForMatrixStrategy() == RegexpForMatrixStrategy.TestChildrenRetriggerAll
+        ) {
+            // check should be performed for child builds here.
+            if (!testRegexpForFailedChildren((MatrixBuild)run, listener)) {
                 return false;
             }
         }
@@ -89,20 +123,42 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return super.shouldSchedule(run, listener, retryCount);
     }
 
+    private boolean testRegexpForFailedChildren(@Nonnull MatrixBuild run, @Nonnull TaskListener listener) {
+        for (MatrixRun r : ((MatrixBuild)run).getExactRuns()) {
+            if (!checkCommonScheduleThreshold(r)) {
+                continue;
+            }
+            if (testRegexp(r, listener)) {
+                return true;
+            }
+        }
+        // no children matched.
+        return false;
+    }
+
     @Override
     public boolean shouldScheduleForMatrixRun(@Nonnull MatrixRun run, @Nonnull TaskListener listener) {
-        if ((run.getResult() == Result.SUCCESS) || (run.getResult() == Result.ABORTED)) {
+        if (!checkCommonScheduleThreshold(run)) {
             return false;
         }
-        if ((!isRerunIfUnstable()) && (run.getResult() == Result.UNSTABLE)) {
-            return false;
-        }
-        if (isCheckRegexp() && !isRegexpForMatrixParent()) {
+        if (isCheckRegexp() && getRegexpForMatrixStrategy() == RegexpForMatrixStrategy.TestChildrenRetriggerMatched) {
             LOGGER.log(Level.FINEST, "Got isRerunMatrixPart == true");
             
             if (!testRegexp(run, listener)) {
                 return false;
             }
+        }
+        return true;
+    }
+    
+    private boolean checkCommonScheduleThreshold(@Nonnull Run<?, ?> run) {
+        if ((run.getResult() == Result.SUCCESS) || (run.getResult() == Result.ABORTED)) {
+            return false;
+        }
+        
+        // If we're not set to rerun if unstable, and the build's unstable, return true.
+        if ((!isRerunIfUnstable()) && (run.getResult() == Result.UNSTABLE)) {
+            return false;
         }
         return true;
     }
