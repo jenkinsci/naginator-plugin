@@ -122,4 +122,14 @@ public class NaginatorScheduleAction extends InvisibleAction {
     public boolean shouldScheduleForMatrixRun(@Nonnull MatrixRun run, @Nonnull TaskListener listener) {
         return true;
     }
+    
+    /**
+     * @return how to do when no children to rerun for a matrix project.
+     * 
+     * @since 1.17
+     */
+    @Nonnull
+    public NoChildStrategy getNoChildStrategy() {
+        return NoChildStrategy.getDefault();
+    }
 }

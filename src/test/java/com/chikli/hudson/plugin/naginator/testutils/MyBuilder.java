@@ -1,5 +1,7 @@
 package com.chikli.hudson.plugin.naginator.testutils;
 
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -18,18 +20,29 @@ public final class MyBuilder extends Builder {
     private final String text;
     private final Result result;
     private final int duration;
+    private final String successCondition;
 
     public MyBuilder(String text, Result result) {
         super();
         this.text = text;
         this.result = result;
         this.duration = 0;
+        this.successCondition = null;
     }
 
     public MyBuilder(String text, Result result, int duration) {
         this.text = text;
         this.result = result;
         this.duration = duration;
+        this.successCondition = null;
+    }
+
+    public MyBuilder(String text, String successCondition) {
+        super();
+        this.text = text;
+        this.result = Result.SUCCESS;
+        this.duration = 0;
+        this.successCondition = successCondition;
     }
 
     @Override
@@ -40,6 +53,11 @@ public final class MyBuilder extends Builder {
 
         listener.getLogger().println(build.getEnvironment(listener).expand(text));
         build.setResult(result);
+        if (successCondition != null) {
+            Binding binding = new Binding(build.getEnvironment(listener));
+            GroovyShell shell = new GroovyShell(binding);
+            return (Boolean)shell.evaluate(successCondition);
+        }
         return true;
     }
 

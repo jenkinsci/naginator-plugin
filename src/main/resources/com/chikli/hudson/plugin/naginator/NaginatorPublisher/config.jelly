@@ -3,9 +3,11 @@
         <f:checkbox />
     </f:entry>
 
-    <f:entry title="Rerun build only for failed parts on the matrix" field="rerunMatrixPart">
-        <f:checkbox />
-    </f:entry>
+    <j:if test="${descriptor.isMatrixProject(it)}">
+        <f:entry title="Rerun build only for failed parts on the matrix" field="rerunMatrixPart">
+            <f:checkbox />
+        </f:entry>
+    </j:if>
 
     <f:entry title="${%Delay before retrying build}">
         <j:invokeStatic var="delays" className="com.chikli.hudson.plugin.naginator.ScheduleDelay" method="all"/>
@@ -17,14 +19,20 @@
     </f:entry>
 
     <f:advanced>
+        <j:if test="${descriptor.isMatrixProject(it)}">
+            <f:entry title="${%When no combinations to rerun}" field="noChildStrategy">
+                <f:enum>${it.displayName}</f:enum>
+            </f:entry>
+        </j:if>
         <f:optionalBlock field="checkRegexp" inline="true"
                  title="${%Only rerun build if regular expression is found in output}">
             <f:entry title="${%Regular expression to search for}" field="regexpForRerun">
                 <f:textbox />
             </f:entry>
             <j:if test="${descriptor.isMatrixProject(it)}">
-                <f:entry title="${%Test regular expression for the matrix parent}" field="regexpForMatrixParent">
-                    <f:checkbox />
+                <f:entry title="${%How to apply the regular expression to matrix}" field="regexpForMatrixStrategy">
+                    <!-- unfortunatelly, f:enum doesn't support doCheckXxxx -->
+                    <f:select />
                 </f:entry>
             </j:if>
         </f:optionalBlock>
