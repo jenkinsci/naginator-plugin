@@ -91,7 +91,13 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
     public Environment setUpEnvironment(@SuppressWarnings("rawtypes") AbstractBuild build, Launcher launcher, BuildListener listener)
             throws IOException, InterruptedException, RunnerAbortedException
     {
-        final NaginatorAction action = build.getRootBuild().getAction(NaginatorAction.class);
+        AbstractBuild<?, ?> rootBuild = build.getRootBuild();
+        if (rootBuild == null) {
+            // getRootBuild() should not be null, 
+            // but some builds irregularly returns null. 
+            rootBuild = build;
+        }
+        final NaginatorAction action = rootBuild.getAction(NaginatorAction.class);
         if (action == null) {
             return null;
         }
