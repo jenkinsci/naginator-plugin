@@ -101,8 +101,9 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
             public void buildEnvVars(Map<String, String> env) {
                 env.put("NAGINATOR_COUNT", Integer.toString(action.getRetryCount()));
                 env.put("NAGINATOR_MAXCOUNT", Integer.toString(action.getMaxRetryCount()));
-                if (action.getParentBuildNumber() != null) {
-                    env.put("NAGINATOR_BUILD_NUMBER", action.getParentBuildNumber().toString());
+                Integer parentBuildNumber = action.getParentBuildNumber();
+                if (parentBuildNumber != null) {
+                    env.put("NAGINATOR_BUILD_NUMBER", parentBuildNumber.toString());
                 }
             }
         };

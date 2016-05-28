@@ -333,7 +333,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
     }
     
     public void testVariableForMatrixBuild() throws Exception {
-        MatrixProject p = createMatrixProject();
+        MatrixProject p = jenkins.createProject(MatrixProject.class, createUniqueProjectName());
         AxisList axisList = new AxisList(new Axis("axis1", "value1", "value2"));
         p.setAxes(axisList);
         VariableRecordBuilder countRecorder = new VariableRecordBuilder("NAGINATOR_COUNT");

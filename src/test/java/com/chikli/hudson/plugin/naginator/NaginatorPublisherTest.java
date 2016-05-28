@@ -94,7 +94,7 @@ public class NaginatorPublisherTest {
     public void testMatrixBuildWithoutRerunMatrixPart() throws Exception {
         final int maxSchedule = 2;
         
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         AxisList axes = new AxisList(
                 new Axis("axis1", "1", "2"),
                 new Axis("axis2", "1", "2")
@@ -133,7 +133,7 @@ public class NaginatorPublisherTest {
     public void testMatrixBuildWithRerunMatrixPart() throws Exception {
         final int maxSchedule = 2;
         
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         AxisList axes = new AxisList(
                 new Axis("axis1", "1", "2"),
                 new Axis("axis2", "1", "2")
@@ -170,7 +170,7 @@ public class NaginatorPublisherTest {
      */
     @Test
     public void testRegexpForMatrixParentMatches() throws Exception {
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         AxisList axes = new AxisList(
                 new Axis("axis1", "value1", "value2", "value3")
         );
@@ -204,7 +204,7 @@ public class NaginatorPublisherTest {
      */
     @Test
     public void testRegexpForMatrixParentNotMatches() throws Exception {
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         AxisList axes = new AxisList(
                 new Axis("axis1", "value1", "value2", "value3")
         );
@@ -238,7 +238,7 @@ public class NaginatorPublisherTest {
      */
     @Test
     public void testRegexpForMatrixChild() throws Exception {
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         AxisList axes = new AxisList(
                 new Axis("axis1", "value1", "value2", "value3")
         );
@@ -278,7 +278,7 @@ public class NaginatorPublisherTest {
      */
     @Test
     public void testRegexpForMatrixChildWithoutMatrixPart() throws Exception {
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         AxisList axes = new AxisList(
                 new Axis("axis1", "value1", "value2", "value3")
         );
@@ -313,7 +313,7 @@ public class NaginatorPublisherTest {
      */
     @Test
     public void testRegexpForMatrixChildAndRetriggerAll() throws Exception {
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         AxisList axes = new AxisList(
                 new Axis("axis1", "value1", "value2", "value3")
         );
@@ -353,7 +353,7 @@ public class NaginatorPublisherTest {
      */
     @Test
     public void testRegexpForMatrixChildAndRetriggerAllWithoutMatrixPart() throws Exception {
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         AxisList axes = new AxisList(
                 new Axis("axis1", "value1", "value2", "value3")
         );
@@ -393,7 +393,7 @@ public class NaginatorPublisherTest {
      */
     @Test
     public void testRegexpForMatrixChildAndRetriggerDontMatch() throws Exception {
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         AxisList axes = new AxisList(
                 new Axis("axis1", "value1", "value2", "value3")
         );
@@ -426,7 +426,7 @@ public class NaginatorPublisherTest {
      */
     @Test
     public void testConfigurationForRegexpOnMatrixProject() throws Exception {
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         
         NaginatorPublisher naginator = new NaginatorPublisher(
                 "Some regular expression",

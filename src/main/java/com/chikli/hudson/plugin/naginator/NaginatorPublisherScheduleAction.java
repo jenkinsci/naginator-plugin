@@ -8,8 +8,10 @@ import hudson.model.TaskListener;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -171,7 +173,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
             try {
                 // If parseLog returns false, we didn't find the regular expression,
                 // so return true.
-                if (!parseLog(run.getLogFile(), regexpForRerun)) {
+                if (!parseLog(run.getLogFile(), run.getCharset(), regexpForRerun)) {
                     LOGGER.log(Level.FINEST, "regexp not in logfile");
                     return false;
                 }
@@ -195,7 +197,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return d.getRegexpTimeoutMs();
     }
     
-    private boolean parseLog(final File logFile, @Nonnull final String regexp) throws IOException {
+    private boolean parseLog(final File logFile, final Charset charset, @Nonnull final String regexp) throws IOException {
         // TODO annotate `logFile` with `@Nonnull`
         // after upgrading the target Jenkins to 1.568 or later.
         
@@ -203,7 +205,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         
         FutureTask<Boolean> task = new FutureTask<Boolean>(new Callable<Boolean>() {
             public Boolean call() throws Exception {
-                return parseLogImpl(logFile, regexp);
+                return parseLogImpl(logFile, charset, regexp);
             }
         });
         
@@ -242,7 +244,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return false;
     }
     
-    private class InterruptibleCharSequence implements CharSequence {
+    private static class InterruptibleCharSequence implements CharSequence {
         private final CharSequence wrapped;
         
         public InterruptibleCharSequence(CharSequence wrapped) {
@@ -265,8 +267,8 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         }
     }
     
-    private boolean parseLogImpl(final File logFile, @Nonnull final String regexp) throws IOException {
-        // TODO annotate `logFile` with `@Nonnull`
+    private boolean parseLogImpl(File logFile, Charset charset, @Nonnull final String regexp) throws IOException {
+        // TODO annotate `logFile` and 'charset' with `@Nonnull`
         // after upgrading the target Jenkins to 1.568 or later.
 
         // Assume default encoding and text files
@@ -274,7 +276,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         Pattern pattern = Pattern.compile(regexp);
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new FileReader(logFile));
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(logFile), charset));
             while ((line = reader.readLine()) != null) {
                 Matcher matcher = pattern.matcher(new InterruptibleCharSequence(line));
                 if (matcher.find()) {
