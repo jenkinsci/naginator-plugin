@@ -1,6 +1,7 @@
 package com.chikli.hudson.plugin.naginator;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,9 +9,10 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang.StringUtils;
+import org.bouncycastle.util.Arrays;
 import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.HudsonTestCase;
-import org.jvnet.hudson.test.SingleFileSCM;
+import org.jvnet.hudson.test.TestExtension;
 import org.jvnet.hudson.test.ToolInstallations;
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.SleepBuilder;
@@ -33,11 +35,14 @@ import hudson.model.Cause;
 import hudson.model.CauseAction;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import hudson.model.Job;
 import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
 import hudson.model.Run;
 import hudson.model.StringParameterDefinition;
 import hudson.model.StringParameterValue;
+import hudson.model.JobProperty;
+import hudson.model.JobPropertyDescriptor;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildTrigger;
@@ -388,6 +393,51 @@ public class NaginatorListenerTest extends HudsonTestCase {
         assertEquals("2", buildNumberRecorder.getRecordedValue(p.getBuildByNumber(3).getExactRun(new Combination(axisList, "value2"))));
     }
     
+    public static class PrepareSingleFileProperty extends JobProperty<Job<?,?>> {
+        private final String filename;
+        private final byte[] contents;
+        
+        public PrepareSingleFileProperty(String filename, byte[] contents) {
+            this.filename = filename;
+            this.contents = Arrays.copyOf(contents, contents.length);
+        }
+        
+        @Override
+        public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
+            OutputStream os;
+            try {
+                os = build.getWorkspace().child(filename).write();
+            } catch (IOException e) {
+                e.printStackTrace(listener.getLogger());
+                return false;
+            } catch (InterruptedException e) {
+                e.printStackTrace(listener.getLogger());
+                return false;
+            }
+            try {
+                os.write(contents);
+            } catch (IOException e) {
+                e.printStackTrace(listener.getLogger());
+                return false;
+            } finally {
+                try {
+                    os.close();
+                } catch (IOException e) {
+                    e.printStackTrace(listener.getLogger());
+                }
+            }
+            return true;
+        }
+        
+        @TestExtension("testMavenModuleSetWithoutNaginator")
+        public static class DescriptorImpl extends JobPropertyDescriptor {
+            @Override
+            public String getDisplayName() {
+                return "PrepareSingleFileProperty";
+            }
+        }
+    }
+    
     @Bug(34900)
     public void testMavenModuleSetWithoutNaginator() throws Exception {
         final String SIMPLE_POM = StringUtils.join(new String[]{
@@ -403,7 +453,11 @@ public class NaginatorListenerTest extends HudsonTestCase {
         
         ToolInstallations.configureDefaultMaven();
         MavenModuleSet p = jenkins.createProject(MavenModuleSet.class, createUniqueProjectName());
-        p.setScm(new SingleFileSCM("pom.xml", SIMPLE_POM));
+        
+        // as SingleFileSCM in jenkins-test-harness doesn't work with
+        // Jenkins 1.554, use a simple custom JobProperty instead.
+        // p.setScm(new SingleFileSCM("pom.xml", SIMPLE_POM));
+        p.addProperty(new PrepareSingleFileProperty("pom.xml", SIMPLE_POM.getBytes("UTF-8")));
         p.setGoals("clean");
         
         // Run once to have the project read the module structure.
