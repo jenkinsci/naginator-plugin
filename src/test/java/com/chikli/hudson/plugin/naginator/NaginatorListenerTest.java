@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.HudsonTestCase;
 import org.jvnet.hudson.test.SingleFileSCM;
+import org.jvnet.hudson.test.ToolInstallations;
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.SleepBuilder;
 
@@ -400,8 +401,8 @@ public class NaginatorListenerTest extends HudsonTestCase {
                 "</project>"
         }, "\n");
         
-        configureDefaultMaven();
-        MavenModuleSet p = createMavenProject();
+        ToolInstallations.configureDefaultMaven();
+        MavenModuleSet p = jenkins.createProject(MavenModuleSet.class, createUniqueProjectName());
         p.setScm(new SingleFileSCM("pom.xml", SIMPLE_POM));
         p.setGoals("clean");
         
