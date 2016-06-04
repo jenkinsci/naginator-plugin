@@ -7,8 +7,10 @@ import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang.StringUtils;
 import org.jvnet.hudson.test.Bug;
 import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.SingleFileSCM;
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.SleepBuilder;
 
@@ -22,6 +24,7 @@ import hudson.matrix.Axis;
 import hudson.matrix.AxisList;
 import hudson.matrix.Combination;
 import hudson.matrix.MatrixProject;
+import hudson.maven.MavenModuleSet;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
@@ -382,5 +385,30 @@ public class NaginatorListenerTest extends HudsonTestCase {
         assertEquals("2", countRecorder.getRecordedValue(p.getBuildByNumber(3).getExactRun(new Combination(axisList, "value2"))));
         assertEquals("2", maxCountRecorder.getRecordedValue(p.getBuildByNumber(3).getExactRun(new Combination(axisList, "value2"))));
         assertEquals("2", buildNumberRecorder.getRecordedValue(p.getBuildByNumber(3).getExactRun(new Combination(axisList, "value2"))));
+    }
+    
+    @Bug(34900)
+    public void testMavenModuleSetWithoutNaginator() throws Exception {
+        final String SIMPLE_POM = StringUtils.join(new String[]{
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+                "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">",
+                "  <modelVersion>4.0.0</modelVersion>",
+                "  <groupId>com.exmaple</groupId>",
+                "  <artifactId>test</artifactId>",
+                "  <version>1.0</version>",
+                "  <packaging>jar</packaging>",
+                "</project>"
+        }, "\n");
+        
+        configureDefaultMaven();
+        MavenModuleSet p = createMavenProject();
+        p.setScm(new SingleFileSCM("pom.xml", SIMPLE_POM));
+        p.setGoals("clean");
+        
+        // Run once to have the project read the module structure.
+        assertBuildStatusSuccess(p.scheduleBuild2(0));
+        
+        // This results MavenModuleBuild#getRootBuild() to be `null`.
+        assertBuildStatusSuccess(p.getRootModule().scheduleBuild2(0));
     }
 }
