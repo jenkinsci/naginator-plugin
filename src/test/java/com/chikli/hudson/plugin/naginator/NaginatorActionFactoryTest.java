@@ -41,7 +41,6 @@ import hudson.model.User;
 import hudson.security.Permission;
 import hudson.security.AuthorizationMatrixProperty;
 import hudson.security.ProjectMatrixAuthorizationStrategy;
-import net.sf.ezmorph.object.MapToDateMorpher;
 
 import org.junit.After;
 import org.junit.ClassRule;

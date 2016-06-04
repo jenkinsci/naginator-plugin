@@ -280,7 +280,7 @@ public class NaginatorScheduleActionTest {
     public void testMatrixWithRerunMatrixPartWithoutFiltering() throws Exception {
         final int maxSchedule = 2;
         
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         AxisList axes = new AxisList(
                 new Axis("axis1", "1", "2"),
                 new Axis("axis2", "1", "2")
@@ -317,7 +317,7 @@ public class NaginatorScheduleActionTest {
     public void testMatrixWithRerunMatrixPartWithFiltering() throws Exception {
         final int maxSchedule = 1;
         
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         AxisList axes = new AxisList(
                 new Axis("axis1", "1", "2"),
                 new Axis("axis2", "1", "2")
@@ -354,7 +354,7 @@ public class NaginatorScheduleActionTest {
     public void testMatrixWithNoChildren() throws Exception {
         final int maxSchedule = 1;
         
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         AxisList axes = new AxisList(
                 new Axis("axis1", "1", "2"),
                 new Axis("axis2", "1", "2")
@@ -393,7 +393,7 @@ public class NaginatorScheduleActionTest {
     public void testMatrixWithNoChildrenNoRerun() throws Exception {
         final int maxSchedule = 1;
         
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         AxisList axes = new AxisList(
                 new Axis("axis1", "1", "2"),
                 new Axis("axis2", "1", "2")
@@ -425,7 +425,7 @@ public class NaginatorScheduleActionTest {
     public void testMatrixWithNoChildrenEmpty() throws Exception {
         final int maxSchedule = 1;
         
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         AxisList axes = new AxisList(
                 new Axis("axis1", "1", "2"),
                 new Axis("axis2", "1", "2")
@@ -464,7 +464,7 @@ public class NaginatorScheduleActionTest {
     public void testMatrixWithoutRerunMatrixPart() throws Exception {
         final int maxSchedule = 1;
         
-        MatrixProject p = j.createMatrixProject();
+        MatrixProject p = j.createProject(MatrixProject.class);
         AxisList axes = new AxisList(
                 new Axis("axis1", "1", "2"),
                 new Axis("axis2", "1", "2")
