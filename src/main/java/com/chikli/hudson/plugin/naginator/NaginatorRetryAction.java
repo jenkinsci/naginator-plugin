@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import hudson.model.BuildBadgeAction;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerResponse;
@@ -62,6 +63,7 @@ public class NaginatorRetryAction implements Action {
         actions.add(action);
         actions.add(build.getAction(ParametersAction.class));
         actions.add(build.getAction(CauseAction.class));
+        actions.addAll(build.getActions(BuildBadgeAction.class));
 
         return build.getProject().scheduleBuild(delay, new NaginatorCause(build), actions.toArray(new Action[actions.size()]));
     }
