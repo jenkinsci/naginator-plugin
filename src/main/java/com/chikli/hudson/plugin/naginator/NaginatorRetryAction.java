@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.CheckForNull;
+import javax.servlet.http.HttpServletResponse;
+
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerResponse;
@@ -12,10 +15,8 @@ import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import hudson.model.CauseAction;
 import hudson.model.Item;
-import hudson.model.Job;
 import hudson.model.ParametersAction;
-
-import jenkins.model.Jenkins;
+import hudson.model.Run;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
@@ -23,13 +24,21 @@ import jenkins.model.Jenkins;
 public class NaginatorRetryAction implements Action {
 
     private boolean hasPermission() {
-        Job<?, ?> job = Stapler.getCurrentRequest().findAncestorObject(Job.class);
-        if (job != null) {
-            return job.getACL().hasPermission(Item.BUILD);
+        Run<?, ?> run = Stapler.getCurrentRequest().findAncestorObject(Run.class);
+        if (run == null) {
+            // this page should be shown only when
+            // there's a valid build in the path hierarchy.
+            // (otherwise, we can't get what to retry)
+            return false;
         }
-        
-        Jenkins j = Jenkins.getInstance();
-        return (j != null)?j.hasPermission(Item.BUILD):false;
+
+        if (!(run instanceof AbstractBuild)) {
+            // retry is applicable only to AbstractBuild
+            // (Run such as WorkflowRun is not supported)
+            return false;
+        }
+
+        return run.getParent().hasPermission(Item.BUILD);
     }
 
     public String getIconFileName() {
@@ -47,8 +56,14 @@ public class NaginatorRetryAction implements Action {
             "retry" : null;
     }
 
-    public void doIndex(StaplerResponse res, @AncestorInPath AbstractBuild build) throws IOException {
-        build.getACL().checkPermission(Item.BUILD);
+    public void doIndex(StaplerResponse res, @CheckForNull @AncestorInPath AbstractBuild<?, ?> build) throws IOException {
+        if (build == null) {
+            // This should not happen as
+            // this page is displayed only for AbstractBuild.
+            res.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        build.getParent().checkPermission(Item.BUILD);
         NaginatorRetryAction.scheduleBuild(build, 0, NaginatorListener.calculateRetryCount(build), 0);
         res.sendRedirect2(build.getUpUrl());
     }
