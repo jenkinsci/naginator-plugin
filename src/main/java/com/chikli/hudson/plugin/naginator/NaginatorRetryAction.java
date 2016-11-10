@@ -7,6 +7,7 @@ import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.servlet.http.HttpServletResponse;
 
+import hudson.model.BuildBadgeAction;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerResponse;
@@ -18,10 +19,17 @@ import hudson.model.Item;
 import hudson.model.ParametersAction;
 import hudson.model.Run;
 
+import static java.util.Arrays.asList;
+
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
 public class NaginatorRetryAction implements Action {
+    // While there is no common interfaces to mark Action as safe copyable, whitelist via class name
+    private static final List<String> COPYABLE_ACTION_CLASSES = asList(
+            "org.jenkinsci.plugins.github.pullrequest.GitHubPRBadgeAction",
+            "com.github.kostyasha.github.integration.branch.GitHubBranchBadgeAction"
+    );
 
     private boolean hasPermission() {
         Run<?, ?> run = Stapler.getCurrentRequest().findAncestorObject(Run.class);
@@ -77,6 +85,11 @@ public class NaginatorRetryAction implements Action {
         actions.add(action);
         actions.add(build.getAction(ParametersAction.class));
         actions.add(build.getAction(CauseAction.class));
+        for (Action a : build.getActions(BuildBadgeAction.class)) {
+            if (COPYABLE_ACTION_CLASSES.contains(a.getClass().getName())) {
+                actions.add(a);
+            }
+        }
 
         return build.getProject().scheduleBuild(delay, new NaginatorCause(build), actions.toArray(new Action[actions.size()]));
     }
