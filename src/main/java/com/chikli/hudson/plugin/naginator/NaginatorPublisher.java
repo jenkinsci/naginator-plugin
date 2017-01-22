@@ -4,11 +4,10 @@ import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.MatrixRun;
 import hudson.matrix.MatrixBuild;
-import hudson.matrix.MatrixProject;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Job;
 import hudson.model.BuildListener;
+import hudson.model.Job;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
@@ -19,7 +18,6 @@ import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -198,7 +196,7 @@ public class NaginatorPublisher extends Notifier {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
-        if (build instanceof MatrixRun) {
+        if (MatrixSupportUtility.isMatrixRun(build)) {
             if (
                     getRegexpForMatrixStrategy() == RegexpForMatrixStrategy.TestChildrenRetriggerMatched
                     && !isRerunMatrixPart()
@@ -302,7 +300,11 @@ public class NaginatorPublisher extends Notifier {
          * @return true if the current request is for a matrix project.
          */
         public boolean isMatrixProject(Object it) {
-            return (it instanceof MatrixProject);
+            return (
+                it != null
+                && (it instanceof Job)
+                && MatrixSupportUtility.isMatrixProject((Job<?, ?>)it)
+            );
         }
         
         public FormValidation doCheckRegexpForMatrixStrategy(
