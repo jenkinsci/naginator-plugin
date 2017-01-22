@@ -4,15 +4,13 @@ import hudson.Extension;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixConfiguration;
 import hudson.matrix.listeners.MatrixBuildListener;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 /**
  *
  * @author galunto
  */
-@Extension
+@Extension(optional=true)
 public class NaginatorMatrixBuildListner extends MatrixBuildListener {
     
     /*

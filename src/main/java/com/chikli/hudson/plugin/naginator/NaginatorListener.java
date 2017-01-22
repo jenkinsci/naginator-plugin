@@ -27,7 +27,7 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
     @Override
     public void onCompleted(AbstractBuild<?, ?> build, @Nonnull TaskListener listener) {
         // Do nothing for null or a single Matrix run. (Run only when all Matrix finishes)
-        if (build == null || build instanceof MatrixRun) {
+        if (build == null || MatrixSupportUtility.isMatrixRun(build)) {
             return;
         }
         
@@ -39,43 +39,40 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
                 int n = action.getDelay().computeScheduleDelay(build);
                 LOGGER.log(Level.FINE, "about to try to schedule a build #{0} in {1} seconds for {2}",
                         new Object[]{build.getNumber(), n, build.getProject().getName()} );
-                
-                List<Combination> combsToRerun = new ArrayList<Combination>();
 
-                if (action.isRerunMatrixPart()) {
-                    if (build instanceof MatrixBuild) {
-                        MatrixBuild mb = (MatrixBuild) build;
-                        List<MatrixRun> matrixRuns = mb.getRuns();
+                if (MatrixSupportUtility.isMatrixBuild(build) && action.isRerunMatrixPart()) {
+                    List<Combination> combsToRerun = new ArrayList<Combination>();
 
-                        for (MatrixRun r : matrixRuns) {
-                            if (r.getNumber() == build.getNumber()) {
-                                if (!action.shouldScheduleForMatrixRun(r, listener)) {
-                                    continue;
-                                }
-                                
-                                LOGGER.log(Level.FINE, "add combination to matrix rerun ({0})", r.getParent().getCombination().toString());
-                                combsToRerun.add(r.getParent().getCombination());    
+                    MatrixBuild mb = (MatrixBuild) build;
+                    List<MatrixRun> matrixRuns = mb.getRuns();
+
+                    for (MatrixRun r : matrixRuns) {
+                        if (r.getNumber() == build.getNumber()) {
+                            if (!action.shouldScheduleForMatrixRun(r, listener)) {
+                                continue;
                             }
+                            
+                            LOGGER.log(Level.FINE, "add combination to matrix rerun ({0})", r.getParent().getCombination().toString());
+                            combsToRerun.add(r.getParent().getCombination());    
                         }
-
                     }
-                }
 
-                if (!combsToRerun.isEmpty()) {
-                    LOGGER.log(Level.FINE, "schedule matrix rebuild");
-                    scheduleMatrixBuild(build, combsToRerun, n, retryCount + 1, action.getMaxSchedule());
-                } else if (build instanceof MatrixBuild && action.isRerunMatrixPart()) {
-                    // No children to rerun
-                    switch (action.getNoChildStrategy()) {
-                    case RerunWhole:
-                        scheduleBuild(build, n, retryCount + 1, action.getMaxSchedule());
-                        break;
-                    case RerunEmpty:
+                    if (!combsToRerun.isEmpty()) {
                         LOGGER.log(Level.FINE, "schedule matrix rebuild");
                         scheduleMatrixBuild(build, combsToRerun, n, retryCount + 1, action.getMaxSchedule());
-                        break;
-                    case DontRun:
-                        continue;   // confusing, but back to the look for NaginatorScheduleAction
+                    } else {
+                        // No children to rerun
+                        switch (action.getNoChildStrategy()) {
+                        case RerunWhole:
+                            scheduleBuild(build, n, retryCount + 1, action.getMaxSchedule());
+                            break;
+                        case RerunEmpty:
+                            LOGGER.log(Level.FINE, "schedule matrix rebuild");
+                            scheduleMatrixBuild(build, combsToRerun, n, retryCount + 1, action.getMaxSchedule());
+                            break;
+                        case DontRun:
+                            continue;   // confusing, but back to the look for NaginatorScheduleAction
+                        }
                     }
                 } else {
                     scheduleBuild(build, n, retryCount + 1, action.getMaxSchedule());

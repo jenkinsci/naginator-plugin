@@ -105,7 +105,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         
         // If we're supposed to check for a regular expression in the build output before
         // scheduling a new build, do so.
-        if (isCheckRegexp() && (!(run instanceof MatrixBuild) || getRegexpForMatrixStrategy() == RegexpForMatrixStrategy.TestParent)) {
+        if (isCheckRegexp() && (!MatrixSupportUtility.isMatrixBuild(run) || getRegexpForMatrixStrategy() == RegexpForMatrixStrategy.TestParent)) {
             LOGGER.log(Level.FINEST, "Got checkRegexp == true");
             
             if (!testRegexp(run, listener)) {
@@ -113,7 +113,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
             }
         } else if (
                 isCheckRegexp()
-                && (run instanceof MatrixBuild)
+                && MatrixSupportUtility.isMatrixBuild(run)
                 && getRegexpForMatrixStrategy() == RegexpForMatrixStrategy.TestChildrenRetriggerAll
         ) {
             // check should be performed for child builds here.
