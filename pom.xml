@@ -28,7 +28,7 @@
   </scm>
 
   <properties>
-    <jenkins.version>1.565</jenkins.version>
+    <jenkins.version>1.554</jenkins.version>
     <java.level>6</java.level>
   </properties>
   
@@ -75,11 +75,6 @@
     </pluginRepositories>
     
     <dependencies>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>matrix-project</artifactId>
-            <version>1.0</version>
-        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
