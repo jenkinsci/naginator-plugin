@@ -14,11 +14,7 @@ public abstract class ScheduleDelay extends AbstractDescribableImpl<ScheduleDela
     public abstract int computeScheduleDelay(AbstractBuild failedBuild);
 
     public static DescriptorExtensionList<ScheduleDelay, Descriptor<ScheduleDelay>> all() {
-        Jenkins j = Jenkins.getInstance();
-        if (j == null) {
-            return null;
-        }
-        return j.getDescriptorList(ScheduleDelay.class);
+        return Jenkins.getInstance().getDescriptorList(ScheduleDelay.class);
     }
 
     public static abstract class ScheduleDelayDescriptor extends Descriptor<ScheduleDelay> {
