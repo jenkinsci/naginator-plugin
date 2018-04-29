@@ -6,7 +6,7 @@ import hudson.model.AbstractBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
- * @author: <a hef="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
+ * @author: <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
 public class FixedDelay extends ScheduleDelay {
 

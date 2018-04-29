@@ -1,42 +1,40 @@
+<?xml version="1.0"?>
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <f:entry title="Rerun build for unstable builds as well as failures" field="rerunIfUnstable">
-        <f:checkbox />
+  <f:entry title="Rerun unstable builds" field="rerunIfUnstable">
+    <f:checkbox/>
+  </f:entry>
+  <j:if test="${descriptor.isMatrixProject(it)}">
+    <f:entry title="Rerun build only for failed parts on the matrix" field="rerunMatrixPart">
+      <f:checkbox/>
     </f:entry>
-
+  </j:if>
+  <f:entry title="${%Delay before retrying build}">
+    <j:invokeStatic var="delays" className="com.chikli.hudson.plugin.naginator.ScheduleDelay" method="all"/>
+    <f:hetero-radio descriptors="${delays}" field="delay"/>
+  </f:entry>
+  <f:entry title="${%Maximum retries}" field="maxSchedule">
+    <f:textbox/>
+  </f:entry>
+  <f:advanced>
     <j:if test="${descriptor.isMatrixProject(it)}">
-        <f:entry title="Rerun build only for failed parts on the matrix" field="rerunMatrixPart">
-            <f:checkbox />
-        </f:entry>
+      <f:entry title="${%When no combinations to rerun}" field="noChildStrategy">
+        <f:enum>${it.displayName}</f:enum>
+      </f:entry>
     </j:if>
-
-    <f:entry title="${%Delay before retrying build}">
-        <j:invokeStatic var="delays" className="com.chikli.hudson.plugin.naginator.ScheduleDelay" method="all"/>
-        <f:hetero-radio descriptors="${delays}" field="delay"/>
-    </f:entry>
-
-    <f:entry title="${%Maximum number of successive failed builds}" field="maxSchedule">
+    <f:optionalBlock field="checkRegexp" inline="true" title="${%Only rerun if log message is found}">
+      <f:entry title="${%Search for Log message}" field="regexpForRerun">
         <f:textbox/>
-    </f:entry>
-
-    <f:advanced>
-        <j:if test="${descriptor.isMatrixProject(it)}">
-            <f:entry title="${%When no combinations to rerun}" field="noChildStrategy">
-                <f:enum>${it.displayName}</f:enum>
-            </f:entry>
-        </j:if>
-        <f:optionalBlock field="checkRegexp" inline="true"
-                 title="${%Only rerun build if regular expression is found in output}">
-            <f:entry title="${%Regular expression to search for}" field="regexpForRerun">
-                <f:textbox />
-            </f:entry>
-            <j:if test="${descriptor.isMatrixProject(it)}">
-                <f:entry title="${%How to apply the regular expression to matrix}" field="regexpForMatrixStrategy">
-                    <!-- unfortunatelly, f:enum doesn't support doCheckXxxx -->
-                    <f:select />
-                </f:entry>
-            </j:if>
-        </f:optionalBlock>
-    </f:advanced>
-
+      </f:entry>
+      <j:if test="${descriptor.isMatrixProject(it)}">
+        <f:entry title="${%How to apply the regular expression to matrix}" field="regexpForMatrixStrategy">
+          <!-- unfortunatelly, f:enum doesn't support doCheckXxxx -->
+          <f:select/>
+        </f:entry>
+      </j:if>
+      <f:entry title="Override maximum retries" field="maxScheduleOverrideAllowed">
+        <f:checkbox/>
+      </f:entry>
+    </f:optionalBlock>
+  </f:advanced>
 </j:jelly>
