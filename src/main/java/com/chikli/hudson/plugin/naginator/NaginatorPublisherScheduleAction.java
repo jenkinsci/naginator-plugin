@@ -41,9 +41,11 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
     private transient Boolean regexpForMatrixParent;        // for backward compatibility
     private /* almost final */ RegexpForMatrixStrategy regexpForMatrixStrategy;
     private final NoChildStrategy noChildStrategy;
+    private NaginatorPublisher naginatorPublisher;
     
     public NaginatorPublisherScheduleAction(NaginatorPublisher publisher) {
         super(publisher.getMaxSchedule(), publisher.getDelay(), publisher.isRerunMatrixPart());
+        this.naginatorPublisher = publisher;
         this.regexpForRerun = publisher.getRegexpForRerun();
         this.rerunIfUnstable = publisher.isRerunIfUnstable();
         this.checkRegexp = publisher.isCheckRegexp();
@@ -267,7 +269,30 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         }
     }
     
-    private boolean parseLogImpl(File logFile, Charset charset, @Nonnull final String regexp) throws IOException {
+  /**
+     * Extracts the maxSchedule from build log message against the "Search for Log message" regexp.
+     *
+     * @param message build log message to examine
+     * @param regexp string containing regular expression to locate. The data is expected to be in the capture group 1
+     * @return the matched integer value
+     */
+    private int getMessageData(@Nonnull final String message,
+        @Nonnull final String regexp) {
+        Pattern pattern = Pattern.compile(regexp);
+        int data = 0;
+        LOGGER.log(Level.FINEST, "Processing message: " + message);
+        Matcher matcher = pattern.matcher(message);
+        if (matcher.find()) {
+            data = Integer.parseInt(matcher.group(1));
+            // assertThat(data, greaterThan(0));
+            LOGGER.log(Level.FINEST, "Extracted data: " + data);
+        } else {
+            LOGGER.log(Level.FINEST, "Failed to find data in the message: " + message);
+        }
+        return data;
+    }
+
+   private boolean parseLogImpl(File logFile, Charset charset, @Nonnull final String regexp) throws IOException {
         // TODO annotate `logFile` and 'charset' with `@Nonnull`
         // after upgrading the target Jenkins to 1.568 or later.
 
@@ -280,6 +305,17 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
             while ((line = reader.readLine()) != null) {
                 Matcher matcher = pattern.matcher(new InterruptibleCharSequence(line));
                 if (matcher.find()) {
+                    String message = matcher.group(0);
+                    LOGGER.log(Level.FINEST, "Found Log message: " + message);
+
+                    if (naginatorPublisher.isMaxScheduleOverrideAllowed()) {
+                        int maxScheduleOverride = getMessageData(message, regexp);
+                        if (maxScheduleOverride != 0) {
+                            LOGGER.log(Level.FINEST,
+                                "Updating maxScheduleOverride: " + maxScheduleOverride);
+                            naginatorPublisher.setMaxSchedule(maxScheduleOverride);
+                        }
+                    }
                     return true;
                 }
             }
@@ -290,7 +326,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
             }
         }
     }
-    
+     
     @Override
     @Nonnull
     public NoChildStrategy getNoChildStrategy() {
@@ -299,3 +335,4 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
                 : NoChildStrategy.getDefault();
     }
 }
+
