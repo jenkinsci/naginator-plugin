@@ -106,6 +106,7 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 false,  // rerunMatrixPart
                 false,  // checkRegexp
+                false,  // maxScheduleOverrideAllowed
                 maxSchedule,
                 new FixedDelay(0)
         ));
@@ -145,6 +146,7 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 true,  // rerunMatrixPart
                 false,  // checkRegexp
+                false,  // maxScheduleOverrideAllowed
                 maxSchedule,
                 new FixedDelay(0)
         ));
@@ -183,6 +185,7 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 true,   // retunMatrixPart
                 true,   // checkRegexp
+                false,  // maxScheduleOverrideAllowed
                 1,      // maxSchedule
                 new FixedDelay(0)
         );
@@ -217,6 +220,7 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 true,   // retunMatrixPart
                 true,   // checkRegexp
+                false,  // maxScheduleOverrideAllowed
                 1,      // maxSchedule
                 new FixedDelay(0)
         );
@@ -251,6 +255,7 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 true,   // retunMatrixPart
                 true,   // checkRegexp
+                false,  // maxScheduleOverrideAllowed
                 1,      // maxSchedule
                 new FixedDelay(0)
         );
@@ -291,6 +296,7 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 false,  // retunMatrixPart
                 true,   // checkRegexp
+                false,  // maxScheduleOverrideAllowed
                 1,      // maxSchedule
                 new FixedDelay(0)
         );
@@ -326,6 +332,7 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 true,   // retunMatrixPart
                 true,   // checkRegexp
+                false,  // maxScheduleOverrideAllowed
                 1,      // maxSchedule
                 new FixedDelay(0)
         );
@@ -366,6 +373,7 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 false,  // retunMatrixPart
                 true,   // checkRegexp
+                false,  // maxScheduleOverrideAllowed
                 1,      // maxSchedule
                 new FixedDelay(0)
         );
@@ -406,6 +414,7 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 false,  // retunMatrixPart
                 true,   // checkRegexp
+                false,  // maxScheduleOverrideAllowed
                 1,      // maxSchedule
                 new FixedDelay(0)
         );
@@ -433,6 +442,7 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 true,   // retunMatrixPart
                 true,   // checkRegexp
+                false,  // maxScheduleOverrideAllowed
                 1,      // maxSchedule
                 new FixedDelay(0)
         );
@@ -470,6 +480,7 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 true,   // retunMatrixPart
                 true,   // checkRegexp
+                false,  // maxScheduleOverrideAllowed
                 1,      // maxSchedule
                 new FixedDelay(0)
         );
@@ -480,6 +491,7 @@ public class NaginatorPublisherTest {
                 naginator.isRerunIfUnstable(),
                 false,  // retunMatrixPart (not preserved)
                 naginator.isCheckRegexp(),
+                naginator.isMaxScheduleOverrideAllowed(),
                 naginator.getMaxSchedule(),
                 naginator.getDelay()
         );
@@ -513,6 +525,7 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 true,   // rerunMatrixPart
                 true,   // checkRegexp
+                false,  // maxScheduleOverrideAllowed
                 1,      // maxschedule
                 new FixedDelay(0)
         );
@@ -543,6 +556,7 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 true,   // rerunMatrixPart
                 true,   // checkRegexp
+                false,  // maxScheduleOverrideAllowed
                 1,      // maxschedule
                 new FixedDelay(0)
         );
@@ -573,6 +587,7 @@ public class NaginatorPublisherTest {
                 false,  // rerunIfUnstable
                 true,   // rerunMatrixPart
                 true,   // checkRegexp
+                false,  // maxScheduleOverrideAllowed
                 1,      // maxschedule
                 new FixedDelay(0)
         );
