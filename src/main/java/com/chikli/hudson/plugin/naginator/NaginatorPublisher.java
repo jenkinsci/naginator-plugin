@@ -58,17 +58,17 @@ public class NaginatorPublisher extends Notifier {
 
     }
 
-  	/**
-  	 * Constructor
-  	 *
-  	 * @param regexpForRerun regular expression to scan build log
-  	 * @param rerunIfUnstable whether to rerun unstable builds
-  	 * @param rerunMatrixPart whether to rerun matrix build
-  	 * @param checkRegexp use the regexpForRerun to determine whether to rerun the failing build
-  	 * @param maxScheduleOverrideAllowed extract the maxSchedule with the help of the regexpForRerun
-  	 * @param maxSchedule maximum number of consecutive reruns
-  	 * @param delay delay between reruns
-  	 */
+    /**
+     * Constructor
+     *
+     * @param regexpForRerun regular expression to scan build log
+     * @param rerunIfUnstable whether to rerun unstable builds
+     * @param rerunMatrixPart whether to rerun matrix build
+     * @param checkRegexp use the regexpForRerun to determine whether to rerun the failing build
+     * @param maxScheduleOverrideAllowed extract the maxSchedule with the help of the regexpForRerun
+     * @param maxSchedule maximum number of consecutive reruns
+     * @param delay delay between reruns
+    */
   
     @DataBoundConstructor
     public NaginatorPublisher(String regexpForRerun,
@@ -90,20 +90,8 @@ public class NaginatorPublisher extends Notifier {
     
     /**
      * @since 1.16
-     * @deprecated use {@link #NaginatorPublisher(String, boolean, boolean, boolean, int, ScheduleDelay)} and other setters
+     * @deprecated use {@link #NaginatorPublisher(String, boolean, boolean, boolean, boolean, int, ScheduleDelay)} and other setters
      */
-  	/**
-	   * Constructor
-	   *
-	   * @param regexpForRerun regular expression to scan build log
-	   * @param rerunIfUnstable whether to rerun unstable builds
-	   * @param rerunMatrixPart whether to rerun matrix build
-	   * @param checkRegexp use the regexpForRerun to determine whether to rerun the failing build
-	   * @param regexpForMatrixParent analog of regexpForRerun provided for the parent build
-	   * @param maxScheduleOverrideAllowed extract the maxSchedule with the help of the regexpForRerun
-	   * @param maxSchedule maximum number of consecutive reruns
-	   * @param delay delay between reruns
-	   */
     @Deprecated
     public NaginatorPublisher(String regexpForRerun,
                               boolean rerunIfUnstable,
@@ -135,9 +123,9 @@ public class NaginatorPublisher extends Notifier {
         return this;
     }
 
-  	public boolean isMaxScheduleOverrideAllowed() {
-	    	return maxScheduleOverrideAllowed;
-	  }
+    public boolean isMaxScheduleOverrideAllowed() {
+        return maxScheduleOverrideAllowed;
+    }
 
     public boolean isRerunIfUnstable() {
         return rerunIfUnstable;
@@ -148,11 +136,10 @@ public class NaginatorPublisher extends Notifier {
     }
     
     /**
-     * setNoChildStrategy
-     * @param noChildStrategy
-     * 
-     * @since 1.17
-     */
+    * @param noChildStrategy
+    * 
+    * @since 1.17
+    */
     @DataBoundSetter
     public void setNoChildStrategy(@Nonnull NoChildStrategy noChildStrategy) {
         this.noChildStrategy = noChildStrategy;

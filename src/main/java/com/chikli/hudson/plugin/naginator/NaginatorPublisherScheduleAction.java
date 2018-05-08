@@ -269,30 +269,36 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         }
     }
     
-  /**
-     * Extracts the maxSchedule from build log message against the "Search for Log message" regexp.
-     *
-     * @param message build log message to examine
-     * @param regexp string containing regular expression to locate. The data is expected to be in the capture group 1
-     * @return the matched integer value
-     */
+
+    /**
+  	 * Extracts the maxSchedule from build log message against the "Search for Log message" regexp.
+  	 *
+  	 * @param message build log message to examine
+  	 * @param regexp string containing regular expression to locate. The data is expected to be in the capture group 1
+  	 * @return the matched integer value
+  	 */
     private int getMessageData(@Nonnull final String message,
-        @Nonnull final String regexp) {
+  	    @Nonnull final String regexp) {
         Pattern pattern = Pattern.compile(regexp);
         int data = 0;
         LOGGER.log(Level.FINEST, "Processing message: " + message);
         Matcher matcher = pattern.matcher(message);
         if (matcher.find()) {
-            data = Integer.parseInt(matcher.group(1));
-            // assertThat(data, greaterThan(0));
-            LOGGER.log(Level.FINEST, "Extracted data: " + data);
+  			    String matchedGroup = null;
+  			    try {
+  				      matchedGroup = matcher.group(1);
+  				      data = Integer.parseInt(matchedGroup);
+  			    } catch (NumberFormatException e) {
+  				      LOGGER.log(Level.FINEST, "Failed to parse captured data: " + matchedGroup);
+  			    }
+  			    LOGGER.log(Level.FINEST, "Extracted data: " + data);
         } else {
-            LOGGER.log(Level.FINEST, "Failed to find data in the message: " + message);
+  			    LOGGER.log(Level.FINEST, "Failed to find data in the message: " + message);
         }
         return data;
     }
 
-   private boolean parseLogImpl(File logFile, Charset charset, @Nonnull final String regexp) throws IOException {
+  	private boolean parseLogImpl(File logFile, Charset charset, @Nonnull final String regexp) throws IOException {
         // TODO annotate `logFile` and 'charset' with `@Nonnull`
         // after upgrading the target Jenkins to 1.568 or later.
 
@@ -326,7 +332,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
             }
         }
     }
-     
+
     @Override
     @Nonnull
     public NoChildStrategy getNoChildStrategy() {
