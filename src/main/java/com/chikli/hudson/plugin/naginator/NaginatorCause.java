@@ -3,7 +3,9 @@ package com.chikli.hudson.plugin.naginator;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Job;
+import hudson.model.Run;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 /**
@@ -46,4 +48,15 @@ public class NaginatorCause extends Cause {
 
     public Integer getSourceBuildNumber() { return this.sourceBuildNumber; }
 
+    /**
+     * @return the source build. <code>null</code> when the build is deleted.
+     * @since 1.18
+     */
+    @CheckForNull
+    public Run<?, ?> getSourceBuild() {
+        if (getSourceBuildNumber() == null) {
+            return null;
+        }
+        return getProject().getBuildByNumber(getSourceBuildNumber());
+    }
 }

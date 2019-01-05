@@ -5,8 +5,8 @@
             <j:when test="${it.sourceBuildNumber!=null}">
 
                 <j:choose>
-                    <j:when test="${it.project.getBuildByNumber(it.sourceBuildNumber)!=null}">
-                        <j:out value="${%DescriptionWithLinkToSource(it.summary,rootURL,it.jobUrl,it.sourceBuildNumber)}"/>
+                    <j:when test="${it.sourceBuild!=null}">
+                        <j:out value="${%DescriptionWithLinkToSource(it.summary,rootURL,it.sourceBuild.url)}"/>
                     </j:when>
                     <j:otherwise>
                         <j:out value="${%DescriptionWithDeletedSource(it.summary)}"/>
