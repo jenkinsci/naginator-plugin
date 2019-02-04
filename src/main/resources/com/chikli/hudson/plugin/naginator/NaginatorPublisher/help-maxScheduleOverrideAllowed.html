@@ -1,0 +1,17 @@
+<div>
+Allow Log parser to extract the maximum number of successive failed build retries from the failure log message. 
+Clear to enforce the configuration value to be always used.
+The Regular expression to search for will need to have a integer number in its first match group e.g.
+<br/>
+<pre>ERROR: (?:NETWORK ERROR|ARTIFACTORY ERROR) RETRY: (\d)</pre>
+<br/>
+and the log message 
+<pre>
+ERROR: NETWORK ERROR RETRY: 2
+</pre>
+and
+<pre>
+ERROR: ARTIFACTORY ERROR RETRY: 1
+</pre>
+in the build console output would trigger <b>2</b> and <b>1</b> maximum reruns.
+</div>

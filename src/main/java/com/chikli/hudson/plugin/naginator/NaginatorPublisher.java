@@ -40,6 +40,7 @@ public class NaginatorPublisher extends Notifier {
     private final boolean rerunIfUnstable;
     private final boolean rerunMatrixPart;
     private final boolean checkRegexp;
+    private final boolean maxScheduleOverrideAllowed;
     @Deprecated
     private transient Boolean regexpForMatrixParent;
     private RegexpForMatrixStrategy regexpForMatrixStrategy;    /* almost final */
@@ -53,17 +54,28 @@ public class NaginatorPublisher extends Notifier {
     public NaginatorPublisher(String regexpForRerun,
                               boolean rerunIfUnstable,
                               boolean checkRegexp) {
-        this(regexpForRerun, rerunIfUnstable, false, checkRegexp, 0, new ProgressiveDelay(5*60, 3*60*60));
+        this(regexpForRerun, rerunIfUnstable, false, checkRegexp, false, 0, new ProgressiveDelay(5 * 60, 3 * 60 * 60));
+
     }
 
     /**
-     * constructor.
-     */
+     * Constructor
+     *
+     * @param regexpForRerun regular expression to scan build log
+     * @param rerunIfUnstable whether to rerun unstable builds
+     * @param rerunMatrixPart whether to rerun matrix build
+     * @param checkRegexp use the regexpForRerun to determine whether to rerun the failing build
+     * @param maxScheduleOverrideAllowed extract the maxSchedule with the help of the regexpForRerun
+     * @param maxSchedule maximum number of consecutive reruns
+     * @param delay delay between reruns
+    */
+  
     @DataBoundConstructor
     public NaginatorPublisher(String regexpForRerun,
                               boolean rerunIfUnstable,
                               boolean rerunMatrixPart,
                               boolean checkRegexp,
+                              boolean maxScheduleOverrideAllowed, 
                               int maxSchedule,
                               ScheduleDelay delay) {
         this.regexpForRerun = regexpForRerun;
@@ -71,23 +83,25 @@ public class NaginatorPublisher extends Notifier {
         this.rerunMatrixPart = rerunMatrixPart;
         this.checkRegexp = checkRegexp;
         this.maxSchedule = maxSchedule;
+    	this.maxScheduleOverrideAllowed = maxScheduleOverrideAllowed;
         this.delay = delay;
         setRegexpForMatrixStrategy(RegexpForMatrixStrategy.TestParent); // backward compatibility with < 1.16
     }
     
     /**
      * @since 1.16
-     * @deprecated use {@link #NaginatorPublisher(String, boolean, boolean, boolean, int, ScheduleDelay)} and other setters
+     * @deprecated use {@link #NaginatorPublisher(String, boolean, boolean, boolean, boolean, int, ScheduleDelay)} and other setters
      */
     @Deprecated
     public NaginatorPublisher(String regexpForRerun,
                               boolean rerunIfUnstable,
                               boolean rerunMatrixPart,
                               boolean checkRegexp,
+                              boolean maxScheduleOverrideAllowed, 
                               boolean regexpForMatrixParent,
                               int maxSchedule,
                               ScheduleDelay delay) {
-        this(regexpForRerun, rerunIfUnstable, rerunMatrixPart, checkRegexp, maxSchedule, delay);
+        this(regexpForRerun, rerunIfUnstable, rerunMatrixPart, checkRegexp, maxScheduleOverrideAllowed, maxSchedule, delay);
         setRegexpForMatrixParent(regexpForMatrixParent);
     }
 
@@ -109,6 +123,10 @@ public class NaginatorPublisher extends Notifier {
         return this;
     }
 
+    public boolean isMaxScheduleOverrideAllowed() {
+        return maxScheduleOverrideAllowed;
+    }
+
     public boolean isRerunIfUnstable() {
         return rerunIfUnstable;
     }
@@ -118,10 +136,10 @@ public class NaginatorPublisher extends Notifier {
     }
     
     /**
-     * @param noChildStrategy
-     * 
-     * @since 1.17
-     */
+    * @param noChildStrategy
+    * 
+    * @since 1.17
+    */
     @DataBoundSetter
     public void setNoChildStrategy(@Nonnull NoChildStrategy noChildStrategy) {
         this.noChildStrategy = noChildStrategy;
@@ -165,10 +183,20 @@ public class NaginatorPublisher extends Notifier {
                 : RegexpForMatrixStrategy.TestChildrenRetriggerMatched  // compatible with 1.16.
         );
     }
-
+    
     public String getRegexpForRerun() {
         return regexpForRerun;
     }
+
+    /**
+  	 * Sets the maxSchedule property, initially filled from data bound comstructor e.g. from the matched build log message.
+	   *
+	   * @param value new maxSchedule
+	   * @see getMaxSchedule
+	   */
+  	public void setMaxSchedule(int value) {
+	    	this.maxSchedule = value;
+  	}
 
     /**
      * @param regexpForMatrixStrategy

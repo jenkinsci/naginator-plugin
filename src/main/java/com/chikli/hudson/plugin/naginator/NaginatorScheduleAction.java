@@ -116,7 +116,6 @@ public class NaginatorScheduleAction extends InvisibleAction {
      * A test for each child builds of multi-configuration builds.
      * You can filter child builds to reschedule.
      * 
-     * @param run
      * @return
      */
     public boolean shouldScheduleForMatrixRun(@Nonnull MatrixRun run, @Nonnull TaskListener listener) {

@@ -101,7 +101,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
 
         FreeStyleProject project = createFreeStyleProject();
         project.getBuildersList().add(new MyBuilder("foo", Result.SUCCESS, 1000));
-        NaginatorPublisher nag = new NaginatorPublisher("foo", false, false, false, 10, new FixedDelay(0));
+        NaginatorPublisher nag = new NaginatorPublisher("foo", false, false, false, false, 10, new FixedDelay(0));
         project.getPublishersList().add(nag);
         BuildWrapper failTheBuild = new FailTheBuild();
         project.getBuildWrappersList().add(failTheBuild);
@@ -123,7 +123,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
         FreeStyleProject a = createFreeStyleProject("a");
         FreeStyleProject b = createFreeStyleProject("b");
         a.getPublishersList().add(new BuildTrigger("b", Result.SUCCESS));
-        NaginatorPublisher nag = new NaginatorPublisher("", false, false, false, 2, new FixedDelay(1));
+        NaginatorPublisher nag = new NaginatorPublisher("", false, false, false, false, 2, new FixedDelay(1));
 
         b.getPublishersList().add(nag);
 
@@ -148,7 +148,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
                                     boolean rerunIfUnstable, boolean checkRegexp) throws Exception {
         FreeStyleProject project = createFreeStyleProject();
         project.getBuildersList().add(new MyBuilder(buildLog, result));
-        Publisher nag = new NaginatorPublisher(regexpForRerun, rerunIfUnstable, false, checkRegexp, 10, new FixedDelay(0));
+        Publisher nag = new NaginatorPublisher(regexpForRerun, rerunIfUnstable, false, checkRegexp, false, 10, new FixedDelay(0));
         project.getPublishersList().add(nag);
 
         return isScheduledForRetry(project);
@@ -204,6 +204,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
                 false,                  // rerunIfUnstable
                 false,                  // rerunMatrixPart
                 false,                  // checkRegexp
+                false,                  // maxScheduleOverrideAllowed
                 2,                      // maxSchedule
                 new FixedDelay(0)       // delay
         ));
@@ -264,6 +265,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
                 false,                  // rerunIfUnstable
                 false,                  // rerunMatrixPart
                 true,                   // checkRegexp
+                false,                  // maxScheduleOverrideAllowed
                 1,                      // maxSchedule
                 new FixedDelay(0)       // delay
         ));
@@ -315,6 +317,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
                 false,  // rerunMatrixPart
                 false,  // checkRegexp
                 false,  // regexpForMatrixParent
+                false,  // maxScheduleOverrideAllowed
                 2,      // maxSchedule
                 new FixedDelay(0) // delay
         ));
