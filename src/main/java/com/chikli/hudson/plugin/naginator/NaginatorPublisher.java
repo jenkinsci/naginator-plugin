@@ -31,7 +31,7 @@ import javax.annotation.Nonnull;
 /**
  * Reschedules a build if the current one fails.
  *
- * @author Nayan Hajratwala <nayan@chikli.com>
+ * @author Nayan Hajratwala &lt;nayan@chikli.com&gt;
  */
 public class NaginatorPublisher extends Notifier {
     public final static long DEFAULT_REGEXP_TIMEOUT_MS = 30000;
@@ -146,8 +146,8 @@ public class NaginatorPublisher extends Notifier {
     /**
      * Returns whether apply the regexp to the matrix parent instead of matrix children.
      * 
-     * The default is <code>false</code> for naginator-plugin >= 1.16
-     * though <code>true</code> for configurations upgraded from naginator-plugin < 1.16.
+     * The default is <code>false</code> for naginator-plugin &gt;= 1.16
+     * though <code>true</code> for configurations upgraded from naginator-plugin &lt; 1.16.
      * 
      * @return Returns whether apply the regexp to the matrix parent instead of matrix children
      * @since 1.16
