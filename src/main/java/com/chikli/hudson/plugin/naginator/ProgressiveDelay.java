@@ -40,16 +40,18 @@ public class ProgressiveDelay extends ScheduleDelay {
         //
         // so to avoid this problem, progressively introduce delay until the next build
 
-        int n = 1;
-        int delay = increment;
-        Run r = failedBuild;
-        while (r != null && r.getAction(NaginatorAction.class) != null) {
-            r = r.getPreviousBuild();
-            n++;
-            delay += n * increment;
-        }
-        // delay = increment * n * (n + 1) / 2
+        int n = getRetryCount(failedBuild);
+        int factor = (n + 1) * (n + 2) / 2;
+        int delay = increment * factor;
         return max <= 0 ? delay : min(delay, max);
+    }
+
+    private int getRetryCount(AbstractBuild<?, ?> failedBuild) {
+        NaginatorAction action = failedBuild.getAction(NaginatorAction.class);
+        if (action == null) {
+            return 0;
+        }
+        return action.getRetryCount();
     }
 
     @Extension
