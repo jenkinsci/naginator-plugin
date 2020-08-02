@@ -16,9 +16,7 @@
   <artifactId>naginator</artifactId>
   <packaging>hpi</packaging>
   <version>1.19-SNAPSHOT</version>
-  <url>
-    http://wiki.jenkins-ci.org/display/JENKINS/Naginator+Plugin
-  </url>
+  <url>https://github.com/jenkinsci/naginator-plugin</url>
 
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/naginator-plugin.git</connection>
