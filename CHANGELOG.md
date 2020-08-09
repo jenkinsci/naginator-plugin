@@ -114,7 +114,9 @@ Release date: Nov 12, 2014
     folder
 -   Don't show rerun link if user doesn't have permissions
 
-### Version 1.12 - Aug 25, 2014
+### 1.12
+
+Release date: Aug 25, 2014
 
 -   Added the option to rerun only the failed parts of a matrix
 -   Retry will occur only when all parts of a matrix finish
