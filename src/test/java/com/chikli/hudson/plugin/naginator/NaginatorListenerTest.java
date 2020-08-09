@@ -448,6 +448,18 @@ public class NaginatorListenerTest extends HudsonTestCase {
                 "  <artifactId>test</artifactId>",
                 "  <version>1.0</version>",
                 "  <packaging>jar</packaging>",
+                "  <repositories>",
+                "    <repository>",
+                "      <id>central</id>",
+                "      <url>https://repo.maven.apache.org/maven2</url>",
+                "    </repository>",
+                "  </repositories>",
+                "  <pluginRepositories>",
+                "    <pluginRepository>",
+                "      <id>central</id>",
+                "      <url>https://repo.maven.apache.org/maven2</url>",
+                "    </pluginRepository>",
+                "  </pluginRepositories>",
                 "</project>"
         }, "\n");
         
