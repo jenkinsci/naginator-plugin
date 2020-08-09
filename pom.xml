@@ -15,14 +15,14 @@
   </description>
   <artifactId>naginator</artifactId>
   <packaging>hpi</packaging>
-  <version>1.19-SNAPSHOT</version>
+  <version>1.18.1</version>
   <url>https://github.com/jenkinsci/naginator-plugin</url>
 
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/naginator-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/naginator-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/naginator-plugin</url>
-    <tag>HEAD</tag>
+    <tag>naginator-1.18.1</tag>
   </scm>
 
   <properties>
