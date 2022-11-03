@@ -1,5 +1,12 @@
 # Changelog
 
+### 1.18.2
+
+Release date: (TBD), 2022
+
+* *SECURITY FIX* (SECURITY-2946)
+    * https://www.jenkins.io/security/advisory/(TBD)/
+
 ### 1.18.1
 
 Release date: Aug 9, 2020

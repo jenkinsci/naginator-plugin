@@ -35,6 +35,7 @@ import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
 
+import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
@@ -180,4 +181,17 @@ public class NaginatorCauseTest {
         }
     }
 
+    @Issue("SECURITY-2946")
+    @Test
+    public void testEscapedDisplayname() throws Exception {
+        FreeStyleProject p = j.createFreeStyleProject();
+        FreeStyleBuild build1 = p.scheduleBuild2(0).get();
+        build1.setDisplayName​("<div id=\"unescaped-displayname\">bad displayname</div>");
+        FreeStyleBuild build2 = p.scheduleBuild2(0, new NaginatorCause(build1)).get();
+
+        WebClient wc = j.createWebClient();
+        HtmlPage page = wc.getPage(build2);
+        DomElement unescaped = page.getElementById("unescaped-displayname");
+        assertNull(unescaped);
+    }
 }
