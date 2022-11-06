@@ -2,10 +2,10 @@
 
 ### 1.18.2
 
-Release date: (TBD), 2022
+Release date: Nov 15, 2022
 
 * *SECURITY FIX* (SECURITY-2946)
-    * https://www.jenkins.io/security/advisory/(TBD)/
+    * https://www.jenkins.io/security/advisory/2022-11-15/#SECURITY-2946
 
 ### 1.18.1
 
