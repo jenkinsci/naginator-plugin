@@ -1,5 +1,7 @@
 package com.chikli.hudson.plugin.naginator;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.Combination;
 import hudson.matrix.MatrixBuild;
@@ -16,16 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
 /**
  * @author <a href="mailto:nicolas.deloof@cloudbees.com">Nicolas De loof</a>
  */
+@Extension
 public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
 
 
     @Override
-    public void onCompleted(AbstractBuild<?, ?> build, @Nonnull TaskListener listener) {
+    public void onCompleted(AbstractBuild<?, ?> build, @NonNull TaskListener listener) {
         // Do nothing for null or a single Matrix run. (Run only when all Matrix finishes)
         if (build == null || build instanceof MatrixRun) {
             return;
@@ -135,7 +136,7 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
         return n < max;
     }
 
-    public static int calculateRetryCount(@Nonnull Run<?, ?> r) {
+    public static int calculateRetryCount(@NonNull Run<?, ?> r) {
         NaginatorAction naginatorAction = r.getAction(NaginatorAction.class);
         if (naginatorAction == null) {
             return 0;

@@ -1,6 +1,5 @@
 package com.chikli.hudson.plugin.naginator;
 
-import com.chikli.hudson.plugin.naginator.ScheduleDelay;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractBuild;

@@ -1,5 +1,7 @@
 package com.chikli.hudson.plugin.naginator;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.matrix.MatrixRun;
 import hudson.matrix.MatrixBuild;
 import hudson.model.Result;
@@ -12,7 +14,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
@@ -21,9 +22,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
 import jenkins.model.Jenkins;
 
@@ -92,13 +90,13 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
     /**
      * @since 1.17
      */
-    @Nonnull
+    @NonNull
     public RegexpForMatrixStrategy getRegexpForMatrixStrategy() {
         return regexpForMatrixStrategy;
     }
     
     @Override
-    public boolean shouldSchedule(@Nonnull Run<?, ?> run, @Nonnull TaskListener listener, int retryCount) {
+    public boolean shouldSchedule(@NonNull Run<?, ?> run, @NonNull TaskListener listener, int retryCount) {
         if (!checkCommonScheduleThreshold(run)) {
             return false;
         }
@@ -125,7 +123,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return super.shouldSchedule(run, listener, retryCount);
     }
 
-    private boolean testRegexpForFailedChildren(@Nonnull MatrixBuild run, @Nonnull TaskListener listener) {
+    private boolean testRegexpForFailedChildren(@NonNull MatrixBuild run, @NonNull TaskListener listener) {
         for (MatrixRun r : ((MatrixBuild)run).getExactRuns()) {
             if (!checkCommonScheduleThreshold(r)) {
                 continue;
@@ -139,7 +137,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
     }
 
     @Override
-    public boolean shouldScheduleForMatrixRun(@Nonnull MatrixRun run, @Nonnull TaskListener listener) {
+    public boolean shouldScheduleForMatrixRun(@NonNull MatrixRun run, @NonNull TaskListener listener) {
         if (!checkCommonScheduleThreshold(run)) {
             return false;
         }
@@ -153,7 +151,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return true;
     }
     
-    private boolean checkCommonScheduleThreshold(@Nonnull Run<?, ?> run) {
+    private boolean checkCommonScheduleThreshold(@NonNull Run<?, ?> run) {
         if ((run.getResult() == Result.SUCCESS) || (run.getResult() == Result.ABORTED)) {
             return false;
         }
@@ -165,7 +163,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return true;
     }
     
-    private boolean testRegexp(@Nonnull Run<?, ?> run, TaskListener listener) {
+    private boolean testRegexp(@NonNull Run<?, ?> run, TaskListener listener) {
         String regexpForRerun = getRegexpForRerun();
         if ((regexpForRerun != null) && (!regexpForRerun.equals(""))) {
             LOGGER.log(Level.FINEST, "regexpForRerun - {0}", regexpForRerun);
@@ -186,10 +184,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
     }
     
     private long getRegexpTimeoutMs() {
-        Jenkins j = Jenkins.getInstance();
-        if (j == null) {
-            return NaginatorPublisher.DEFAULT_REGEXP_TIMEOUT_MS;
-        }
+        Jenkins j = Jenkins.get();
         NaginatorPublisher.DescriptorImpl d = (NaginatorPublisher.DescriptorImpl)j.getDescriptor(NaginatorPublisher.class);
         if (d == null) {
             return NaginatorPublisher.DEFAULT_REGEXP_TIMEOUT_MS;
@@ -197,17 +192,13 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return d.getRegexpTimeoutMs();
     }
     
-    private boolean parseLog(final File logFile, final Charset charset, @Nonnull final String regexp) throws IOException {
+    private boolean parseLog(final File logFile, final Charset charset, @NonNull final String regexp) throws IOException {
         // TODO annotate `logFile` with `@Nonnull`
         // after upgrading the target Jenkins to 1.568 or later.
         
         long timeout = getRegexpTimeoutMs();
         
-        FutureTask<Boolean> task = new FutureTask<Boolean>(new Callable<Boolean>() {
-            public Boolean call() throws Exception {
-                return parseLogImpl(logFile, charset, regexp);
-            }
-        });
+        FutureTask<Boolean> task = new FutureTask<>(() -> parseLogImpl(logFile, charset, regexp));
         
         Thread t = new Thread(task);
         t.start();
@@ -220,13 +211,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
                     Level.WARNING,
                     String.format("Aborted regexp '%s' for too long execution time ( > %d ms).", regexp, timeout)
             );
-        } catch (InterruptedException e) {
-            LOGGER.log(
-                    Level.SEVERE,
-                    String.format("Aborted regexp '%s'", regexp),
-                    e
-            );
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOGGER.log(
                     Level.SEVERE,
                     String.format("Aborted regexp '%s'", regexp),
@@ -262,12 +247,13 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
             return wrapped.charAt(index);
         }
         
+        @NonNull
         public CharSequence subSequence(int start, int end) {
             return wrapped.subSequence(start, end);
         }
     }
     
-    private boolean parseLogImpl(File logFile, Charset charset, @Nonnull final String regexp) throws IOException {
+    private boolean parseLogImpl(File logFile, Charset charset, @NonNull final String regexp) throws IOException {
         // TODO annotate `logFile` and 'charset' with `@Nonnull`
         // after upgrading the target Jenkins to 1.568 or later.
 
@@ -291,8 +277,8 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         }
     }
     
+    @NonNull
     @Override
-    @Nonnull
     public NoChildStrategy getNoChildStrategy() {
         return (noChildStrategy != null)
                 ? noChildStrategy

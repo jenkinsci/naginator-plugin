@@ -28,6 +28,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Launcher;
 import hudson.matrix.Axis;
 import hudson.matrix.AxisList;
@@ -86,7 +87,7 @@ public class NaginatorScheduleActionTest {
         }
         
         @Override
-        public boolean shouldSchedule(Run<?, ?> run, TaskListener listener, int retryCount) {
+        public boolean shouldSchedule(@NonNull Run<?, ?> run, @NonNull TaskListener listener, int retryCount) {
             return false;
         }
     }
@@ -106,13 +107,14 @@ public class NaginatorScheduleActionTest {
         }
         
         @Override
-        public boolean shouldScheduleForMatrixRun(MatrixRun run, TaskListener listener) {
+        public boolean shouldScheduleForMatrixRun(@NonNull MatrixRun run, @NonNull TaskListener listener) {
             return run.getParent().getCombination().evalGroovyExpression(
                     run.getParent().getParent().getAxes(),
                     combinationFilter
             );
         }
         
+        @NonNull
         @Override
         public NoChildStrategy getNoChildStrategy() {
             return noChildStrategy;

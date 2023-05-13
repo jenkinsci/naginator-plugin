@@ -4,8 +4,6 @@ import hudson.Extension;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixConfiguration;
 import hudson.matrix.listeners.MatrixBuildListener;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 /**

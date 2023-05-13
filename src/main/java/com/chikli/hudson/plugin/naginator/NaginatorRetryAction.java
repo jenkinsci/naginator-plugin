@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.CheckForNull;
 import javax.servlet.http.HttpServletResponse;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerResponse;
@@ -73,12 +73,12 @@ public class NaginatorRetryAction implements Action {
     }
 
     static boolean scheduleBuild(final AbstractBuild<?, ?> build, final int delay, final NaginatorAction action) {
-        final List<Action> actions = new ArrayList<Action>();
+        final List<Action> actions = new ArrayList<>();
         actions.add(action);
         actions.add(build.getAction(ParametersAction.class));
         actions.add(build.getAction(CauseAction.class));
 
-        return build.getProject().scheduleBuild(delay, new NaginatorCause(build), actions.toArray(new Action[actions.size()]));
+        return build.getProject().scheduleBuild(delay, new NaginatorCause(build), actions.toArray(new Action[0]));
     }
 
 }

@@ -1,7 +1,9 @@
 package com.chikli.hudson.plugin.naginator;
 
 import hudson.DescriptorExtensionList;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractDescribableImpl;
+import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
 
 /**
