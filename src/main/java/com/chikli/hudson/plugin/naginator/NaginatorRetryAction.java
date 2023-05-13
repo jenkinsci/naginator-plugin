@@ -3,6 +3,7 @@ package com.chikli.hudson.plugin.naginator;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -11,6 +12,7 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerResponse;
 
+import hudson.model.Cause;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
 import hudson.model.CauseAction;
@@ -64,7 +66,9 @@ public class NaginatorRetryAction implements Action {
             return;
         }
         build.getParent().checkPermission(Item.BUILD);
-        NaginatorRetryAction.scheduleBuild(build, 0, NaginatorListener.calculateRetryCount(build), 0);
+        NaginatorRetryAction.scheduleBuild2(build, 0,
+                new NaginatorAction(build, NaginatorListener.calculateRetryCount(build), 0),
+                true);
         res.sendRedirect2(build.getUpUrl());
     }
 
@@ -73,12 +77,27 @@ public class NaginatorRetryAction implements Action {
     }
 
     static boolean scheduleBuild(final AbstractBuild<?, ?> build, final int delay, final NaginatorAction action) {
-        final List<Action> actions = new ArrayList<>();
-        actions.add(action);
-        actions.add(build.getAction(ParametersAction.class));
-        actions.add(build.getAction(CauseAction.class));
-
-        return build.getProject().scheduleBuild(delay, new NaginatorCause(build), actions.toArray(new Action[0]));
+        return scheduleBuild2(build, delay, action, false);
     }
 
+    static boolean scheduleBuild2(final AbstractBuild<?, ?> build, final int delay, final NaginatorAction action, boolean replaceUser) {
+        final List<Action> actions = new ArrayList<>();
+        NaginatorCause cause = new NaginatorCause(build);
+        actions.add(action);
+        action.setCause(cause);
+        actions.add(build.getAction(ParametersAction.class));
+        actions.add(getCauseAction(build, replaceUser, cause));
+
+        return build.getProject().scheduleBuild2(delay, actions.toArray(new Action[0])) != null;
+    }
+
+    private static CauseAction getCauseAction(AbstractBuild<?, ?> build, boolean replaceUser, NaginatorCause cause) {
+        List<Cause> currentCauses = new ArrayList<>(build.getCauses());
+        List<Cause> newCauses = currentCauses.stream().filter(c -> !((c instanceof Cause.UserIdCause) && replaceUser) && !(c instanceof NaginatorCause)).collect(Collectors.toList());
+        newCauses.add(cause);
+        if (replaceUser) {
+            newCauses.add(new Cause.UserIdCause());
+        }
+        return new CauseAction(newCauses);
+    }
 }

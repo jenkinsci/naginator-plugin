@@ -24,10 +24,14 @@
 
 package com.chikli.hudson.plugin.naginator;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import hudson.model.Cause;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.jvnet.hudson.test.FailureBuilder;
@@ -41,6 +45,8 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
+import org.kohsuke.stapler.StaplerResponse;
+import org.mockito.Mock;
 
 /**
  * Tests for {@link NaginatorCause}
@@ -48,6 +54,10 @@ import hudson.model.FreeStyleProject;
 public class NaginatorCauseTest {
     @ClassRule
     public static JenkinsRule j = new JenkinsRule();
+
+    @Mock
+    private StaplerResponse rsp;
+
 
     /**
      * @return the expected value of "rootURL" in jelly.
@@ -196,6 +206,35 @@ public class NaginatorCauseTest {
             HtmlPage page = wc.getPage(build2);
             DomElement unescaped = page.getElementById("unescaped-displayname");
             assertNull(unescaped);
+        }
+    }
+
+    @Issue("JENKINS-59222")
+    @Test
+    public void testRetryUserCause() throws Exception {
+        FreeStyleProject p = j.createFreeStyleProject();
+        p.getBuildersList().add(new FailureBuilder());
+        p.getPublishersList().add(new NaginatorPublisher(
+                "", // regexForRerun
+                true,       // rerunIfUnstable
+                false,      // rerunMatrixPart
+                false,      // checkRegexp
+                1,          // maxSchedule
+                new FixedDelay(0)   // delay
+        ));
+        p.scheduleBuild2(0);
+        j.waitUntilNoActivity();
+
+        assertEquals(2, p.getLastBuild().getNumber());
+
+        try (WebClient wc = j.createWebClient()) {
+            FreeStyleBuild b = p.getBuildByNumber(2);
+            NaginatorRetryAction.scheduleBuild2(b, 0,
+                    new NaginatorAction(b, NaginatorListener.calculateRetryCount(b), 0),
+                    true);
+            j.waitUntilNoActivity();
+            b = p.getBuildByNumber(3);
+            assertThat(b.getCauses(), hasItem(isA(Cause.UserIdCause.class)));
         }
     }
 }
