@@ -438,7 +438,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
         }
     }
     
-    @Bug(34900)
+    @Issue("JENKINS-34900")
     public void testMavenModuleSetWithoutNaginator() throws Exception {
         final String SIMPLE_POM = StringUtils.join(new String[]{
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
@@ -463,7 +463,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
                 "</project>"
         }, "\n");
         
-        ToolInstallations.configureDefaultMaven();
+        ToolInstallations.configureMaven35();
         MavenModuleSet p = jenkins.createProject(MavenModuleSet.class, createUniqueProjectName());
         
         // as SingleFileSCM in jenkins-test-harness doesn't work with

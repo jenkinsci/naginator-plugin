@@ -100,14 +100,14 @@ public class NaginatorActionFactoryTest {
     }
     
     @Test
-    public void testRetrylinkNotInSuccessBuild() throws Exception {
+    public void testRetryLinkNotInSuccessBuild() throws Exception {
         FreeStyleProject p = r.createFreeStyleProject();
         FreeStyleBuild b = r.assertBuildStatusSuccess(p.scheduleBuild2(0));
         assertRetryLinkNotExists(b);
     }
     
     @Test
-    public void testRetrylinkInFailureBuild() throws Exception {
+    public void testRetryLinkInFailureBuild() throws Exception {
         FreeStyleProject p = r.createFreeStyleProject();
         p.getBuildersList().add(new FailureBuilder());
         FreeStyleBuild b = r.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
@@ -115,7 +115,7 @@ public class NaginatorActionFactoryTest {
     }
     
     @Test
-    public void testRetrylinkInOptInProject() throws Exception {
+    public void testRetryLinkInOptInProject() throws Exception {
         FreeStyleProject p = r.createFreeStyleProject();
         p.addProperty(new NaginatorOptOutProperty(false));
         p.getBuildersList().add(new FailureBuilder());
@@ -124,7 +124,7 @@ public class NaginatorActionFactoryTest {
     }
     
     @Test
-    public void testRetrylinkNotInOptOutProject() throws Exception {
+    public void testRetryLinkNotInOptOutProject() throws Exception {
         FreeStyleProject p = r.createFreeStyleProject();
         p.addProperty(new NaginatorOptOutProperty(true));
         p.getBuildersList().add(new FailureBuilder());
@@ -133,7 +133,7 @@ public class NaginatorActionFactoryTest {
     }
     
     @Test
-    public void testRetrylinkForPermittedUser() throws Exception {
+    public void testRetryLinkForPermittedUser() throws Exception {
         r.jenkins.setSecurityRealm(r.createDummySecurityRealm());
         ProjectMatrixAuthorizationStrategy pmas = new ProjectMatrixAuthorizationStrategy();
         pmas.add(Jenkins.READ, "user1");
@@ -149,7 +149,7 @@ public class NaginatorActionFactoryTest {
     
     
     @Test
-    public void testRetrylinkNotForNonPermittedUser() throws Exception {
+    public void testRetryLinkNotForNonPermittedUser() throws Exception {
         r.jenkins.setSecurityRealm(r.createDummySecurityRealm());
         ProjectMatrixAuthorizationStrategy pmas = new ProjectMatrixAuthorizationStrategy();
         pmas.add(Jenkins.READ, "user1");
@@ -164,7 +164,7 @@ public class NaginatorActionFactoryTest {
     }
     
     @Test
-    public void testRetrylinkForPermittedUserByProject() throws Exception {
+    public void testRetryLinkForPermittedUserByProject() throws Exception {
         r.jenkins.setSecurityRealm(r.createDummySecurityRealm());
         ProjectMatrixAuthorizationStrategy pmas = new ProjectMatrixAuthorizationStrategy();
         pmas.add(Jenkins.READ, "user1");

@@ -43,7 +43,7 @@ public class NaginatorRetryAction implements Action {
 
     public String getIconFileName() {
         return hasPermission() ?
-            "refresh.png" : null;
+            "symbol-arrow-redo-outline plugin-ionicons-api" : null;
     }
 
     public String getDisplayName() {

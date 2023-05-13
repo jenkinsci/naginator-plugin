@@ -73,28 +73,29 @@ public class NaginatorCauseTest {
 
         assertEquals(3, p.getLastBuild().getNumber());
 
-        WebClient wc = j.createWebClient();
-        {
-            FreeStyleBuild b = p.getBuildByNumber(3);
-            FreeStyleBuild causeBuild = p.getBuildByNumber(2);
-            HtmlPage page = wc.getPage(b);
-            HtmlAnchor anchor = page.getFirstByXPath("//a[contains(@class,'naginator-cause')]");
-            assertNotNull(anchor);
-            assertEquals(
-                getRootURL() + causeBuild.getUrl(),
-                anchor.getHrefAttribute()
-            );
-        }
-        {
-            FreeStyleBuild b = p.getBuildByNumber(2);
-            FreeStyleBuild causeBuild = p.getBuildByNumber(1);
-            HtmlPage page = wc.getPage(b);
-            HtmlAnchor anchor = page.getFirstByXPath("//a[contains(@class,'naginator-cause')]");
-            assertNotNull(anchor);
-            assertEquals(
-                getRootURL() + causeBuild.getUrl(),
-                anchor.getHrefAttribute()
-            );
+        try (WebClient wc = j.createWebClient()) {
+            {
+                FreeStyleBuild b = p.getBuildByNumber(3);
+                FreeStyleBuild causeBuild = p.getBuildByNumber(2);
+                HtmlPage page = wc.getPage(b);
+                HtmlAnchor anchor = page.getFirstByXPath("//a[contains(@class,'naginator-cause')]");
+                assertNotNull(anchor);
+                assertEquals(
+                        getRootURL() + causeBuild.getUrl(),
+                        anchor.getHrefAttribute()
+                );
+            }
+            {
+                FreeStyleBuild b = p.getBuildByNumber(2);
+                FreeStyleBuild causeBuild = p.getBuildByNumber(1);
+                HtmlPage page = wc.getPage(b);
+                HtmlAnchor anchor = page.getFirstByXPath("//a[contains(@class,'naginator-cause')]");
+                assertNotNull(anchor);
+                assertEquals(
+                        getRootURL() + causeBuild.getUrl(),
+                        anchor.getHrefAttribute()
+                );
+            }
         }
     }
 
@@ -117,23 +118,24 @@ public class NaginatorCauseTest {
 
         p.getBuildByNumber(1).delete();
 
-        WebClient wc = j.createWebClient();
-        {
-            FreeStyleBuild b = p.getBuildByNumber(3);
-            FreeStyleBuild causeBuild = p.getBuildByNumber(2);
-            HtmlPage page = wc.getPage(b);
-            HtmlAnchor anchor = page.getFirstByXPath("//a[contains(@class,'naginator-cause')]");
-            assertNotNull(anchor);
-            assertEquals(
-                getRootURL() + causeBuild.getUrl(),
-                anchor.getHrefAttribute()
-            );
-        }
-        {
-            FreeStyleBuild b = p.getBuildByNumber(2);
-            HtmlPage page = wc.getPage(b);
-            HtmlAnchor anchor = page.getFirstByXPath("//a[contains(@class,'naginator-cause')]");
-            assertNull(anchor);
+        try (WebClient wc = j.createWebClient()) {
+            {
+                FreeStyleBuild b = p.getBuildByNumber(3);
+                FreeStyleBuild causeBuild = p.getBuildByNumber(2);
+                HtmlPage page = wc.getPage(b);
+                HtmlAnchor anchor = page.getFirstByXPath("//a[contains(@class,'naginator-cause')]");
+                assertNotNull(anchor);
+                assertEquals(
+                        getRootURL() + causeBuild.getUrl(),
+                        anchor.getHrefAttribute()
+                );
+            }
+            {
+                FreeStyleBuild b = p.getBuildByNumber(2);
+                HtmlPage page = wc.getPage(b);
+                HtmlAnchor anchor = page.getFirstByXPath("//a[contains(@class,'naginator-cause')]");
+                assertNull(anchor);
+            }
         }
     }
 
@@ -156,42 +158,44 @@ public class NaginatorCauseTest {
 
         assertEquals(2002, p.getLastBuild().getNumber());
 
-        WebClient wc = j.createWebClient();
-        {
-            FreeStyleBuild b = p.getBuildByNumber(2002);
-            FreeStyleBuild causeBuild = p.getBuildByNumber(2001);
-            HtmlPage page = wc.getPage(b);
-            HtmlAnchor anchor = page.getFirstByXPath("//a[contains(@class,'naginator-cause')]");
-            assertNotNull(anchor);
-            assertEquals(
-                getRootURL() + causeBuild.getUrl(),
-                anchor.getHrefAttribute()
-            );
-        }
-        {
-            FreeStyleBuild b = p.getBuildByNumber(2001);
-            FreeStyleBuild causeBuild = p.getBuildByNumber(2000);
-            HtmlPage page = wc.getPage(b);
-            HtmlAnchor anchor = page.getFirstByXPath("//a[contains(@class,'naginator-cause')]");
-            assertNotNull(anchor);
-            assertEquals(
-                getRootURL() + causeBuild.getUrl(),
-                anchor.getHrefAttribute()
-            );
+        try (WebClient wc = j.createWebClient()) {
+            {
+                FreeStyleBuild b = p.getBuildByNumber(2002);
+                FreeStyleBuild causeBuild = p.getBuildByNumber(2001);
+                HtmlPage page = wc.getPage(b);
+                HtmlAnchor anchor = page.getFirstByXPath("//a[contains(@class,'naginator-cause')]");
+                assertNotNull(anchor);
+                assertEquals(
+                        getRootURL() + causeBuild.getUrl(),
+                        anchor.getHrefAttribute()
+                );
+            }
+            {
+                FreeStyleBuild b = p.getBuildByNumber(2001);
+                FreeStyleBuild causeBuild = p.getBuildByNumber(2000);
+                HtmlPage page = wc.getPage(b);
+                HtmlAnchor anchor = page.getFirstByXPath("//a[contains(@class,'naginator-cause')]");
+                assertNotNull(anchor);
+                assertEquals(
+                        getRootURL() + causeBuild.getUrl(),
+                        anchor.getHrefAttribute()
+                );
+            }
         }
     }
 
     @Issue("SECURITY-2946")
     @Test
-    public void testEscapedDisplayname() throws Exception {
+    public void testEscapedDisplayName() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         FreeStyleBuild build1 = p.scheduleBuild2(0).get();
-        build1.setDisplayName​("<div id=\"unescaped-displayname\">bad displayname</div>");
+        build1.setDisplayName("<div id=\"unescaped-displayname\">bad displayname</div>");
         FreeStyleBuild build2 = p.scheduleBuild2(0, new NaginatorCause(build1)).get();
 
-        WebClient wc = j.createWebClient();
-        HtmlPage page = wc.getPage(build2);
-        DomElement unescaped = page.getElementById("unescaped-displayname");
-        assertNull(unescaped);
+        try (WebClient wc = j.createWebClient()) {
+            HtmlPage page = wc.getPage(build2);
+            DomElement unescaped = page.getElementById("unescaped-displayname");
+            assertNull(unescaped);
+        }
     }
 }

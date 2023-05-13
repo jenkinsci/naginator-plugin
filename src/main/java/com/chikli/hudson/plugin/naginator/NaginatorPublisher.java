@@ -1,5 +1,6 @@
 package com.chikli.hudson.plugin.naginator;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.MatrixRun;
@@ -290,14 +291,6 @@ public class NaginatorPublisher extends Notifier {
             return true;
         }
 
-        /**
-         * Creates a new instance of {@link NaginatorPublisher} from a submitted form.
-         */
-        @Override
-        public Notifier newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            return req.bindJSON(NaginatorPublisher.class, formData);
-        }
-        
         /**
          * @return true if the current request is for a matrix project.
          */
