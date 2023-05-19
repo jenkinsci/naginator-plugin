@@ -1,7 +1,6 @@
 package com.chikli.hudson.plugin.naginator;
 
-import javax.annotation.CheckForNull;
-
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.model.BuildBadgeAction;
 import hudson.model.Run;
 

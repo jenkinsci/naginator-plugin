@@ -1,5 +1,6 @@
 package com.chikli.hudson.plugin.naginator;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.MatrixRun;
@@ -7,7 +8,6 @@ import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Job;
 import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
@@ -19,14 +19,11 @@ import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.util.logging.Logger;
-
-import javax.annotation.Nonnull;
 
 /**
  * Reschedules a build if the current one fails.
@@ -123,7 +120,7 @@ public class NaginatorPublisher extends Notifier {
      * @since 1.17
      */
     @DataBoundSetter
-    public void setNoChildStrategy(@Nonnull NoChildStrategy noChildStrategy) {
+    public void setNoChildStrategy(@NonNull NoChildStrategy noChildStrategy) {
         this.noChildStrategy = noChildStrategy;
     }
     
@@ -132,7 +129,7 @@ public class NaginatorPublisher extends Notifier {
      * 
      * @since 1.17
      */
-    @Nonnull
+    @NonNull
     public NoChildStrategy getNoChildStrategy() {
         return (noChildStrategy != null)
                 ? noChildStrategy
@@ -175,7 +172,7 @@ public class NaginatorPublisher extends Notifier {
      * @since 1.17
      */
     @DataBoundSetter
-    public void setRegexpForMatrixStrategy(@Nonnull RegexpForMatrixStrategy regexpForMatrixStrategy) {
+    public void setRegexpForMatrixStrategy(@NonNull RegexpForMatrixStrategy regexpForMatrixStrategy) {
         this.regexpForMatrixStrategy = regexpForMatrixStrategy;
     }
 
@@ -183,7 +180,7 @@ public class NaginatorPublisher extends Notifier {
      * @return how to apply regexp for matrix builds.
      * @since 1.17
      */
-    @Nonnull
+    @NonNull
     public RegexpForMatrixStrategy getRegexpForMatrixStrategy() {
         return regexpForMatrixStrategy;
     }
@@ -228,9 +225,6 @@ public class NaginatorPublisher extends Notifier {
         // see Descriptor javadoc for more about what a descriptor is.
         return (DescriptorImpl) super.getDescriptor();
     }
-
-    @Extension
-    public final static NaginatorListener LISTENER = new NaginatorListener();
 
 
     /**
@@ -281,6 +275,7 @@ public class NaginatorPublisher extends Notifier {
         /**
          * This human readable name is used in the configuration screen.
          */
+        @NonNull
         public String getDisplayName() {
             return "Retry build after failure";
         }
@@ -290,14 +285,6 @@ public class NaginatorPublisher extends Notifier {
             return true;
         }
 
-        /**
-         * Creates a new instance of {@link NaginatorPublisher} from a submitted form.
-         */
-        @Override
-        public Notifier newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            return req.bindJSON(NaginatorPublisher.class, formData);
-        }
-        
         /**
          * @return true if the current request is for a matrix project.
          */

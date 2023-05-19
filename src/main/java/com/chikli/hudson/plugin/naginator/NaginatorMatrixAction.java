@@ -1,12 +1,11 @@
 package com.chikli.hudson.plugin.naginator;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.matrix.Combination;
 import hudson.model.Run;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.CheckForNull;
 
 /**
  * This is an extention for the NaginatorAction class which used to store the

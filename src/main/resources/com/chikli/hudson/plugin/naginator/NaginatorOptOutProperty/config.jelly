@@ -1,9 +1,8 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-<f:optionalBlock name="optOut"
+<f:optionalBlock field="optOut"
                  title="Don't let user manually re-trigger this job"
                  checked="${instance.optOut}"
                  inline="true"
-                 help="plugin/naginator/help-optOut.html"
         />
 </j:jelly>

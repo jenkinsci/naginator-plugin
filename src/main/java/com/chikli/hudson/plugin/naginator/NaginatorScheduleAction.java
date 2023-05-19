@@ -24,9 +24,8 @@
 
 package com.chikli.hudson.plugin.naginator;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.matrix.MatrixRun;
 import hudson.model.Action;
 import hudson.model.InvisibleAction;
@@ -85,7 +84,7 @@ public class NaginatorScheduleAction extends InvisibleAction {
     /**
      * @return A scheduling policy to trigger a new build
      */
-    @Nonnull
+    @NonNull
     public ScheduleDelay getDelay() {
         return delay;
     }
@@ -108,7 +107,7 @@ public class NaginatorScheduleAction extends InvisibleAction {
      * @param retryCount the count the build is rescheduled.
      * @return whether to reschedule the build.
      */
-    public boolean shouldSchedule(@Nonnull Run<?, ?> run, @Nonnull TaskListener listener, int retryCount) {
+    public boolean shouldSchedule(@NonNull Run<?, ?> run, @NonNull TaskListener listener, int retryCount) {
         return getMaxSchedule() <= 0 || retryCount < getMaxSchedule();
     }
     
@@ -119,7 +118,7 @@ public class NaginatorScheduleAction extends InvisibleAction {
      * @param run
      * @return
      */
-    public boolean shouldScheduleForMatrixRun(@Nonnull MatrixRun run, @Nonnull TaskListener listener) {
+    public boolean shouldScheduleForMatrixRun(@NonNull MatrixRun run, @NonNull TaskListener listener) {
         return true;
     }
     
@@ -128,7 +127,7 @@ public class NaginatorScheduleAction extends InvisibleAction {
      * 
      * @since 1.17
      */
-    @Nonnull
+    @NonNull
     public NoChildStrategy getNoChildStrategy() {
         return NoChildStrategy.getDefault();
     }

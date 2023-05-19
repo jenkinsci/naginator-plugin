@@ -24,8 +24,7 @@
 
 package com.chikli.hudson.plugin.naginator;
 
-import javax.annotation.Nonnull;
-
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.jvnet.localizer.Localizable;
 
 /**
@@ -46,7 +45,7 @@ public enum RegexpForMatrixStrategy {
         return displayName.toString();
     }
     
-    @Nonnull
+    @NonNull
     public static RegexpForMatrixStrategy getDefault() {
         return TestChildrenRetriggerAll;
     }

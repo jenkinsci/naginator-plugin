@@ -32,8 +32,7 @@
             </f:entry>
             <j:if test="${descriptor.isMatrixProject(it)}">
                 <f:entry title="${%How to apply the regular expression to matrix}" field="regexpForMatrixStrategy">
-                    <!-- unfortunatelly, f:enum doesn't support doCheckXxxx -->
-                    <f:select />
+                    <f:select default="TestParent"/>
                 </f:entry>
             </j:if>
         </f:optionalBlock>

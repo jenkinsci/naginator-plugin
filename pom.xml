@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>2.37</version>
+    <version>4.62</version>
   </parent>
   
   <name>Naginator</name>
@@ -26,8 +26,7 @@
   </scm>
 
   <properties>
-    <jenkins.version>1.565</jenkins.version>
-    <java.level>6</java.level>
+    <jenkins.version>2.361.4</jenkins.version>
   </properties>
   
   <licenses>
@@ -71,62 +70,51 @@
             <url>https://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
-    
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.jenkins.tools.bom</groupId>
+                <artifactId>bom-2.361.x</artifactId>
+                <version>2062.v154408a_24d20</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>matrix-project</artifactId>
-            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>ionicons-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.9.5</version>
+            <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>matrix-auth</artifactId>
-            <version>1.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
             <artifactId>maven-plugin</artifactId>
-            <version>2.1</version>
+            <version>3.22</version>
             <scope>test</scope>
-            <exclusions>
-              <!--
-                  To pick up http component classes from jenkins-test-harness dependencies
-                  in test executions.
-              -->
-              <exclusion>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-              </exclusion>
-              <exclusion>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpcore</artifactId>
-              </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
             <artifactId>jenkins-test-harness-tools</artifactId>
-            <version>2.0</version>
-            <scope>test</scope>
+            <version>2.2</version>
         </dependency>
+
     </dependencies>
-    <dependencyManagement>
-        <!-- To resolve RequireUpperBoundDeps errors -->
-        <dependencies>
-            <dependency>
-                <groupId>org.apache.ant</groupId>
-                <artifactId>ant</artifactId>
-                <version>1.9.2</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-</project>  
+</project>
   
 

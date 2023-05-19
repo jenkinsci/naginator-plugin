@@ -5,17 +5,11 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.apache.commons.lang.StringUtils;
 import org.bouncycastle.util.Arrays;
-import org.jvnet.hudson.test.Bug;
-import org.jvnet.hudson.test.HudsonTestCase;
-import org.jvnet.hudson.test.TestExtension;
-import org.jvnet.hudson.test.ToolInstallations;
-import org.jvnet.hudson.test.FailureBuilder;
-import org.jvnet.hudson.test.SleepBuilder;
+import org.jvnet.hudson.test.*;
 
 import com.chikli.hudson.plugin.naginator.testutils.MyBuilder;
 import com.google.common.base.Predicate;
@@ -280,19 +274,19 @@ public class NaginatorListenerTest extends HudsonTestCase {
         private final String name;
         private final Map<String, String> recorded = new HashMap<String, String>();
         
-        public VariableRecordBuilder(@Nonnull String name) {
+        public VariableRecordBuilder(@NonNull String name) {
             this.name = name;
         }
         
-        private String getIdForBuild(@Nonnull Run<?, ?> r) {
+        private String getIdForBuild(@NonNull Run<?, ?> r) {
             return String.format("%s-%s", r.getParent().getFullName(), r.getId());
         }
         
         @CheckForNull
-        public String getRecordedValue(@Nonnull Run<?, ?> r) {
+        public String getRecordedValue(@NonNull Run<?, ?> r) {
             return recorded.get(getIdForBuild(r));
         }
-        
+
         @Override
         public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
             recorded.put(getIdForBuild(build), build.getEnvironment(listener).get(name));
@@ -438,7 +432,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
         }
     }
     
-    @Bug(34900)
+    @Issue("JENKINS-34900")
     public void testMavenModuleSetWithoutNaginator() throws Exception {
         final String SIMPLE_POM = StringUtils.join(new String[]{
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
@@ -463,7 +457,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
                 "</project>"
         }, "\n");
         
-        ToolInstallations.configureDefaultMaven();
+        ToolInstallations.configureMaven35();
         MavenModuleSet p = jenkins.createProject(MavenModuleSet.class, createUniqueProjectName());
         
         // as SingleFileSCM in jenkins-test-harness doesn't work with

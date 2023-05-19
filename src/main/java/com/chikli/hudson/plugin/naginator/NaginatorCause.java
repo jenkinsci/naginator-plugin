@@ -1,12 +1,11 @@
 package com.chikli.hudson.plugin.naginator;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Job;
 import hudson.model.Run;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
 /**
  * {@link Cause} for builds triggered by this plugin.
@@ -34,7 +33,7 @@ public class NaginatorCause extends Cause {
     }
 
     @Override
-    public void onLoad(@Nonnull AbstractBuild<?,?> build) {
+    public void onLoad(@NonNull AbstractBuild<?, ?> build) {
         this.project = build.getParent();
     }
 
