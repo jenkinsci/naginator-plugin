@@ -1,5 +1,12 @@
 # Changelog
 
+### 1.19
+
+Release date: May 21, 2023
+
+* plugin modernization (https://github.com/jenkinsci/naginator-plugin/pull/58[#58])
+    * Update the target Jenkins version to 2.361.4 (was 1.565)
+
 ### 1.18.2
 
 Release date: Nov 15, 2022
