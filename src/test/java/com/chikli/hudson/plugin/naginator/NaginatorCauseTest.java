@@ -45,8 +45,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import org.kohsuke.stapler.StaplerResponse;
-import org.mockito.Mock;
 
 /**
  * Tests for {@link NaginatorCause}
@@ -54,9 +52,6 @@ import org.mockito.Mock;
 public class NaginatorCauseTest {
     @ClassRule
     public static JenkinsRule j = new JenkinsRule();
-
-    @Mock
-    private StaplerResponse rsp;
 
 
     /**

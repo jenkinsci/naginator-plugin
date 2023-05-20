@@ -431,7 +431,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
         }
     }
     
-    @ Issue("JENKINS-34900")
+    @Issue("JENKINS-34900")
     public void testMavenModuleSetWithoutNaginator() throws Exception {
         final String SIMPLE_POM = StringUtils.join(new String[]{
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
