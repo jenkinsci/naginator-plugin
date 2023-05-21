@@ -4,7 +4,7 @@ import hudson.Extension;
 import hudson.model.Cause;
 import org.jenkinsci.plugins.buildtriggerbadge.provider.BuildTriggerBadgeDeactivator;
 
-@Extension
+@Extension(optional = true)
 public class NaginatorBuildTriggerBadgeDeactivator extends BuildTriggerBadgeDeactivator {
 
     @Override

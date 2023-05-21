@@ -53,7 +53,7 @@ public class NaginatorAction implements BuildBadgeAction {
         if (cause != null) {
             return cause.getShortDescription();
         }
-        return "";
+        return Messages.NaginatorAction_rescheduled();
     }
     public String getIconFileName() {
         return null;
