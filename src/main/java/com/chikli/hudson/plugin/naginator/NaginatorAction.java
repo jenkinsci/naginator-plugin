@@ -2,6 +2,7 @@ package com.chikli.hudson.plugin.naginator;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.model.BuildBadgeAction;
+import hudson.model.Cause;
 import hudson.model.Run;
 
 /**
@@ -11,6 +12,8 @@ public class NaginatorAction implements BuildBadgeAction {
     private final int retryCount;
     private final int maxRetryCount;
     private final Integer parentBuildNumber;
+
+    private Cause cause = null;
 
     /**
      * @deprecated use {@link NaginatorAction#NaginatorAction(int)}
@@ -42,6 +45,16 @@ public class NaginatorAction implements BuildBadgeAction {
         this.maxRetryCount = maxRetryCount;
     }
 
+    public void setCause(Cause cause) {
+        this.cause = cause;
+    }
+
+    public String getTooltip() {
+        if (cause != null) {
+            return cause.getShortDescription();
+        }
+        return Messages.NaginatorAction_rescheduled();
+    }
     public String getIconFileName() {
         return null;
     }

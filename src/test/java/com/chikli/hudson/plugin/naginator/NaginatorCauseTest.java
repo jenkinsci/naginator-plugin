@@ -24,10 +24,14 @@
 
 package com.chikli.hudson.plugin.naginator;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import hudson.model.Cause;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.jvnet.hudson.test.FailureBuilder;
@@ -48,6 +52,7 @@ import hudson.model.FreeStyleProject;
 public class NaginatorCauseTest {
     @ClassRule
     public static JenkinsRule j = new JenkinsRule();
+
 
     /**
      * @return the expected value of "rootURL" in jelly.

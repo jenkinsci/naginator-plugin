@@ -132,9 +132,8 @@ public class NaginatorListenerTest extends HudsonTestCase {
         assertEquals(1, a.getLastBuild().getNumber());
         assertEquals(3, b.getLastBuild().getNumber());
         assertEquals(Result.FAILURE, b.getLastBuild().getResult());
-        assertEquals(2, b.getBuildByNumber(2).getActions(CauseAction.class).size());
-        assertEquals(2, b.getBuildByNumber(3).getActions(CauseAction.class).size());
-
+        assertEquals(2, b.getBuildByNumber(2).getAction(CauseAction.class).getCauses().size());
+        assertEquals(2, b.getBuildByNumber(3).getAction(CauseAction.class).getCauses().size());
     }
 
 
