@@ -4,10 +4,10 @@
 
 Release date: Jun 3, 2023
 
-* plugin modernization (https://github.com/jenkinsci/naginator-plugin/pull/58[#58])
+* plugin modernization ([#58](https://github.com/jenkinsci/naginator-plugin/pull/58))
     * Update the target Jenkins version to 2.361.4 (was 1.565)
-* Display user triggering interactive retry (https://issues.jenkins.io/browse/JENKINS-59222[JENKINS-59222])
-* Integration with https://plugins.jenkins.io/buildtriggerbadge/[Build Trigger Badge plugin] (https://github.com/jenkinsci/naginator-plugin/pull/61[#61])
+* Display user triggering interactive retry ([JENKINS-59222](https://issues.jenkins.io/browse/JENKINS-59222))
+* Integration with [Build Trigger Badge plugin](https://plugins.jenkins.io/buildtriggerbadge/) ([#61](https://github.com/jenkinsci/naginator-plugin/pull/61))
     * This is an optional feature and you don't need Build Trigger Badge plugin to use features of Naginator plugin.
 
 
@@ -23,7 +23,7 @@ Release date: Nov 15, 2022
 Release date: Aug 9, 2020
 
 * Move the documentation to Github
-(https://github.com/jenkinsci/naginator-plugin/pull/48[#48])
+([#48](https://github.com/jenkinsci/naginator-plugin/pull/48))
 
 ### 1.18
 
@@ -32,12 +32,10 @@ Release date: Feb 23, 2019
 -   Now targets Jenkins 1.565+ (was 1.554+)
 -   FIXED: wrong delay time calcuration in "Progressive" strategy when
     there're multiple series of retries in parallel: [
-    JENKINS-43803](https://issues.jenkins-ci.org/browse/JENKINS-43803) -
-    Getting issue details... STATUS
+    JENKINS-43803](https://issues.jenkins-ci.org/browse/JENKINS-43803)
 -   FIXED: links to the source builds in cause texts are broken when the
     build number gets 1000+: [
-    JENKINS-50751](https://issues.jenkins-ci.org/browse/JENKINS-50751) -
-    Getting issue details... STATUS
+    JENKINS-50751](https://issues.jenkins-ci.org/browse/JENKINS-50751)
 
 ### 1.17.2
 
