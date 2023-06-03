@@ -115,7 +115,7 @@ public class NaginatorPublisher extends Notifier {
     }
     
     /**
-     * @param noChildStrategy
+     * @param noChildStrategy strategy for the case no chilredn to run
      * 
      * @since 1.17
      */
@@ -168,7 +168,7 @@ public class NaginatorPublisher extends Notifier {
     }
 
     /**
-     * @param regexpForMatrixStrategy
+     * @param regexpForMatrixStrategy how to apply regexp to multi-configuration builds
      * @since 1.17
      */
     @DataBoundSetter
@@ -232,7 +232,7 @@ public class NaginatorPublisher extends Notifier {
      * The class is marked as public so that it can be accessed from views.
      *
      * <p>
-     * See <tt>views/hudson/plugins/naginator/NaginatorBuilder/*.jelly</tt>
+     * See <code>views/hudson/plugins/naginator/NaginatorBuilder/*.jelly</code>
      * for the actual HTML fragment for the configuration screen.
      */
     @Extension
