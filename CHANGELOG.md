@@ -1,14 +1,19 @@
 # Changelog
 
-### 1.19
+### 1.19.1
 
-Release date: Jun 3, 2023
+Release date: Jun 4, 2023
 
 * plugin modernization ([#58](https://github.com/jenkinsci/naginator-plugin/pull/58))
     * Update the target Jenkins version to 2.361.4 (was 1.565)
 * Display user triggering interactive retry ([JENKINS-59222](https://issues.jenkins.io/browse/JENKINS-59222))
 * Integration with [Build Trigger Badge plugin](https://plugins.jenkins.io/buildtriggerbadge/) ([#61](https://github.com/jenkinsci/naginator-plugin/pull/61))
     * This is an optional feature and you don't need Build Trigger Badge plugin to use features of Naginator plugin.
+
+
+### 1.19
+
+* Not released for javadoc issue *
 
 
 ### 1.18.2

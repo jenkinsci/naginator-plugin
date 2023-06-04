@@ -8,7 +8,7 @@ import jenkins.model.Jenkins;
 
 /**
  * Defines schedules policy to trigger a new build after failure
- * @author: <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
+ * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
 public abstract class ScheduleDelay extends AbstractDescribableImpl<ScheduleDelay> {
 
