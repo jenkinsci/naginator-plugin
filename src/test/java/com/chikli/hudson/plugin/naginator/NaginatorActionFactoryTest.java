@@ -49,8 +49,8 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
 import org.jvnet.hudson.test.FailureBuilder;
 
-import com.gargoylesoftware.htmlunit.ElementNotFoundException;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
+import org.htmlunit.ElementNotFoundException;
+import org.htmlunit.html.HtmlAnchor;
 import com.google.common.collect.Sets;
 
 /**
