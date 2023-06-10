@@ -1,5 +1,11 @@
 # Changelog
 
+### 1.19.2
+
+Release date: Jun 10, 2023
+
+* Fix dependency issue in 1.19.1 ([#64](https://github.com/jenkinsci/naginator-plugin/pull/64))
+
 ### 1.19.1
 
 Release date: Jun 4, 2023
