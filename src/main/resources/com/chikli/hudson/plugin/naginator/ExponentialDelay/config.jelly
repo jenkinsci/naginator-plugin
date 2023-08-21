@@ -1,0 +1,9 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+  <f:entry title="backoff_base" field="backoff_base">
+    <f:textbox />
+  </f:entry>
+  <f:entry title="max" field="max">
+    <f:textbox />
+  </f:entry>
+</j:jelly>
