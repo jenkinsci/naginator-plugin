@@ -15,17 +15,20 @@
   </description>
   <artifactId>naginator</artifactId>
   <packaging>hpi</packaging>
-  <version>1.20-SNAPSHOT</version>
+  <version>${revision}.${changelist}</version>
   <url>https://github.com/jenkinsci/naginator-plugin</url>
 
   <scm>
-    <connection>scm:git:git://github.com/jenkinsci/naginator-plugin.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/naginator-plugin.git</developerConnection>
-    <url>https://github.com/jenkinsci/naginator-plugin</url>
-    <tag>HEAD</tag>
+    <connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
+    <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
+    <url>https://github.com/${gitHubRepo}</url>
+    <tag>${scmTag}</tag>
   </scm>
 
   <properties>
+    <revision>1</revision>
+    <changelist>999999-SNAPSHOT</changelist>
+    <gitHubRepo>jenkinsci/naginator-plugin</gitHubRepo>
     <jenkins.version>2.375.4</jenkins.version>
   </properties>
   
