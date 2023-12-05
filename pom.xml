@@ -29,7 +29,7 @@
     <revision>1</revision>
     <changelist>999999-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/naginator-plugin</gitHubRepo>
-    <jenkins.version>2.387.3</jenkins.version>
+    <jenkins.version>2.401.3</jenkins.version>
   </properties>
   
   <licenses>
@@ -78,8 +78,8 @@
     <dependencies>
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-2.387.x</artifactId>
-        <version>2543.vfb_1a_5fb_9496d</version>
+        <artifactId>bom-2.401.x</artifactId>
+        <version>2612.v3d6a_2128c0ef</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
