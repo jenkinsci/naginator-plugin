@@ -7,7 +7,6 @@ import hudson.model.FreeStyleProject;
 import hudson.model.User;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
-import hudson.security.SecurityRealm;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
