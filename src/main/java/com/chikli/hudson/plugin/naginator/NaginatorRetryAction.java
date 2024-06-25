@@ -14,6 +14,7 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import hudson.model.Cause;
 import hudson.model.AbstractBuild;
@@ -61,6 +62,7 @@ public class NaginatorRetryAction implements Action {
             "retry" : null;
     }
 
+    @RequirePOST
     public void doIndex(StaplerResponse res, @CheckForNull @AncestorInPath AbstractBuild<?, ?> build) throws IOException {
         if (build == null) {
             // This should not happen as
