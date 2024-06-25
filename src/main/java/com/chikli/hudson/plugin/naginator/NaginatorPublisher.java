@@ -292,6 +292,7 @@ public class NaginatorPublisher extends Notifier {
             return (it instanceof MatrixProject);
         }
         
+        @SuppressWarnings("lgtm[jenkins/no-permission-check]")
         public FormValidation doCheckRegexpForMatrixStrategy(
                 @QueryParameter RegexpForMatrixStrategy value,
                 @QueryParameter boolean rerunMatrixPart
@@ -304,6 +305,7 @@ public class NaginatorPublisher extends Notifier {
             return FormValidation.ok();
         }
         
+        @SuppressWarnings({"lgtm[jenkins/csrf]", "lgtm[jenkins/no-permission-check]"})
         public ListBoxModel doFillRegexpForMatrixStrategyItems() {
             ListBoxModel ret = new ListBoxModel();
             for (RegexpForMatrixStrategy strategy: RegexpForMatrixStrategy.values()) {
