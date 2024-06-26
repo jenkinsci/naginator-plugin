@@ -24,30 +24,31 @@
 
 package com.chikli.hudson.plugin.naginator;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.lang.reflect.Field;
-
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
-
 import com.chikli.hudson.plugin.naginator.testutils.MyBuilder;
-
 import hudson.AbortException;
 import hudson.Launcher;
 import hudson.matrix.Axis;
 import hudson.matrix.AxisList;
 import hudson.matrix.Combination;
-import hudson.matrix.MatrixRun;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixProject;
+import hudson.matrix.MatrixRun;
 import hudson.model.AbstractBuild;
-import hudson.model.FreeStyleProject;
 import hudson.model.BuildListener;
+import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.tasks.Builder;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+
+import java.io.IOException;
+import java.lang.reflect.Field;
+
+import static com.chikli.hudson.plugin.naginator.testutils.TestSupport.lastBuildNumber;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Tests for {@link NaginatorPublisher}.
@@ -113,10 +114,11 @@ public class NaginatorPublisherTest {
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
         
-        assertEquals(maxSchedule + 1, p.getLastBuild().number);
+        assertEquals(maxSchedule + 1, lastBuildNumber(p));
         
         // (1, 1), (1, 2), (2, 1), (2, 2) are rescheduled.
         MatrixBuild b = p.getLastBuild();
+        assertNotNull(b);
         assertNotNull(b.getExactRun(new Combination(axes, "1", "1")));
         assertNotNull(b.getExactRun(new Combination(axes, "1", "2")));
         assertNotNull(b.getExactRun(new Combination(axes, "2", "1")));
@@ -152,10 +154,11 @@ public class NaginatorPublisherTest {
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
         
-        assertEquals(maxSchedule + 1, p.getLastBuild().number);
+        assertEquals(maxSchedule + 1, lastBuildNumber(p));
         
         // (1, 2), (2, 1) are rescheduled.
         MatrixBuild b = p.getLastBuild();
+        assertNotNull(b);
         assertNull(b.getExactRun(new Combination(axes, "1", "1")));
         assertNotNull(b.getExactRun(new Combination(axes, "1", "2")));
         assertNotNull(b.getExactRun(new Combination(axes, "2", "1")));
@@ -193,7 +196,7 @@ public class NaginatorPublisherTest {
         j.waitUntilNoActivity();
         
         // build rescheduled.
-        assertEquals(2, p.getLastBuild().number);
+        assertEquals(2, lastBuildNumber(p));
     }
     
     /**
@@ -227,7 +230,7 @@ public class NaginatorPublisherTest {
         j.waitUntilNoActivity();
         
         // build rescheduled.
-        assertEquals(1, p.getLastBuild().number);
+        assertEquals(1, lastBuildNumber(p));
     }
     
     
@@ -261,10 +264,11 @@ public class NaginatorPublisherTest {
         j.waitUntilNoActivity();
         
         // build rescheduled.
-        assertEquals(2, p.getLastBuild().number);
+        assertEquals(2, lastBuildNumber(p));
         
         // only axis1=value1, axis1=value3 is rescheduled for the regular expression.
         MatrixBuild b = p.getLastBuild();
+        assertNotNull(b);
         assertNotNull(b.getExactRun(new Combination(axes, "value1")));
         assertNull(b.getExactRun(new Combination(axes, "value2")));
         assertNotNull(b.getExactRun(new Combination(axes, "value3")));
@@ -303,7 +307,7 @@ public class NaginatorPublisherTest {
         
         // build is rescheduled
         // as regular expression is not applied actually.
-        assertEquals(2, p.getLastBuild().number);
+        assertEquals(2, lastBuildNumber(p));
     }
     
     /**
@@ -336,10 +340,11 @@ public class NaginatorPublisherTest {
         j.waitUntilNoActivity();
         
         // build rescheduled.
-        assertEquals(2, p.getLastBuild().number);
+        assertEquals(2, lastBuildNumber(p));
         
         // only axis1=value1, axis1=value3 is rescheduled for the failure.
         MatrixBuild b = p.getLastBuild();
+        assertNotNull(b);
         assertNotNull(b.getExactRun(new Combination(axes, "value1")));
         assertNull(b.getExactRun(new Combination(axes, "value2")));
         assertNotNull(b.getExactRun(new Combination(axes, "value3")));
@@ -376,10 +381,11 @@ public class NaginatorPublisherTest {
         j.waitUntilNoActivity();
         
         // build rescheduled.
-        assertEquals(2, p.getLastBuild().number);
+        assertEquals(2, lastBuildNumber(p));
         
         // all axes are rescheduled
         MatrixBuild b = p.getLastBuild();
+        assertNotNull(b);
         assertNotNull(b.getExactRun(new Combination(axes, "value1")));
         assertNotNull(b.getExactRun(new Combination(axes, "value2")));
         assertNotNull(b.getExactRun(new Combination(axes, "value3")));
@@ -416,7 +422,7 @@ public class NaginatorPublisherTest {
         j.waitUntilNoActivity();
         
         // build is not rescheduled as no child matches the regexp.
-        assertEquals(1, p.getLastBuild().number);
+        assertEquals(1, lastBuildNumber(p));
     }
     
     /**
@@ -493,6 +499,7 @@ public class NaginatorPublisherTest {
     @Test
     public void testRegexpTimeoutMsInSystemConfiguration() throws Exception {
         NaginatorPublisher.DescriptorImpl d = (NaginatorPublisher.DescriptorImpl)j.jenkins.getDescriptor(NaginatorPublisher.class);
+        assertNotNull(d);
         d.setRegexpTimeoutMs(NaginatorPublisher.DEFAULT_REGEXP_TIMEOUT_MS);
         d.save();       // ensure the default value is saved to the file.
         

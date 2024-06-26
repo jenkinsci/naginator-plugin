@@ -1,21 +1,18 @@
 package com.chikli.hudson.plugin.naginator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 
-import hudson.model.AbstractBuild;
-import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * A test suite for {@link ProgressiveDelay}.
@@ -41,6 +38,7 @@ public class ProgressiveDelayTest {
 
         FreeStyleBuild build1 = p.getFirstBuild();
         FreeStyleBuild build2 = build1.getNextBuild();
+        assertNotNull(build2);
         FreeStyleBuild build3 = build2.getNextBuild();
 
         final ProgressiveDelay progressiveDelay = new ProgressiveDelay(15, 50);
@@ -73,6 +71,7 @@ public class ProgressiveDelayTest {
 
         FreeStyleBuild build1 = p.getFirstBuild();
         FreeStyleBuild build2 = build1.getNextBuild();
+        assertNotNull(build2);
         FreeStyleBuild build3 = build2.getNextBuild();
 
         final ProgressiveDelay progressiveDelay = new ProgressiveDelay(15, 0);
@@ -128,12 +127,5 @@ public class ProgressiveDelayTest {
                 delay.computeScheduleDelay(buildA3)
             )
         );
-    }
-
-    private static AbstractBuild createBuild(final boolean hasNaginatorAction, final AbstractBuild previousBuild) {
-        final AbstractBuild build = mock(AbstractBuild.class);
-        when(build.getPreviousBuild()).thenReturn(previousBuild);
-        when(build.getAction(NaginatorAction.class)).thenReturn(hasNaginatorAction ? new NaginatorAction(0) : null);
-        return build;
     }
 }
