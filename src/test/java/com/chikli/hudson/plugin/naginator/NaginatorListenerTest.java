@@ -1,20 +1,10 @@
 package com.chikli.hudson.plugin.naginator;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
-
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-import edu.umd.cs.findbugs.annotations.NonNull;
-import org.apache.commons.lang.StringUtils;
-import org.bouncycastle.util.Arrays;
-import org.jvnet.hudson.test.*;
-
 import com.chikli.hudson.plugin.naginator.testutils.MyBuilder;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.Axis;
@@ -30,70 +20,93 @@ import hudson.model.CauseAction;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Job;
+import hudson.model.JobProperty;
+import hudson.model.JobPropertyDescriptor;
 import hudson.model.ParametersAction;
 import hudson.model.ParametersDefinitionProperty;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.StringParameterDefinition;
 import hudson.model.StringParameterValue;
-import hudson.model.JobProperty;
-import hudson.model.JobPropertyDescriptor;
-import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildTrigger;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.tasks.Builder;
 import hudson.tasks.Publisher;
+import org.apache.commons.lang.StringUtils;
+import org.bouncycastle.util.Arrays;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.jvnet.hudson.test.Bug;
+import org.jvnet.hudson.test.FailureBuilder;
+import org.jvnet.hudson.test.Issue;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.SleepBuilder;
+import org.jvnet.hudson.test.ToolInstallations;
 
-public class NaginatorListenerTest extends HudsonTestCase {
-    @Override
-    protected void tearDown() throws Exception {
-        try {
-            super.tearDown();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+public class NaginatorListenerTest {
+    @ClassRule
+    public static JenkinsRule j = new JenkinsRule();
+
+    @Test
     public void testSuccessNoRebuild() throws Exception {
         assertEquals(false, isScheduledForRetry("build log", Result.SUCCESS, "foo", false, false));
     }
 
+    @Test
     public void testUnstableNoRebuild() throws Exception {
         assertEquals(false, isScheduledForRetry("build log", Result.SUCCESS, "foo", false, false));
     }
 
+    @Test
     public void testUnstableWithRebuild() throws Exception {
         assertEquals(true, isScheduledForRetry("build log", Result.UNSTABLE, "foo", true, false));
     }
 
+    @Test
     public void testFailureWithRebuild() throws Exception {
         assertEquals(true, isScheduledForRetry("build log", Result.FAILURE, "foo", false, false));
     }
 
+    @Test
     public void testFailureWithUnstableRebuild() throws Exception {
         assertEquals(true, isScheduledForRetry("build log", Result.FAILURE, "foo", true, false));
     }
 
+    @Test
     public void testFailureWithoutRebuildRegexp() throws Exception {
         assertEquals(false, isScheduledForRetry("build log", Result.FAILURE, "foo", false, true));
     }
 
+    @Test
     public void testFailureWithRebuildRegexp() throws Exception {
         assertEquals(true, isScheduledForRetry("build log foo", Result.FAILURE, "foo", false, true));
     }
 
+    @Test
     public void testUnstableWithoutRebuildRegexp() throws Exception {
         assertEquals(false, isScheduledForRetry("build log", Result.UNSTABLE, "foo", true, true));
     }
 
+    @Test
     public void testUnstableWithRebuildRegexp() throws Exception {
         assertEquals(true, isScheduledForRetry("build log foo", Result.UNSTABLE, "foo", true, true));
     }
 
+    @Test
     public void testWithBuildWrapper() throws Exception {
 
-        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleProject project = j.createFreeStyleProject();
         project.getBuildersList().add(new MyBuilder("foo", Result.SUCCESS, 1000));
         NaginatorPublisher nag = new NaginatorPublisher("foo", false, false, false, 10, new FixedDelay(0));
         project.getPublishersList().add(nag);
@@ -113,9 +126,10 @@ public class NaginatorListenerTest extends HudsonTestCase {
      *
      * @throws Exception
      */
+    @Test
     public void testRetainCauses() throws Exception {
-        FreeStyleProject a = createFreeStyleProject("a");
-        FreeStyleProject b = createFreeStyleProject("b");
+        FreeStyleProject a = j.createFreeStyleProject("a");
+        FreeStyleProject b = j.createFreeStyleProject("b");
         a.getPublishersList().add(new BuildTrigger("b", Result.SUCCESS));
         NaginatorPublisher nag = new NaginatorPublisher("", false, false, false, 2, new FixedDelay(1));
 
@@ -123,10 +137,10 @@ public class NaginatorListenerTest extends HudsonTestCase {
 
         BuildWrapper failTheBuild = new FailTheBuild();
         b.getBuildWrappersList().add(failTheBuild);
-        jenkins.rebuildDependencyGraph();
+        j.jenkins.rebuildDependencyGraph();
 
-        buildAndAssertSuccess(a);
-        waitUntilNoActivity();
+        j.buildAndAssertSuccess(a);
+        j.waitUntilNoActivity();
         assertNotNull(a.getLastBuild());
         assertNotNull(b.getLastBuild());
         assertEquals(1, a.getLastBuild().getNumber());
@@ -139,7 +153,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
 
     private boolean isScheduledForRetry(String buildLog, Result result, String regexpForRerun,
                                     boolean rerunIfUnstable, boolean checkRegexp) throws Exception {
-        FreeStyleProject project = createFreeStyleProject();
+        FreeStyleProject project = j.createFreeStyleProject();
         project.getBuildersList().add(new MyBuilder(buildLog, result));
         Publisher nag = new NaginatorPublisher(regexpForRerun, rerunIfUnstable, false, checkRegexp, 10, new FixedDelay(0));
         project.getPublishersList().add(nag);
@@ -149,7 +163,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
 
     private boolean isScheduledForRetry(FreeStyleProject project) throws Exception {
         FreeStyleBuild build = project.scheduleBuild2(0).get();
-        waitUntilNoActivity();
+        j.waitUntilNoActivity();
 
         return project.getLastBuild().getNumber() > 1;
     }
@@ -178,7 +192,8 @@ public class NaginatorListenerTest extends HudsonTestCase {
             }
         }
     }
-    
+
+    @Test
     @Bug(17626)
     public void testCountScheduleIndependently() throws Exception {
         // Running a two sequence of builds
@@ -186,7 +201,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
         // Each of them should be rescheduled
         // 2 times.
         
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = j.createFreeStyleProject();
         p.addProperty(new ParametersDefinitionProperty(
                 new StringParameterDefinition("PARAM", "")
         ));
@@ -216,7 +231,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
                 )
         );
         
-        waitUntilNoActivity();
+        j.waitUntilNoActivity();
         
         assertEquals(3, Collections2.filter(
                 p.getBuilds(),
@@ -247,10 +262,11 @@ public class NaginatorListenerTest extends HudsonTestCase {
                 }
         ).size());
     }
-    
+
+    @Test
     @Bug(24903)
     public void testCatastorophicRegularExpression() throws Exception {
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = j.createFreeStyleProject();
         p.getBuildersList().add(new MyBuilder("0000000000000000000000000000000000000000000000000000", Result.FAILURE));
         p.getPublishersList().add(new NaginatorPublisher(
                 "(0*)*NOSUCHSTRING",               // regexpForRerun
@@ -261,11 +277,11 @@ public class NaginatorListenerTest extends HudsonTestCase {
                 new FixedDelay(0)       // delay
         ));
         
-        ((NaginatorPublisher.DescriptorImpl)jenkins.getDescriptor(NaginatorPublisher.class))
+        ((NaginatorPublisher.DescriptorImpl)j.jenkins.getDescriptor(NaginatorPublisher.class))
             .setRegexpTimeoutMs(1000);
         
         p.scheduleBuild2(0);
-        waitUntilNoActivityUpTo(10 * 1000);
+        j.waitUntilNoActivityUpTo(10 * 1000);
     }
     
     
@@ -292,9 +308,10 @@ public class NaginatorListenerTest extends HudsonTestCase {
             return true;
         }
     }
-    
+
+    @Test
     public void testVariable() throws Exception {
-        FreeStyleProject p = createFreeStyleProject();
+        FreeStyleProject p = j.createFreeStyleProject();
         VariableRecordBuilder countRecorder = new VariableRecordBuilder("NAGINATOR_COUNT");
         VariableRecordBuilder maxCountRecorder = new VariableRecordBuilder("NAGINATOR_MAXCOUNT");
         VariableRecordBuilder buildNumberRecorder = new VariableRecordBuilder("NAGINATOR_BUILD_NUMBER");
@@ -313,7 +330,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
         ));
         
         p.scheduleBuild2(0);
-        waitUntilNoActivity();
+        j.waitUntilNoActivity();
         
         // There should be 3 builds
         assertEquals(3, p.getLastBuild().getNumber());
@@ -333,9 +350,10 @@ public class NaginatorListenerTest extends HudsonTestCase {
         assertEquals("2", maxCountRecorder.getRecordedValue(p.getBuildByNumber(3)));
         assertEquals("2", buildNumberRecorder.getRecordedValue(p.getBuildByNumber(3)));
     }
-    
+
+    @Test
     public void testVariableForMatrixBuild() throws Exception {
-        MatrixProject p = jenkins.createProject(MatrixProject.class, createUniqueProjectName());
+        MatrixProject p = j.jenkins.createProject(MatrixProject.class, createUniqueProjectName());
         AxisList axisList = new AxisList(new Axis("axis1", "value1", "value2"));
         p.setAxes(axisList);
         VariableRecordBuilder countRecorder = new VariableRecordBuilder("NAGINATOR_COUNT");
@@ -356,7 +374,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
         ));
         
         p.scheduleBuild2(0);
-        waitUntilNoActivity();
+        j.waitUntilNoActivity();
         
         // There should be 3 builds
         assertEquals(3, p.getLastBuild().getNumber());
@@ -422,7 +440,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
             return true;
         }
         
-        @TestExtension("testMavenModuleSetWithoutNaginator")
+        @Extension
         public static class DescriptorImpl extends JobPropertyDescriptor {
             @Override
             public String getDisplayName() {
@@ -430,7 +448,8 @@ public class NaginatorListenerTest extends HudsonTestCase {
             }
         }
     }
-    
+
+    @Test
     @Issue("JENKINS-34900")
     public void testMavenModuleSetWithoutNaginator() throws Exception {
         final String SIMPLE_POM = StringUtils.join(new String[]{
@@ -457,7 +476,7 @@ public class NaginatorListenerTest extends HudsonTestCase {
         }, "\n");
         
         ToolInstallations.configureMaven35();
-        MavenModuleSet p = jenkins.createProject(MavenModuleSet.class, createUniqueProjectName());
+        MavenModuleSet p = j.createProject(MavenModuleSet.class, createUniqueProjectName());
         
         // as SingleFileSCM in jenkins-test-harness doesn't work with
         // Jenkins 1.554, use a simple custom JobProperty instead.
@@ -466,9 +485,13 @@ public class NaginatorListenerTest extends HudsonTestCase {
         p.setGoals("clean");
         
         // Run once to have the project read the module structure.
-        assertBuildStatusSuccess(p.scheduleBuild2(0));
+        j.assertBuildStatusSuccess(p.scheduleBuild2(0));
         
         // This results MavenModuleBuild#getRootBuild() to be `null`.
-        assertBuildStatusSuccess(p.getRootModule().scheduleBuild2(0));
+        j.assertBuildStatusSuccess(p.getRootModule().scheduleBuild2(0));
+    }
+
+    private static String createUniqueProjectName() {
+        return "test" + System.currentTimeMillis();
     }
 }
