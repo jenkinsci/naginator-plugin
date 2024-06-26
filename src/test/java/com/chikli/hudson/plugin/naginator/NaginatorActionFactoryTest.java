@@ -39,6 +39,7 @@ import jenkins.model.Jenkins;
 import org.htmlunit.ElementNotFoundException;
 import org.htmlunit.html.HtmlAnchor;
 import org.jenkinsci.plugins.matrixauth.PermissionEntry;
+import org.jenkinsci.plugins.matrixauth.inheritance.InheritParentStrategy;
 import org.junit.After;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -179,10 +180,10 @@ public class NaginatorActionFactoryTest {
         
         FreeStyleProject p = r.createFreeStyleProject();
         
-        Map<Permission, Set<String>> authMap = new HashMap<Permission, Set<String>>();
-        authMap.put(Item.READ, Sets.newHashSet("user1"));
-        authMap.put(Item.BUILD, Sets.newHashSet("user1"));
-        p.addProperty(new AuthorizationMatrixProperty(authMap));
+        Map<Permission, Set<PermissionEntry>> authMap = new HashMap<>();
+        authMap.put(Item.READ, Sets.newHashSet(new PermissionEntry(EITHER, "user1")));
+        authMap.put(Item.BUILD, Sets.newHashSet(new PermissionEntry(EITHER, "user1")));
+        p.addProperty(new AuthorizationMatrixProperty(authMap, new InheritParentStrategy()));
         
         p.getBuildersList().add(new FailureBuilder());
         FreeStyleBuild b = r.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
