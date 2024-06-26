@@ -47,12 +47,15 @@ import org.jvnet.hudson.test.ToolInstallations;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class NaginatorListenerTest {
     @ClassRule
@@ -60,47 +63,47 @@ public class NaginatorListenerTest {
 
     @Test
     public void testSuccessNoRebuild() throws Exception {
-        assertEquals(false, isScheduledForRetry("build log", Result.SUCCESS, "foo", false, false));
+        assertFalse(isScheduledForRetry("build log", Result.SUCCESS, "foo", false, false));
     }
 
     @Test
     public void testUnstableNoRebuild() throws Exception {
-        assertEquals(false, isScheduledForRetry("build log", Result.SUCCESS, "foo", false, false));
+        assertFalse(isScheduledForRetry("build log", Result.SUCCESS, "foo", false, false));
     }
 
     @Test
     public void testUnstableWithRebuild() throws Exception {
-        assertEquals(true, isScheduledForRetry("build log", Result.UNSTABLE, "foo", true, false));
+        assertTrue(isScheduledForRetry("build log", Result.UNSTABLE, "foo", true, false));
     }
 
     @Test
     public void testFailureWithRebuild() throws Exception {
-        assertEquals(true, isScheduledForRetry("build log", Result.FAILURE, "foo", false, false));
+        assertTrue(isScheduledForRetry("build log", Result.FAILURE, "foo", false, false));
     }
 
     @Test
     public void testFailureWithUnstableRebuild() throws Exception {
-        assertEquals(true, isScheduledForRetry("build log", Result.FAILURE, "foo", true, false));
+        assertTrue(isScheduledForRetry("build log", Result.FAILURE, "foo", true, false));
     }
 
     @Test
     public void testFailureWithoutRebuildRegexp() throws Exception {
-        assertEquals(false, isScheduledForRetry("build log", Result.FAILURE, "foo", false, true));
+        assertFalse(isScheduledForRetry("build log", Result.FAILURE, "foo", false, true));
     }
 
     @Test
     public void testFailureWithRebuildRegexp() throws Exception {
-        assertEquals(true, isScheduledForRetry("build log foo", Result.FAILURE, "foo", false, true));
+        assertTrue(isScheduledForRetry("build log foo", Result.FAILURE, "foo", false, true));
     }
 
     @Test
     public void testUnstableWithoutRebuildRegexp() throws Exception {
-        assertEquals(false, isScheduledForRetry("build log", Result.UNSTABLE, "foo", true, true));
+        assertFalse(isScheduledForRetry("build log", Result.UNSTABLE, "foo", true, true));
     }
 
     @Test
     public void testUnstableWithRebuildRegexp() throws Exception {
-        assertEquals(true, isScheduledForRetry("build log foo", Result.UNSTABLE, "foo", true, true));
+        assertTrue(isScheduledForRetry("build log foo", Result.UNSTABLE, "foo", true, true));
     }
 
     @Test
@@ -113,7 +116,7 @@ public class NaginatorListenerTest {
         BuildWrapper failTheBuild = new FailTheBuild();
         project.getBuildWrappersList().add(failTheBuild);
 
-        assertEquals(true, isScheduledForRetry(project));
+        assertTrue(isScheduledForRetry(project));
     }
 
     /**
@@ -481,7 +484,7 @@ public class NaginatorListenerTest {
         // as SingleFileSCM in jenkins-test-harness doesn't work with
         // Jenkins 1.554, use a simple custom JobProperty instead.
         // p.setScm(new SingleFileSCM("pom.xml", SIMPLE_POM));
-        p.addProperty(new PrepareSingleFileProperty("pom.xml", SIMPLE_POM.getBytes("UTF-8")));
+        p.addProperty(new PrepareSingleFileProperty("pom.xml", SIMPLE_POM.getBytes(StandardCharsets.UTF_8)));
         p.setGoals("clean");
         
         // Run once to have the project read the module structure.
