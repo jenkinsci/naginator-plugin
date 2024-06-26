@@ -6,6 +6,7 @@ import com.google.common.collect.Collections2;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.matrix.Axis;
 import hudson.matrix.AxisList;
@@ -51,6 +52,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.chikli.hudson.plugin.naginator.testutils.TestSupport.lastBuildNumber;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -165,10 +167,10 @@ public class NaginatorListenerTest {
     }
 
     private boolean isScheduledForRetry(FreeStyleProject project) throws Exception {
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
+        project.scheduleBuild2(0).get();
         j.waitUntilNoActivity();
 
-        return project.getLastBuild().getNumber() > 1;
+        return lastBuildNumber(project) > 1;
     }
 
     private static final class FailTheBuild extends BuildWrapper {
@@ -279,9 +281,10 @@ public class NaginatorListenerTest {
                 1,                      // maxSchedule
                 new FixedDelay(0)       // delay
         ));
-        
-        ((NaginatorPublisher.DescriptorImpl)j.jenkins.getDescriptor(NaginatorPublisher.class))
-            .setRegexpTimeoutMs(1000);
+
+        NaginatorPublisher.DescriptorImpl descriptor = (NaginatorPublisher.DescriptorImpl) j.jenkins.getDescriptor(NaginatorPublisher.class);
+        assertNotNull(descriptor);
+        descriptor.setRegexpTimeoutMs(1000);
         
         p.scheduleBuild2(0);
         j.waitUntilNoActivityUpTo(10 * 1000);
@@ -290,7 +293,7 @@ public class NaginatorListenerTest {
     
     public static class VariableRecordBuilder extends Builder {
         private final String name;
-        private final Map<String, String> recorded = new HashMap<String, String>();
+        private final Map<String, String> recorded = new HashMap<>();
         
         public VariableRecordBuilder(@NonNull String name) {
             this.name = name;
@@ -336,7 +339,7 @@ public class NaginatorListenerTest {
         j.waitUntilNoActivity();
         
         // There should be 3 builds
-        assertEquals(3, p.getLastBuild().getNumber());
+        assertEquals(3, lastBuildNumber(p));
         
         // for the first build (not a retrying build)
         assertNull(countRecorder.getRecordedValue(p.getBuildByNumber(1)));
@@ -380,7 +383,7 @@ public class NaginatorListenerTest {
         j.waitUntilNoActivity();
         
         // There should be 3 builds
-        assertEquals(3, p.getLastBuild().getNumber());
+        assertEquals(3, lastBuildNumber(p));
         
         // for the first build (not a retrying build)
         assertNull(countRecorder.getRecordedValue(p.getBuildByNumber(1).getExactRun(new Combination(axisList, "value1"))));
@@ -420,7 +423,9 @@ public class NaginatorListenerTest {
         public boolean prebuild(AbstractBuild<?, ?> build, BuildListener listener) {
             OutputStream os;
             try {
-                os = build.getWorkspace().child(filename).write();
+                FilePath workspace = build.getWorkspace();
+                assert workspace != null;
+                os = workspace.child(filename).write();
             } catch (IOException e) {
                 e.printStackTrace(listener.getLogger());
                 return false;

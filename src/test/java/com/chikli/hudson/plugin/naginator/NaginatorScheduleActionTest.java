@@ -24,29 +24,33 @@
 
 package com.chikli.hudson.plugin.naginator;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Launcher;
 import hudson.matrix.Axis;
 import hudson.matrix.AxisList;
 import hudson.matrix.Combination;
-import hudson.matrix.MatrixRun;
 import hudson.matrix.MatrixBuild;
 import hudson.matrix.MatrixProject;
+import hudson.matrix.MatrixRun;
 import hudson.model.AbstractBuild;
-import hudson.model.FreeStyleProject;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.Builder;
-
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+
+import java.io.IOException;
+
+import static com.chikli.hudson.plugin.naginator.testutils.TestSupport.lastBuildNumber;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -189,7 +193,7 @@ public class NaginatorScheduleActionTest {
         j.waitUntilNoActivity();
         
         // no reschedule.
-        assertEquals(1, p.getLastBuild().number);
+        assertEquals(1, lastBuildNumber(p));
     }
     
     /**
@@ -214,7 +218,7 @@ public class NaginatorScheduleActionTest {
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
         
-        assertEquals(maxSchedule + 1, p.getLastBuild().number);
+        assertEquals(maxSchedule + 1, lastBuildNumber(p));
     }
         
     /**
@@ -238,7 +242,7 @@ public class NaginatorScheduleActionTest {
         j.waitUntilNoActivity();
         
         // no reschedule.
-        assertEquals(1, p.getLastBuild().number);
+        assertEquals(1, lastBuildNumber(p));
     }
         
     /**
@@ -268,7 +272,7 @@ public class NaginatorScheduleActionTest {
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
         
-        assertEquals(maxSchedule + 1, p.getLastBuild().number);
+        assertEquals(maxSchedule + 1, lastBuildNumber(p));
     }
     
     /**
@@ -299,10 +303,11 @@ public class NaginatorScheduleActionTest {
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
         
-        assertEquals(maxSchedule + 1, p.getLastBuild().number);
+        assertEquals(maxSchedule + 1, lastBuildNumber(p));
         
         // (1, 1), (1, 2), (2, 1) are scheduled
         MatrixBuild b = p.getLastBuild();
+        assertNotNull(b);
         assertNotNull(b.getExactRun(new Combination(axes, "1", "1")));
         assertNotNull(b.getExactRun(new Combination(axes, "1", "2")));
         assertNotNull(b.getExactRun(new Combination(axes, "2", "1")));
@@ -337,10 +342,11 @@ public class NaginatorScheduleActionTest {
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
         
-        assertEquals(maxSchedule + 1, p.getLastBuild().number);
+        assertEquals(maxSchedule + 1, lastBuildNumber(p));
         
         // (1, 2), (2, 1) are scheduled
         MatrixBuild b = p.getLastBuild();
+        assertNotNull(b);
         assertNull(b.getExactRun(new Combination(axes, "1", "1")));
         assertNotNull(b.getExactRun(new Combination(axes, "1", "2")));
         assertNotNull(b.getExactRun(new Combination(axes, "2", "1")));
@@ -375,10 +381,11 @@ public class NaginatorScheduleActionTest {
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
         
-        assertEquals(maxSchedule + 1, p.getLastBuild().number);
+        assertEquals(maxSchedule + 1, lastBuildNumber(p));
         
         // (1, 1), (1, 2), (2, 1) are scheduled
         MatrixBuild b = p.getLastBuild();
+        assertNotNull(b);
         assertNotNull(b.getExactRun(new Combination(axes, "1", "1")));
         assertNotNull(b.getExactRun(new Combination(axes, "1", "2")));
         assertNotNull(b.getExactRun(new Combination(axes, "2", "1")));
@@ -414,7 +421,7 @@ public class NaginatorScheduleActionTest {
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
         
-        assertEquals(1, p.getLastBuild().number);
+        assertEquals(1, lastBuildNumber(p));
     }
     
     /**
@@ -446,10 +453,11 @@ public class NaginatorScheduleActionTest {
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
         
-        assertEquals(maxSchedule + 1, p.getLastBuild().number);
+        assertEquals(maxSchedule + 1, lastBuildNumber(p));
         
         // No children are rescheduled
         MatrixBuild b = p.getLastBuild();
+        assertNotNull(b);
         assertNull(b.getExactRun(new Combination(axes, "1", "1")));
         assertNull(b.getExactRun(new Combination(axes, "1", "2")));
         assertNull(b.getExactRun(new Combination(axes, "2", "1")));
@@ -484,10 +492,11 @@ public class NaginatorScheduleActionTest {
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
         
-        assertEquals(maxSchedule + 1, p.getLastBuild().number);
+        assertEquals(maxSchedule + 1, lastBuildNumber(p));
         
         // (1, 1), (1, 2), (2, 1) are scheduled
         MatrixBuild b = p.getLastBuild();
+        assertNotNull(b);
         assertNotNull(b.getExactRun(new Combination(axes, "1", "1")));
         assertNotNull(b.getExactRun(new Combination(axes, "1", "2")));
         assertNotNull(b.getExactRun(new Combination(axes, "2", "1")));
