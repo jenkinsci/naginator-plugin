@@ -24,34 +24,34 @@
 
 package com.chikli.hudson.plugin.naginator;
 
-import static org.junit.Assert.fail;
+import com.google.common.collect.Sets;
+import hudson.Functions;
+import hudson.model.AbstractBuild;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
+import hudson.model.Item;
+import hudson.model.Result;
+import hudson.model.User;
+import hudson.security.AuthorizationMatrixProperty;
+import hudson.security.Permission;
+import hudson.security.ProjectMatrixAuthorizationStrategy;
+import jenkins.model.Jenkins;
+import org.htmlunit.ElementNotFoundException;
+import org.htmlunit.html.HtmlAnchor;
+import org.jenkinsci.plugins.matrixauth.PermissionEntry;
+import org.junit.After;
+import org.junit.ClassRule;
+import org.junit.Test;
+import org.jvnet.hudson.test.FailureBuilder;
+import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.JenkinsRule.WebClient;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import jenkins.model.Jenkins;
-import hudson.Functions;
-import hudson.model.FreeStyleBuild;
-import hudson.model.Item;
-import hudson.model.Result;
-import hudson.model.AbstractBuild;
-import hudson.model.FreeStyleProject;
-import hudson.model.User;
-import hudson.security.Permission;
-import hudson.security.AuthorizationMatrixProperty;
-import hudson.security.ProjectMatrixAuthorizationStrategy;
-
-import org.junit.After;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
-import org.jvnet.hudson.test.JenkinsRule.WebClient;
-import org.jvnet.hudson.test.FailureBuilder;
-
-import org.htmlunit.ElementNotFoundException;
-import org.htmlunit.html.HtmlAnchor;
-import com.google.common.collect.Sets;
+import static org.jenkinsci.plugins.matrixauth.AuthorizationType.EITHER;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -144,9 +144,9 @@ public class NaginatorActionFactoryTest {
     public void testRetryLinkForPermittedUser() throws Exception {
         r.jenkins.setSecurityRealm(r.createDummySecurityRealm());
         ProjectMatrixAuthorizationStrategy pmas = new ProjectMatrixAuthorizationStrategy();
-        pmas.add(Jenkins.READ, "user1");
-        pmas.add(Item.READ, "user1");
-        pmas.add(Item.BUILD, "user1");
+        pmas.add(Jenkins.READ, new PermissionEntry(EITHER, "user1"));
+        pmas.add(Item.READ, new PermissionEntry(EITHER, "user1"));
+        pmas.add(Item.BUILD, new PermissionEntry(EITHER, "user1"));
         r.jenkins.setAuthorizationStrategy(pmas);
         
         FreeStyleProject p = r.createFreeStyleProject();
@@ -160,9 +160,8 @@ public class NaginatorActionFactoryTest {
     public void testRetryLinkNotForNonPermittedUser() throws Exception {
         r.jenkins.setSecurityRealm(r.createDummySecurityRealm());
         ProjectMatrixAuthorizationStrategy pmas = new ProjectMatrixAuthorizationStrategy();
-        pmas.add(Jenkins.READ, "user1");
-        pmas.add(Item.READ, "user1");
-        //pmas.add(Item.BUILD, "user1");
+        pmas.add(Jenkins.READ, new PermissionEntry(EITHER, "user1"));
+        pmas.add(Item.READ, new PermissionEntry(EITHER, "user1"));
         r.jenkins.setAuthorizationStrategy(pmas);
         
         FreeStyleProject p = r.createFreeStyleProject();
@@ -175,7 +174,7 @@ public class NaginatorActionFactoryTest {
     public void testRetryLinkForPermittedUserByProject() throws Exception {
         r.jenkins.setSecurityRealm(r.createDummySecurityRealm());
         ProjectMatrixAuthorizationStrategy pmas = new ProjectMatrixAuthorizationStrategy();
-        pmas.add(Jenkins.READ, "user1");
+        pmas.add(Jenkins.READ, new PermissionEntry(EITHER, "user1"));
         r.jenkins.setAuthorizationStrategy(pmas);
         
         FreeStyleProject p = r.createFreeStyleProject();
