@@ -67,7 +67,7 @@ public class NaginatorActionFactoryTest {
         r.jenkins.setAuthorizationStrategy(null);
     }
     
-    private String getRetryLinkFor(AbstractBuild<?, ?> b) throws Exception {
+    private String getRetryLinkFor(AbstractBuild<?, ?> b) {
         return Functions.joinPath(r.contextPath, b.getUrl(), "retry");
     }
     
