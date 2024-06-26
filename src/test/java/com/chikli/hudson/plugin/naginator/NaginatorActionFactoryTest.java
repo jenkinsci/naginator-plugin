@@ -84,19 +84,27 @@ public class NaginatorActionFactoryTest {
     }
     
     private void assertRetryLinkExists(AbstractBuild<?, ?> b) throws Exception {
-        assertRetryLinkExists(b, r.createWebClient());
+        try (WebClient webClient = r.createWebClient()) {
+            assertRetryLinkExists(b, webClient);
+        }
     }
     
     private void assertRetryLinkNotExists(AbstractBuild<?, ?> b) throws Exception {
-        assertRetryLinkNotExists(b, r.createWebClient());
+        try (WebClient webClient = r.createWebClient()) {
+            assertRetryLinkNotExists(b, webClient);
+        }
     }
     
     private void assertRetryLinkExists(AbstractBuild<?, ?> b, User u) throws Exception {
-        assertRetryLinkExists(b, r.createWebClient().login(u.getId()));
+        try (WebClient webClient = r.createWebClient()) {
+            assertRetryLinkExists(b, webClient.login(u.getId()));
+        }
     }
     
     private void assertRetryLinkNotExists(AbstractBuild<?, ?> b, User u) throws Exception {
-        assertRetryLinkNotExists(b, r.createWebClient().login(u.getId()));
+        try (WebClient webClient = r.createWebClient()) {
+            assertRetryLinkNotExists(b, webClient.login(u.getId()));
+        }
     }
     
     @Test
