@@ -24,10 +24,11 @@
 
 package com.chikli.hudson.plugin.naginator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
+import org.htmlunit.html.DomElement;
+import org.htmlunit.html.HtmlAnchor;
+import org.htmlunit.html.HtmlPage;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.jvnet.hudson.test.FailureBuilder;
@@ -35,12 +36,10 @@ import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
 
-import org.htmlunit.html.DomElement;
-import org.htmlunit.html.HtmlAnchor;
-import org.htmlunit.html.HtmlPage;
-
-import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
+import static com.chikli.hudson.plugin.naginator.testutils.TestSupport.lastBuildNumber;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Tests for {@link NaginatorCause}
@@ -72,7 +71,7 @@ public class NaginatorCauseTest {
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
 
-        assertEquals(3, p.getLastBuild().getNumber());
+        assertEquals(3, lastBuildNumber(p));
 
         try (WebClient wc = j.createWebClient()) {
             {
@@ -115,7 +114,7 @@ public class NaginatorCauseTest {
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
 
-        assertEquals(3, p.getLastBuild().getNumber());
+        assertEquals(3, lastBuildNumber(p));
 
         p.getBuildByNumber(1).delete();
 
@@ -157,7 +156,7 @@ public class NaginatorCauseTest {
         p.scheduleBuild2(0);
         j.waitUntilNoActivity();
 
-        assertEquals(2002, p.getLastBuild().getNumber());
+        assertEquals(2002, lastBuildNumber(p));
 
         try (WebClient wc = j.createWebClient()) {
             {
