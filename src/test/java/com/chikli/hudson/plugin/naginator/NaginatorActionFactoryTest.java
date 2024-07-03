@@ -68,7 +68,7 @@ public class NaginatorActionFactoryTest {
     }
     
     private String getRetryLinkFor(AbstractBuild<?, ?> b) {
-        return Functions.joinPath(r.contextPath, b.getUrl(), "retry");
+        return Functions.joinPath(r.contextPath, b.getUrl(), "retry") + "/";
     }
     
     private void assertRetryLinkExists(AbstractBuild<?, ?> b, WebClient wc) throws Exception {
