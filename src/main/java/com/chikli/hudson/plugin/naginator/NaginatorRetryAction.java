@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.Stapler;
-import org.kohsuke.stapler.StaplerResponse;
+import org.kohsuke.stapler.StaplerResponse2;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import hudson.model.Cause;
@@ -27,7 +27,7 @@ import hudson.model.Run;
 public class NaginatorRetryAction implements Action {
 
     private boolean hasPermission() {
-        Run<?, ?> run = Stapler.getCurrentRequest().findAncestorObject(Run.class);
+        Run<?, ?> run = Stapler.getCurrentRequest2().findAncestorObject(Run.class);
         if (run == null) {
             // this page should be shown only when
             // there's a valid build in the path hierarchy.
@@ -60,7 +60,7 @@ public class NaginatorRetryAction implements Action {
     }
 
     @RequirePOST
-    public void doIndex(StaplerResponse res, @CheckForNull @AncestorInPath AbstractBuild<?, ?> build) throws IOException {
+    public void doIndex(StaplerResponse2 res, @CheckForNull @AncestorInPath AbstractBuild<?, ?> build) throws IOException {
         if (build == null) {
             // This should not happen as
             // this page is displayed only for AbstractBuild.

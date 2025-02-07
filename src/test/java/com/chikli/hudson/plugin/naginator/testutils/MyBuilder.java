@@ -14,7 +14,7 @@ import java.io.IOException;
 
 import net.sf.json.JSONObject;
 
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 public final class MyBuilder extends Builder {
     private final String text;
@@ -66,7 +66,7 @@ public final class MyBuilder extends Builder {
         public String getDisplayName() {
             return "MyBuilder";
         }
-        public MyBuilder newInstance(StaplerRequest req, JSONObject data) {
+        public MyBuilder newInstance(StaplerRequest2 req, JSONObject data) {
             return new MyBuilder("foo", Result.SUCCESS);
         }
     }
