@@ -19,7 +19,7 @@ import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -262,10 +262,10 @@ public class NaginatorPublisher extends Notifier {
         }
 
         /**
-         * @see hudson.model.Descriptor#configure(org.kohsuke.stapler.StaplerRequest, net.sf.json.JSONObject)
+         * @see hudson.model.Descriptor#configure(org.kohsuke.stapler.StaplerRequest2, net.sf.json.JSONObject)
          */
         @Override
-        public boolean configure(StaplerRequest req, JSONObject json) throws hudson.model.Descriptor.FormException {
+        public boolean configure(StaplerRequest2 req, JSONObject json) throws hudson.model.Descriptor.FormException {
             setRegexpTimeoutMs(json.getLong("regexpTimeoutMs"));
             boolean result = super.configure(req, json);
             save();
