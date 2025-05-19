@@ -7,12 +7,13 @@ import hudson.model.FreeStyleProject;
 import hudson.model.User;
 import hudson.security.ACL;
 import hudson.security.ACLContext;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.util.List;
 
@@ -20,15 +21,22 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-public class NaginatorRetryActionTest {
-    @ClassRule
-    public static JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class NaginatorRetryActionTest {
+
+    private static JenkinsRule j;
 
     private User user;
 
     private FreeStyleProject project;
-    @Before
-    public void setup() throws Exception {
+
+    @BeforeAll
+    static void setUp(JenkinsRule rule) {
+        j = rule;
+    }
+
+    @BeforeEach
+    void setUp() throws Exception {
         j.jenkins.setSecurityRealm(j.createDummySecurityRealm());
         user = User.getById("naginator", true);
         project = j.createFreeStyleProject();
@@ -49,7 +57,7 @@ public class NaginatorRetryActionTest {
 
     @Issue("JENKINS-59222")
     @Test
-    public void testRetryUserCause() throws Exception {
+    void testRetryUserCause() throws Exception {
         try (JenkinsRule.WebClient wc = j.createWebClient()) {
             User retryUser = User.getById("retry", true);
 
@@ -68,7 +76,7 @@ public class NaginatorRetryActionTest {
     }
 
     @Test
-    public void testUserIsKept() {
+    void testUserIsKept() {
         FreeStyleBuild b = project.getBuildByNumber(3);
         UserIdCause cause = b.getCause(UserIdCause.class);
         assertThat(cause, is(notNullValue()));
@@ -76,7 +84,7 @@ public class NaginatorRetryActionTest {
     }
 
     @Test
-    public void testNaginatorCauseAppearsOnlyOnce() {
+    void testNaginatorCauseAppearsOnlyOnce() {
         FreeStyleBuild b = project.getBuildByNumber(3);
         List<Cause> causes = b.getCauses();
         long countOfNaginatorCause = causes.stream().filter(t -> t instanceof NaginatorCause).count();

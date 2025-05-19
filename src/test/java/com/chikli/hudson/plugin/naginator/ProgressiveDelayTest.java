@@ -2,27 +2,34 @@ package com.chikli.hudson.plugin.naginator;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * A test suite for {@link ProgressiveDelay}.
  */
-public class ProgressiveDelayTest {
-    @ClassRule
-    public static JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class ProgressiveDelayTest {
+
+    private static JenkinsRule j;
+
+    @BeforeAll
+    static void setUp(JenkinsRule rule) {
+        j = rule;
+    }
 
     @Test
-    public void testComputeScheduleDelay() throws Exception {
+    void testComputeScheduleDelay() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         p.getBuildersList().add(new FailureBuilder());
         p.getPublishersList().add(new NaginatorPublisher(
@@ -55,7 +62,7 @@ public class ProgressiveDelayTest {
     }
 
     @Test
-    public void testComputeScheduleDelayNoMax() throws Exception {
+    void testComputeScheduleDelayNoMax() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         p.getBuildersList().add(new FailureBuilder());
         p.getPublishersList().add(new NaginatorPublisher(
@@ -88,7 +95,7 @@ public class ProgressiveDelayTest {
 
     @Issue("JENKINS-43803")
     @Test
-    public void testBuildsRunAlternately() throws Exception {
+    void testBuildsRunAlternately() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         p.getBuildersList().add(new FailureBuilder());
 
@@ -96,7 +103,7 @@ public class ProgressiveDelayTest {
         assertTrue(NaginatorRetryAction.scheduleBuild(
             buildA1,
             0,  // delay
-            1,  // retyCount
+            1,  // retryCount
             120   // maxRetryCount
         ));
         j.waitUntilNoActivity();

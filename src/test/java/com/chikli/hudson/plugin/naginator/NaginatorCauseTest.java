@@ -29,25 +29,31 @@ import hudson.model.FreeStyleProject;
 import org.htmlunit.html.DomElement;
 import org.htmlunit.html.HtmlAnchor;
 import org.htmlunit.html.HtmlPage;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import static com.chikli.hudson.plugin.naginator.testutils.TestSupport.lastBuildNumber;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Tests for {@link NaginatorCause}
  */
-public class NaginatorCauseTest {
-    @ClassRule
-    public static JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class NaginatorCauseTest {
 
+    private static JenkinsRule j;
+
+    @BeforeAll
+    static void setUp(JenkinsRule rule) {
+        j = rule;
+    }
 
     /**
      * @return the expected value of "rootURL" in jelly.
@@ -57,7 +63,7 @@ public class NaginatorCauseTest {
     }
 
     @Test
-    public void testCauseLink() throws Exception {
+    void testCauseLink() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         p.getBuildersList().add(new FailureBuilder());
         p.getPublishersList().add(new NaginatorPublisher(
@@ -100,7 +106,7 @@ public class NaginatorCauseTest {
     }
 
     @Test
-    public void testDisabledCauseLink() throws Exception {
+    void testDisabledCauseLink() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         p.getBuildersList().add(new FailureBuilder());
         p.getPublishersList().add(new NaginatorPublisher(
@@ -141,7 +147,7 @@ public class NaginatorCauseTest {
 
     @Issue("JENKINS-50751")
     @Test
-    public void testCauseLinkWithLargeNumber() throws Exception {
+    void testCauseLinkWithLargeNumber() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         p.getBuildersList().add(new FailureBuilder());
         p.getPublishersList().add(new NaginatorPublisher(
@@ -186,7 +192,7 @@ public class NaginatorCauseTest {
 
     @Issue("SECURITY-2946")
     @Test
-    public void testEscapedDisplayName() throws Exception {
+    void testEscapedDisplayName() throws Exception {
         FreeStyleProject p = j.createFreeStyleProject();
         FreeStyleBuild build1 = p.scheduleBuild2(0).get();
         build1.setDisplayName("<div id=\"unescaped-displayname\">bad displayname</div>");
