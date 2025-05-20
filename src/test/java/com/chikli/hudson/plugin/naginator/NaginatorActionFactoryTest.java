@@ -1,18 +1,18 @@
 /*
  * The MIT License
- * 
+ *
  * Copyright (c) 2015 IKEDA Yasuyuki
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -37,154 +37,154 @@ import hudson.security.Permission;
 import hudson.security.ProjectMatrixAuthorizationStrategy;
 import jenkins.model.Jenkins;
 import org.htmlunit.ElementNotFoundException;
-import org.htmlunit.html.HtmlAnchor;
 import org.jenkinsci.plugins.matrixauth.PermissionEntry;
 import org.jenkinsci.plugins.matrixauth.inheritance.InheritParentStrategy;
-import org.junit.After;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.FailureBuilder;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.JenkinsRule.WebClient;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import static org.jenkinsci.plugins.matrixauth.AuthorizationType.EITHER;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  *
  */
-public class NaginatorActionFactoryTest {
-    @ClassRule
-    public static JenkinsRule r = new JenkinsRule();
-    
-    @After
-    public void tearDown() {
+@WithJenkins
+class NaginatorActionFactoryTest {
+
+    private static JenkinsRule r;
+
+    @BeforeAll
+    static void setUp(JenkinsRule rule) {
+        r = rule;
+    }
+
+    @AfterEach
+    void tearDown() {
         r.jenkins.setSecurityRealm(null);
         r.jenkins.setAuthorizationStrategy(null);
     }
-    
+
     private String getRetryLinkFor(AbstractBuild<?, ?> b) {
         return Functions.joinPath(r.contextPath, b.getUrl(), "retry") + "/";
     }
-    
+
     private void assertRetryLinkExists(AbstractBuild<?, ?> b, WebClient wc) throws Exception {
         wc.getPage(b).getAnchorByHref(getRetryLinkFor(b));
     }
-    
-    private void assertRetryLinkNotExists(AbstractBuild<?, ?> b, WebClient wc) throws Exception {
-        try {
-            HtmlAnchor a = wc.getPage(b).getAnchorByHref(getRetryLinkFor(b));
-            fail("Should not exist: " + a);
-        } catch (ElementNotFoundException e) {
-            // pass
-        }
+
+    private void assertRetryLinkNotExists(AbstractBuild<?, ?> b, WebClient wc) {
+        assertThrows(ElementNotFoundException.class, () -> wc.getPage(b).getAnchorByHref(getRetryLinkFor(b)));
     }
-    
+
     private void assertRetryLinkExists(AbstractBuild<?, ?> b) throws Exception {
         try (WebClient webClient = r.createWebClient()) {
             assertRetryLinkExists(b, webClient);
         }
     }
-    
-    private void assertRetryLinkNotExists(AbstractBuild<?, ?> b) throws Exception {
+
+    private void assertRetryLinkNotExists(AbstractBuild<?, ?> b) {
         try (WebClient webClient = r.createWebClient()) {
             assertRetryLinkNotExists(b, webClient);
         }
     }
-    
+
     private void assertRetryLinkExists(AbstractBuild<?, ?> b, User u) throws Exception {
         try (WebClient webClient = r.createWebClient()) {
             assertRetryLinkExists(b, webClient.login(u.getId()));
         }
     }
-    
+
     private void assertRetryLinkNotExists(AbstractBuild<?, ?> b, User u) throws Exception {
         try (WebClient webClient = r.createWebClient()) {
             assertRetryLinkNotExists(b, webClient.login(u.getId()));
         }
     }
-    
+
     @Test
-    public void testRetryLinkNotInSuccessBuild() throws Exception {
+    void testRetryLinkNotInSuccessBuild() throws Exception {
         FreeStyleProject p = r.createFreeStyleProject();
         FreeStyleBuild b = r.assertBuildStatusSuccess(p.scheduleBuild2(0));
         assertRetryLinkNotExists(b);
     }
-    
+
     @Test
-    public void testRetryLinkInFailureBuild() throws Exception {
+    void testRetryLinkInFailureBuild() throws Exception {
         FreeStyleProject p = r.createFreeStyleProject();
         p.getBuildersList().add(new FailureBuilder());
         FreeStyleBuild b = r.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         assertRetryLinkExists(b);
     }
-    
+
     @Test
-    public void testRetryLinkInOptInProject() throws Exception {
+    void testRetryLinkInOptInProject() throws Exception {
         FreeStyleProject p = r.createFreeStyleProject();
         p.addProperty(new NaginatorOptOutProperty(false));
         p.getBuildersList().add(new FailureBuilder());
         FreeStyleBuild b = r.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         assertRetryLinkExists(b);
     }
-    
+
     @Test
-    public void testRetryLinkNotInOptOutProject() throws Exception {
+    void testRetryLinkNotInOptOutProject() throws Exception {
         FreeStyleProject p = r.createFreeStyleProject();
         p.addProperty(new NaginatorOptOutProperty(true));
         p.getBuildersList().add(new FailureBuilder());
         FreeStyleBuild b = r.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         assertRetryLinkNotExists(b);
     }
-    
+
     @Test
-    public void testRetryLinkForPermittedUser() throws Exception {
+    void testRetryLinkForPermittedUser() throws Exception {
         r.jenkins.setSecurityRealm(r.createDummySecurityRealm());
         ProjectMatrixAuthorizationStrategy pmas = new ProjectMatrixAuthorizationStrategy();
         pmas.add(Jenkins.READ, new PermissionEntry(EITHER, "user1"));
         pmas.add(Item.READ, new PermissionEntry(EITHER, "user1"));
         pmas.add(Item.BUILD, new PermissionEntry(EITHER, "user1"));
         r.jenkins.setAuthorizationStrategy(pmas);
-        
+
         FreeStyleProject p = r.createFreeStyleProject();
         p.getBuildersList().add(new FailureBuilder());
         FreeStyleBuild b = r.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         assertRetryLinkExists(b, User.getOrCreateByIdOrFullName("user1"));
     }
-    
-    
+
     @Test
-    public void testRetryLinkNotForNonPermittedUser() throws Exception {
+    void testRetryLinkNotForNonPermittedUser() throws Exception {
         r.jenkins.setSecurityRealm(r.createDummySecurityRealm());
         ProjectMatrixAuthorizationStrategy pmas = new ProjectMatrixAuthorizationStrategy();
         pmas.add(Jenkins.READ, new PermissionEntry(EITHER, "user1"));
         pmas.add(Item.READ, new PermissionEntry(EITHER, "user1"));
         r.jenkins.setAuthorizationStrategy(pmas);
-        
+
         FreeStyleProject p = r.createFreeStyleProject();
         p.getBuildersList().add(new FailureBuilder());
         FreeStyleBuild b = r.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         assertRetryLinkNotExists(b, User.getOrCreateByIdOrFullName("user1"));
     }
-    
+
     @Test
-    public void testRetryLinkForPermittedUserByProject() throws Exception {
+    void testRetryLinkForPermittedUserByProject() throws Exception {
         r.jenkins.setSecurityRealm(r.createDummySecurityRealm());
         ProjectMatrixAuthorizationStrategy pmas = new ProjectMatrixAuthorizationStrategy();
         pmas.add(Jenkins.READ, new PermissionEntry(EITHER, "user1"));
         r.jenkins.setAuthorizationStrategy(pmas);
-        
+
         FreeStyleProject p = r.createFreeStyleProject();
-        
+
         Map<Permission, Set<PermissionEntry>> authMap = new HashMap<>();
         authMap.put(Item.READ, Sets.newHashSet(new PermissionEntry(EITHER, "user1")));
         authMap.put(Item.BUILD, Sets.newHashSet(new PermissionEntry(EITHER, "user1")));
         p.addProperty(new AuthorizationMatrixProperty(authMap, new InheritParentStrategy()));
-        
+
         p.getBuildersList().add(new FailureBuilder());
         FreeStyleBuild b = r.assertBuildStatus(Result.FAILURE, p.scheduleBuild2(0).get());
         assertRetryLinkExists(b, User.getOrCreateByIdOrFullName("user1"));
