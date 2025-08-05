@@ -100,7 +100,7 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>buildtriggerbadge</artifactId>
-      <version>251.vdf6ef853f3f5</version>
+      <version>307.v19decf05a_0df</version>
       <optional>true</optional>
     </dependency>
     <dependency>
