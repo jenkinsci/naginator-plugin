@@ -33,7 +33,7 @@ import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.tasks.Builder;
 import hudson.tasks.Publisher;
-import org.apache.commons.lang.StringUtils;
+
 import org.bouncycastle.util.Arrays;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -451,7 +451,7 @@ class NaginatorListenerTest {
     @Test
     @Issue("JENKINS-34900")
     void testMavenModuleSetWithoutNaginator() throws Exception {
-        final String SIMPLE_POM = StringUtils.join(new String[]{
+        final String SIMPLE_POM = String.join("\n", new String[]{
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
                 "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">",
                 "  <modelVersion>4.0.0</modelVersion>",
@@ -472,7 +472,7 @@ class NaginatorListenerTest {
                 "    </pluginRepository>",
                 "  </pluginRepositories>",
                 "</project>"
-        }, "\n");
+        });
 
         ToolInstallations.configureMaven35();
         MavenModuleSet p = j.createProject(MavenModuleSet.class, createUniqueProjectName());
