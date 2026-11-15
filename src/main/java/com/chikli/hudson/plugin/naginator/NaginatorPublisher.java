@@ -215,6 +215,7 @@ public class NaginatorPublisher extends Notifier {
         return true;
     }
 
+    @Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
     }
@@ -276,6 +277,7 @@ public class NaginatorPublisher extends Notifier {
          * This human readable name is used in the configuration screen.
          */
         @NonNull
+        @Override
         public String getDisplayName() {
             return "Retry build after failure";
         }

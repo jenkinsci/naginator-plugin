@@ -44,16 +44,19 @@ public class NaginatorRetryAction implements Action {
         return run.getParent().hasPermission(Item.BUILD);
     }
 
+    @Override
     public String getIconFileName() {
         return hasPermission() ?
             "symbol-arrow-redo-outline plugin-ionicons-api" : null;
     }
 
+    @Override
     public String getDisplayName() {
         return hasPermission() ?
             "Retry" : null;
     }
 
+    @Override
     public String getUrlName() {
         return hasPermission() ?
             "retry" : null;

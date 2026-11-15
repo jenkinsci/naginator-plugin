@@ -236,10 +236,12 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
             this.wrapped = wrapped;
         }
         
+        @Override
         public int length() {
             return wrapped.length();
         }
         
+        @Override
         public char charAt(int index) {
             if (Thread.currentThread().isInterrupted()) {
                 throw new RuntimeException(new InterruptedException());
@@ -248,6 +250,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         }
         
         @NonNull
+        @Override
         public CharSequence subSequence(int start, int end) {
             return wrapped.subSequence(start, end);
         }

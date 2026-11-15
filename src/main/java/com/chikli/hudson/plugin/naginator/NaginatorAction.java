@@ -55,14 +55,18 @@ public class NaginatorAction implements BuildBadgeAction {
         }
         return Messages.NaginatorAction_rescheduled();
     }
+
+    @Override
     public String getIconFileName() {
         return null;
     }
 
+    @Override
     public String getDisplayName() {
         return null;
     }
 
+    @Override
     public String getUrlName() {
         return null;
     }

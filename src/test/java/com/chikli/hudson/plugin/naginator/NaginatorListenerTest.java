@@ -191,10 +191,12 @@ class NaginatorListenerTest {
         @Extension
         public static class DescriptorImpl extends BuildWrapperDescriptor {
 
+            @Override
             public boolean isApplicable(AbstractProject<?, ?> item) {
                 return true;
             }
 
+            @Override
             public String getDisplayName() {
                 return null;
             }
