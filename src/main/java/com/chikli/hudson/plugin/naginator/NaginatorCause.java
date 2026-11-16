@@ -1,7 +1,7 @@
 package com.chikli.hudson.plugin.naginator;
 
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-import edu.umd.cs.findbugs.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Job;
@@ -51,7 +51,7 @@ public class NaginatorCause extends Cause {
      * @return the source build. <code>null</code> when the build is deleted.
      * @since 1.18
      */
-    @CheckForNull
+    @Nullable
     public Run<?, ?> getSourceBuild() {
         if (getSourceBuildNumber() == null) {
             return null;

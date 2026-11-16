@@ -1,6 +1,6 @@
 package com.chikli.hudson.plugin.naginator;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
+import org.jspecify.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.JobProperty;

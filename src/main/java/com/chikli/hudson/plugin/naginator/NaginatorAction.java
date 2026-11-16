@@ -1,6 +1,6 @@
 package com.chikli.hudson.plugin.naginator;
 
-import edu.umd.cs.findbugs.annotations.CheckForNull;
+import org.jspecify.annotations.Nullable;
 import hudson.model.BuildBadgeAction;
 import hudson.model.Cause;
 import hudson.model.Run;
@@ -39,7 +39,7 @@ public class NaginatorAction implements BuildBadgeAction {
      * @param maxRetryCount the maximum number to retry. Can be 0 for indeterminable cases.
      * @since 1.17
      */
-    public NaginatorAction(@CheckForNull Run<?, ?> parentBuild, int retryCount, int maxRetryCount) {
+    public NaginatorAction(@Nullable Run<?, ?> parentBuild, int retryCount, int maxRetryCount) {
         this.parentBuildNumber = (parentBuild != null) ? parentBuild.getNumber() : null;
         this.retryCount = retryCount;
         this.maxRetryCount = maxRetryCount;
@@ -105,7 +105,7 @@ public class NaginatorAction implements BuildBadgeAction {
      * @return the build number of the build to reschedule.
      * @since 1.17
      */
-    @CheckForNull
+    @Nullable
     public Integer getParentBuildNumber() {
         return parentBuildNumber;
     }

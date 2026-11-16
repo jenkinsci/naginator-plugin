@@ -101,6 +101,10 @@
       <artifactId>ionicons-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.jenkins.plugins</groupId>
+      <artifactId>jspecify-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>buildtriggerbadge</artifactId>
       <version>343.vb_693d3ceda_44</version>
@@ -136,6 +140,46 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>prefer-jspecify-nullability</id>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <RestrictImports>
+                  <reason>Use org.jspecify.annotations.Nullable</reason>
+                  <bannedImports>
+                    <bannedImport>edu.umd.cs.findbugs.annotations.CheckForNull</bannedImport>
+                  </bannedImports>
+                </RestrictImports>
+              </rules>
+            </configuration>
+          </execution>
+          <execution>
+            <id>ban-findbugs-nonnull-import</id>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <RestrictImports>
+                  <reason>Use org.jspecify.annotations.NonNull</reason>
+                  <bannedImports>
+                    <bannedImport>edu.umd.cs.findbugs.annotations.NonNull</bannedImport>
+                  </bannedImports>
+                </RestrictImports>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>

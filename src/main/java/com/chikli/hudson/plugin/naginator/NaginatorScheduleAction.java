@@ -24,8 +24,8 @@
 
 package com.chikli.hudson.plugin.naginator;
 
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-import edu.umd.cs.findbugs.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import hudson.matrix.MatrixRun;
 import hudson.model.Action;
 import hudson.model.InvisibleAction;
@@ -65,7 +65,7 @@ public class NaginatorScheduleAction extends InvisibleAction {
      * @param delay A scheduling policy to trigger a new build.
      * @param rerunMatrixPart tests matrix child builds and triggers only failed parts.
      */
-    public NaginatorScheduleAction(int maxSchedule, @CheckForNull ScheduleDelay delay, boolean rerunMatrixPart) {
+    public NaginatorScheduleAction(int maxSchedule, @Nullable ScheduleDelay delay, boolean rerunMatrixPart) {
         this.maxSchedule = maxSchedule;
         this.delay = (delay != null) ? delay : new ProgressiveDelay(5 * 60, 3 * 60 * 60);
         this.rerunMatrixPart = rerunMatrixPart;

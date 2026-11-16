@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import jakarta.servlet.http.HttpServletResponse;
 
-import edu.umd.cs.findbugs.annotations.CheckForNull;
+import org.jspecify.annotations.Nullable;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.Stapler;
 import org.kohsuke.stapler.StaplerResponse2;
@@ -63,7 +63,7 @@ public class NaginatorRetryAction implements Action {
     }
 
     @RequirePOST
-    public void doIndex(StaplerResponse2 res, @CheckForNull @AncestorInPath AbstractBuild<?, ?> build) throws IOException {
+    public void doIndex(StaplerResponse2 res, @Nullable @AncestorInPath AbstractBuild<?, ?> build) throws IOException {
         if (build == null) {
             // This should not happen as
             // this page is displayed only for AbstractBuild.

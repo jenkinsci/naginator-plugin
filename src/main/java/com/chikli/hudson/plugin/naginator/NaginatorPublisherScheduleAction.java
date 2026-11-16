@@ -1,7 +1,7 @@
 package com.chikli.hudson.plugin.naginator;
 
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-import edu.umd.cs.findbugs.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import hudson.matrix.MatrixRun;
 import hudson.matrix.MatrixBuild;
 import hudson.model.Result;
@@ -66,7 +66,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return this;
     }
     
-    @CheckForNull
+    @Nullable
     public String getRegexpForRerun() {
         return regexpForRerun;
     }

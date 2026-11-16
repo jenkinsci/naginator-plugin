@@ -2,7 +2,7 @@ package com.chikli.hudson.plugin.naginator;
 
 import static java.lang.Math.min;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;

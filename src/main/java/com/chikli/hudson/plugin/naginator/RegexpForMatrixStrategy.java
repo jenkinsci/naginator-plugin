@@ -24,7 +24,7 @@
 
 package com.chikli.hudson.plugin.naginator;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.jvnet.localizer.Localizable;
 
 /**

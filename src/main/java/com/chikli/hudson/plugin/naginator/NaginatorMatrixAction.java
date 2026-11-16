@@ -1,6 +1,6 @@
 package com.chikli.hudson.plugin.naginator;
 
-import edu.umd.cs.findbugs.annotations.CheckForNull;
+import org.jspecify.annotations.Nullable;
 import hudson.matrix.Combination;
 import hudson.model.Run;
 
@@ -39,7 +39,7 @@ public class NaginatorMatrixAction extends NaginatorAction {
      * @param maxRetryCount the maximum number to retry. Can be 0 for indeterminable cases.
      * @since 1.17
      */
-    public NaginatorMatrixAction(@CheckForNull Run<?, ?> parentBuild, int retryCount, int maxRetryCount) {
+    public NaginatorMatrixAction(@Nullable Run<?, ?> parentBuild, int retryCount, int maxRetryCount) {
         super(parentBuild, retryCount, maxRetryCount);
         this.combsToRerun = new ArrayList<Combination>();
     }
