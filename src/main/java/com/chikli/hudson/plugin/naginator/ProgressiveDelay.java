@@ -2,7 +2,6 @@ package com.chikli.hudson.plugin.naginator;
 
 import static java.lang.Math.min;
 
-import org.jspecify.annotations.NonNull;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
@@ -56,7 +55,6 @@ public class ProgressiveDelay extends ScheduleDelay {
 
     @Extension
     public static class DescriptorImpl extends ScheduleDelayDescriptor {
-        @NonNull
         @Override
         public String getDisplayName() {
             return "Progressive";

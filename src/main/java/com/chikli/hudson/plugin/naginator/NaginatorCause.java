@@ -1,7 +1,6 @@
 package com.chikli.hudson.plugin.naginator;
 
 import org.jspecify.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
 import hudson.model.Job;
@@ -13,9 +12,9 @@ import hudson.model.Run;
  */
 public class NaginatorCause extends Cause {
 
-    private final String summary;
-    private final Integer sourceBuildNumber;
-    private transient Job project;
+    private final @Nullable String summary;
+    private final @Nullable Integer sourceBuildNumber;
+    private transient @Nullable Job project;
 
     public NaginatorCause(AbstractBuild<?, ?> build) {
         this.summary = build.getDisplayName();
@@ -24,7 +23,9 @@ public class NaginatorCause extends Cause {
 
     @Override
     public String getShortDescription() {
-        return Messages.NaginatorCause_Description(summary);
+        return summary == null
+                ? Messages.NaginatorCause_DescriptionGeneral()
+                : Messages.NaginatorCause_Description(summary);
     }
 
     @Override
@@ -33,19 +34,19 @@ public class NaginatorCause extends Cause {
     }
 
     @Override
-    public void onLoad(@NonNull AbstractBuild<?, ?> build) {
+    public void onLoad(AbstractBuild<?, ?> build) {
         this.project = build.getParent();
     }
 
-    public String getSummary() { return this.summary; }
+    public @Nullable String getSummary() { return this.summary; }
 
-    public Job getProject() { return this.project; }
+    public @Nullable Job getProject() { return this.project; }
 
-    public String getJobUrl() {
-        return this.project.getUrl();
+    public @Nullable String getJobUrl() {
+        return this.project == null ? null : this.project.getUrl();
     }
 
-    public Integer getSourceBuildNumber() { return this.sourceBuildNumber; }
+    public @Nullable Integer getSourceBuildNumber() { return this.sourceBuildNumber; }
 
     /**
      * @return the source build. <code>null</code> when the build is deleted.
@@ -53,9 +54,11 @@ public class NaginatorCause extends Cause {
      */
     @Nullable
     public Run<?, ?> getSourceBuild() {
-        if (getSourceBuildNumber() == null) {
+        Integer number = getSourceBuildNumber();
+        if (number == null) {
             return null;
         }
-        return getProject().getBuildByNumber(getSourceBuildNumber());
+        Job<?, ?> project = getProject();
+        return project == null ? null : project.getBuildByNumber(number);
     }
 }

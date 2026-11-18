@@ -1,6 +1,6 @@
 package com.chikli.hudson.plugin.naginator;
 
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.Combination;
@@ -26,7 +26,7 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
 
 
     @Override
-    public void onCompleted(AbstractBuild<?, ?> build, @NonNull TaskListener listener) {
+    public void onCompleted(AbstractBuild<?, ?> build, TaskListener listener) {
         // Do nothing for null or a single Matrix run. (Run only when all Matrix finishes)
         if (build == null || build instanceof MatrixRun) {
             return;
@@ -89,6 +89,7 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
      * {@inheritDoc}
      */
     @Override
+    @Nullable
     public Environment setUpEnvironment(@SuppressWarnings("rawtypes") AbstractBuild build, Launcher launcher, BuildListener listener)
             throws IOException, InterruptedException, RunnerAbortedException
     {
@@ -136,7 +137,7 @@ public class NaginatorListener extends RunListener<AbstractBuild<?,?>> {
         return n < max;
     }
 
-    public static int calculateRetryCount(@NonNull Run<?, ?> r) {
+    public static int calculateRetryCount(Run<?, ?> r) {
         NaginatorAction naginatorAction = r.getAction(NaginatorAction.class);
         if (naginatorAction == null) {
             return 0;

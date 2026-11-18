@@ -45,18 +45,21 @@ public class NaginatorRetryAction implements Action {
     }
 
     @Override
+    @Nullable
     public String getIconFileName() {
         return hasPermission() ?
             "symbol-arrow-redo-outline plugin-ionicons-api" : null;
     }
 
     @Override
+    @Nullable
     public String getDisplayName() {
         return hasPermission() ?
             "Retry" : null;
     }
 
     @Override
+    @Nullable
     public String getUrlName() {
         return hasPermission() ?
             "retry" : null;

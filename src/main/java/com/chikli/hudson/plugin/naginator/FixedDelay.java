@@ -1,6 +1,5 @@
 package com.chikli.hudson.plugin.naginator;
 
-import org.jspecify.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -29,7 +28,6 @@ public class FixedDelay extends ScheduleDelay {
 
     @Extension
     public static class DescriptorImpl extends ScheduleDelayDescriptor {
-        @NonNull
         @Override
         public String getDisplayName() {
             return "Fixed";

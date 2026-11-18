@@ -1,6 +1,5 @@
 package com.chikli.hudson.plugin.naginator;
 
-import org.jspecify.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.JobProperty;
@@ -28,7 +27,6 @@ public class NaginatorOptOutProperty extends JobProperty<AbstractProject<?, ?>> 
     @Extension
     public static class DescriptorImpl extends JobPropertyDescriptor {
 
-        @NonNull
         @Override
         public String getDisplayName() {
             return "Naginator Property";

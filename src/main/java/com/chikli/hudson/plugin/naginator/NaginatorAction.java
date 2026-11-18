@@ -11,9 +11,9 @@ import hudson.model.Run;
 public class NaginatorAction implements BuildBadgeAction {
     private final int retryCount;
     private final int maxRetryCount;
-    private final Integer parentBuildNumber;
+    private final @Nullable Integer parentBuildNumber;
 
-    private Cause cause = null;
+    private @Nullable Cause cause;
 
     /**
      * @deprecated use {@link NaginatorAction#NaginatorAction(int)}
@@ -57,16 +57,19 @@ public class NaginatorAction implements BuildBadgeAction {
     }
 
     @Override
+    @Nullable
     public String getIconFileName() {
         return null;
     }
 
     @Override
+    @Nullable
     public String getDisplayName() {
         return null;
     }
 
     @Override
+    @Nullable
     public String getUrlName() {
         return null;
     }
