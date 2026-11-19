@@ -1,6 +1,5 @@
 package com.chikli.hudson.plugin.naginator;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
@@ -22,8 +21,7 @@ public class NaginatorActionFactory extends TransientActionFactory<AbstractBuild
     }
 
     @Override
-    @NonNull
-    public Collection<? extends Action> createFor(@NonNull AbstractBuild target) {
+    public Collection<? extends Action> createFor(AbstractBuild target) {
         Result result = target.getResult();
         if (result != null && result.isWorseThan(Result.SUCCESS)) {
             NaginatorOptOutProperty p = (NaginatorOptOutProperty) target.getParent().getProperty(NaginatorOptOutProperty.class);

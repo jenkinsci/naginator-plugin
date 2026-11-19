@@ -24,7 +24,6 @@
 
 package com.chikli.hudson.plugin.naginator;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
 import org.jvnet.localizer.Localizable;
 
 /**
@@ -47,7 +46,6 @@ public enum NoChildStrategy {
         return displayName.toString();
     }
     
-    @NonNull
     public static NoChildStrategy getDefault() {
         return RerunWhole;
     }

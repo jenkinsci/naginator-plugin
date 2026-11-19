@@ -1,6 +1,6 @@
 package com.chikli.hudson.plugin.naginator;
 
-import edu.umd.cs.findbugs.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.MatrixRun;
@@ -33,21 +33,21 @@ import java.util.logging.Logger;
 public class NaginatorPublisher extends Notifier {
     public final static long DEFAULT_REGEXP_TIMEOUT_MS = 30000;
     
-    private final String regexpForRerun;
+    private final @Nullable String regexpForRerun;
     private final boolean rerunIfUnstable;
     private final boolean rerunMatrixPart;
     private final boolean checkRegexp;
     @Deprecated
-    private transient Boolean regexpForMatrixParent;
-    private RegexpForMatrixStrategy regexpForMatrixStrategy;    /* almost final */
-    private NoChildStrategy noChildStrategy;    /* almost final */
+    private transient @Nullable Boolean regexpForMatrixParent;
+    private @Nullable RegexpForMatrixStrategy regexpForMatrixStrategy;    /* almost final */
+    private @Nullable NoChildStrategy noChildStrategy;    /* almost final */
 
-    private ScheduleDelay delay;
+    private @Nullable ScheduleDelay delay;
 
     private int maxSchedule;
 
     // backward compatible constructor
-    public NaginatorPublisher(String regexpForRerun,
+    public NaginatorPublisher(@Nullable String regexpForRerun,
                               boolean rerunIfUnstable,
                               boolean checkRegexp) {
         this(regexpForRerun, rerunIfUnstable, false, checkRegexp, 0, new ProgressiveDelay(5*60, 3*60*60));
@@ -57,12 +57,12 @@ public class NaginatorPublisher extends Notifier {
      * constructor.
      */
     @DataBoundConstructor
-    public NaginatorPublisher(String regexpForRerun,
+    public NaginatorPublisher(@Nullable String regexpForRerun,
                               boolean rerunIfUnstable,
                               boolean rerunMatrixPart,
                               boolean checkRegexp,
                               int maxSchedule,
-                              ScheduleDelay delay) {
+                              @Nullable ScheduleDelay delay) {
         this.regexpForRerun = regexpForRerun;
         this.rerunIfUnstable = rerunIfUnstable;
         this.rerunMatrixPart = rerunMatrixPart;
@@ -77,13 +77,13 @@ public class NaginatorPublisher extends Notifier {
      * @deprecated use {@link #NaginatorPublisher(String, boolean, boolean, boolean, int, ScheduleDelay)} and other setters
      */
     @Deprecated
-    public NaginatorPublisher(String regexpForRerun,
+    public NaginatorPublisher(@Nullable String regexpForRerun,
                               boolean rerunIfUnstable,
                               boolean rerunMatrixPart,
                               boolean checkRegexp,
                               boolean regexpForMatrixParent,
                               int maxSchedule,
-                              ScheduleDelay delay) {
+                              @Nullable ScheduleDelay delay) {
         this(regexpForRerun, rerunIfUnstable, rerunMatrixPart, checkRegexp, maxSchedule, delay);
         setRegexpForMatrixParent(regexpForMatrixParent);
     }
@@ -120,7 +120,7 @@ public class NaginatorPublisher extends Notifier {
      * @since 1.17
      */
     @DataBoundSetter
-    public void setNoChildStrategy(@NonNull NoChildStrategy noChildStrategy) {
+    public void setNoChildStrategy(NoChildStrategy noChildStrategy) {
         this.noChildStrategy = noChildStrategy;
     }
     
@@ -129,7 +129,6 @@ public class NaginatorPublisher extends Notifier {
      * 
      * @since 1.17
      */
-    @NonNull
     public NoChildStrategy getNoChildStrategy() {
         return (noChildStrategy != null)
                 ? noChildStrategy
@@ -163,7 +162,7 @@ public class NaginatorPublisher extends Notifier {
         );
     }
 
-    public String getRegexpForRerun() {
+    public @Nullable String getRegexpForRerun() {
         return regexpForRerun;
     }
 
@@ -172,7 +171,7 @@ public class NaginatorPublisher extends Notifier {
      * @since 1.17
      */
     @DataBoundSetter
-    public void setRegexpForMatrixStrategy(@NonNull RegexpForMatrixStrategy regexpForMatrixStrategy) {
+    public void setRegexpForMatrixStrategy(RegexpForMatrixStrategy regexpForMatrixStrategy) {
         this.regexpForMatrixStrategy = regexpForMatrixStrategy;
     }
 
@@ -180,12 +179,12 @@ public class NaginatorPublisher extends Notifier {
      * @return how to apply regexp for matrix builds.
      * @since 1.17
      */
-    @NonNull
+    @Nullable
     public RegexpForMatrixStrategy getRegexpForMatrixStrategy() {
         return regexpForMatrixStrategy;
     }
 
-    public ScheduleDelay getDelay() {
+    public @Nullable ScheduleDelay getDelay() {
         return delay;
     }
 
@@ -215,6 +214,7 @@ public class NaginatorPublisher extends Notifier {
         return true;
     }
 
+    @Override
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
     }
@@ -275,7 +275,7 @@ public class NaginatorPublisher extends Notifier {
         /**
          * This human readable name is used in the configuration screen.
          */
-        @NonNull
+        @Override
         public String getDisplayName() {
             return "Retry build after failure";
         }

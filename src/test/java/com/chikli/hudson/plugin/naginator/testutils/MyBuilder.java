@@ -63,9 +63,12 @@ public final class MyBuilder extends Builder {
 
     @Extension
     public static final class DescriptorImpl extends Descriptor<Builder> {
+        @Override
         public String getDisplayName() {
             return "MyBuilder";
         }
+
+        @Override
         public MyBuilder newInstance(StaplerRequest2 req, JSONObject data) {
             return new MyBuilder("foo", Result.SUCCESS);
         }

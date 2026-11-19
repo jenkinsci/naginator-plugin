@@ -1,7 +1,6 @@
 package com.chikli.hudson.plugin.naginator;
 
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-import edu.umd.cs.findbugs.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import hudson.matrix.MatrixRun;
 import hudson.matrix.MatrixBuild;
 import hudson.model.Result;
@@ -33,12 +32,12 @@ import jenkins.model.Jenkins;
 public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
     private static final Logger LOGGER = Logger.getLogger(NaginatorPublisherScheduleAction.class.getName());
     
-    private final String regexpForRerun;
+    private final @Nullable String regexpForRerun;
     private final boolean rerunIfUnstable;
     private final boolean checkRegexp;
-    private transient Boolean regexpForMatrixParent;        // for backward compatibility
-    private /* almost final */ RegexpForMatrixStrategy regexpForMatrixStrategy;
-    private final NoChildStrategy noChildStrategy;
+    private transient @Nullable Boolean regexpForMatrixParent;        // for backward compatibility
+    private /* almost final */ @Nullable RegexpForMatrixStrategy regexpForMatrixStrategy;
+    private final @Nullable NoChildStrategy noChildStrategy;
     
     public NaginatorPublisherScheduleAction(NaginatorPublisher publisher) {
         super(publisher.getMaxSchedule(), publisher.getDelay(), publisher.isRerunMatrixPart());
@@ -66,7 +65,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return this;
     }
     
-    @CheckForNull
+    @Nullable
     public String getRegexpForRerun() {
         return regexpForRerun;
     }
@@ -90,13 +89,13 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
     /**
      * @since 1.17
      */
-    @NonNull
+    @Nullable
     public RegexpForMatrixStrategy getRegexpForMatrixStrategy() {
         return regexpForMatrixStrategy;
     }
     
     @Override
-    public boolean shouldSchedule(@NonNull Run<?, ?> run, @NonNull TaskListener listener, int retryCount) {
+    public boolean shouldSchedule(Run<?, ?> run, TaskListener listener, int retryCount) {
         if (!checkCommonScheduleThreshold(run)) {
             return false;
         }
@@ -123,7 +122,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return super.shouldSchedule(run, listener, retryCount);
     }
 
-    private boolean testRegexpForFailedChildren(@NonNull MatrixBuild run, @NonNull TaskListener listener) {
+    private boolean testRegexpForFailedChildren(MatrixBuild run, TaskListener listener) {
         for (MatrixRun r : ((MatrixBuild)run).getExactRuns()) {
             if (!checkCommonScheduleThreshold(r)) {
                 continue;
@@ -137,7 +136,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
     }
 
     @Override
-    public boolean shouldScheduleForMatrixRun(@NonNull MatrixRun run, @NonNull TaskListener listener) {
+    public boolean shouldScheduleForMatrixRun(MatrixRun run, TaskListener listener) {
         if (!checkCommonScheduleThreshold(run)) {
             return false;
         }
@@ -151,7 +150,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return true;
     }
     
-    private boolean checkCommonScheduleThreshold(@NonNull Run<?, ?> run) {
+    private boolean checkCommonScheduleThreshold(Run<?, ?> run) {
         if ((run.getResult() == Result.SUCCESS) || (run.getResult() == Result.ABORTED)) {
             return false;
         }
@@ -163,7 +162,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return true;
     }
     
-    private boolean testRegexp(@NonNull Run<?, ?> run, TaskListener listener) {
+    private boolean testRegexp(Run<?, ?> run, TaskListener listener) {
         String regexpForRerun = getRegexpForRerun();
         if ((regexpForRerun != null) && (!regexpForRerun.equals(""))) {
             LOGGER.log(Level.FINEST, "regexpForRerun - {0}", regexpForRerun);
@@ -192,7 +191,7 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         return d.getRegexpTimeoutMs();
     }
     
-    private boolean parseLog(final File logFile, final Charset charset, @NonNull final String regexp) throws IOException {
+    private boolean parseLog(final File logFile, final Charset charset, final String regexp) throws IOException {
         // TODO annotate `logFile` with `@Nonnull`
         // after upgrading the target Jenkins to 1.568 or later.
         
@@ -236,10 +235,12 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
             this.wrapped = wrapped;
         }
         
+        @Override
         public int length() {
             return wrapped.length();
         }
         
+        @Override
         public char charAt(int index) {
             if (Thread.currentThread().isInterrupted()) {
                 throw new RuntimeException(new InterruptedException());
@@ -247,13 +248,13 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
             return wrapped.charAt(index);
         }
         
-        @NonNull
+        @Override
         public CharSequence subSequence(int start, int end) {
             return wrapped.subSequence(start, end);
         }
     }
     
-    private boolean parseLogImpl(File logFile, Charset charset, @NonNull final String regexp) throws IOException {
+    private boolean parseLogImpl(File logFile, Charset charset, final String regexp) throws IOException {
         // TODO annotate `logFile` and 'charset' with `@Nonnull`
         // after upgrading the target Jenkins to 1.568 or later.
 
@@ -277,7 +278,6 @@ public class NaginatorPublisherScheduleAction extends NaginatorScheduleAction {
         }
     }
     
-    @NonNull
     @Override
     public NoChildStrategy getNoChildStrategy() {
         return (noChildStrategy != null)

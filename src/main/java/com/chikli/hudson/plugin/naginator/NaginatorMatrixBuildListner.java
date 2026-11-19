@@ -16,6 +16,7 @@ public class NaginatorMatrixBuildListner extends MatrixBuildListener {
     /*
      * Used to filter the matrix parts which finished with success.
     */
+    @Override
     public boolean doBuildConfiguration(MatrixBuild mb, MatrixConfiguration mc) {
         NaginatorMatrixAction nma = mb.getAction(NaginatorMatrixAction.class);
         

@@ -24,8 +24,7 @@
 
 package com.chikli.hudson.plugin.naginator;
 
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-import edu.umd.cs.findbugs.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import hudson.matrix.MatrixRun;
 import hudson.model.Action;
 import hudson.model.InvisibleAction;
@@ -65,7 +64,7 @@ public class NaginatorScheduleAction extends InvisibleAction {
      * @param delay A scheduling policy to trigger a new build.
      * @param rerunMatrixPart tests matrix child builds and triggers only failed parts.
      */
-    public NaginatorScheduleAction(int maxSchedule, @CheckForNull ScheduleDelay delay, boolean rerunMatrixPart) {
+    public NaginatorScheduleAction(int maxSchedule, @Nullable ScheduleDelay delay, boolean rerunMatrixPart) {
         this.maxSchedule = maxSchedule;
         this.delay = (delay != null) ? delay : new ProgressiveDelay(5 * 60, 3 * 60 * 60);
         this.rerunMatrixPart = rerunMatrixPart;
@@ -84,7 +83,6 @@ public class NaginatorScheduleAction extends InvisibleAction {
     /**
      * @return A scheduling policy to trigger a new build
      */
-    @NonNull
     public ScheduleDelay getDelay() {
         return delay;
     }
@@ -107,7 +105,7 @@ public class NaginatorScheduleAction extends InvisibleAction {
      * @param retryCount the count the build is rescheduled.
      * @return whether to reschedule the build.
      */
-    public boolean shouldSchedule(@NonNull Run<?, ?> run, @NonNull TaskListener listener, int retryCount) {
+    public boolean shouldSchedule(Run<?, ?> run, TaskListener listener, int retryCount) {
         return getMaxSchedule() <= 0 || retryCount < getMaxSchedule();
     }
     
@@ -118,7 +116,7 @@ public class NaginatorScheduleAction extends InvisibleAction {
      * @param run multi-configuration build to test
      * @return <code>true</code> if should be scheduled
      */
-    public boolean shouldScheduleForMatrixRun(@NonNull MatrixRun run, @NonNull TaskListener listener) {
+    public boolean shouldScheduleForMatrixRun(MatrixRun run, TaskListener listener) {
         return true;
     }
     
@@ -127,7 +125,6 @@ public class NaginatorScheduleAction extends InvisibleAction {
      * 
      * @since 1.17
      */
-    @NonNull
     public NoChildStrategy getNoChildStrategy() {
         return NoChildStrategy.getDefault();
     }

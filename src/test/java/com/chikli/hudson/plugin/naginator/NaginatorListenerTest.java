@@ -2,8 +2,8 @@ package com.chikli.hudson.plugin.naginator;
 
 import com.chikli.hudson.plugin.naginator.testutils.MyBuilder;
 import com.google.common.collect.Collections2;
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-import edu.umd.cs.findbugs.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -191,10 +191,12 @@ class NaginatorListenerTest {
         @Extension
         public static class DescriptorImpl extends BuildWrapperDescriptor {
 
+            @Override
             public boolean isApplicable(AbstractProject<?, ?> item) {
                 return true;
             }
 
+            @Override
             public String getDisplayName() {
                 return null;
             }
@@ -297,7 +299,7 @@ class NaginatorListenerTest {
             return String.format("%s-%s", r.getParent().getFullName(), r.getId());
         }
 
-        @CheckForNull
+        @Nullable
         public String getRecordedValue(@NonNull Run<?, ?> r) {
             return recorded.get(getIdForBuild(r));
         }
